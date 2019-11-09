@@ -181,8 +181,7 @@ static string monster_size(const monster& mon)
     }
 }
 
-static string monster_speed(const monster& mon, const monsterentry* me,
-                                 int speed_min, int speed_max)
+static string monster_speed(const monster& mon, int speed_min, int speed_max)
 {
     string speed;
 
@@ -283,11 +282,12 @@ static dice_def mi_calc_iood_damage(monster* mons)
     return dice_def(9, power / 4);
 }
 
-static string mi_calc_smiting_damage(monster* mons) { return "7-17"; }
+static string mi_calc_smiting_damage(monster* /*mons*/) { return "7-17"; }
 
 static string mi_calc_airstrike_damage(monster* mons)
 {
-    return make_stringf("0-%d", 10 + 2 * mons->get_experience_level());
+    int pow = 12 * mons->get_experience_level();
+    return make_stringf("8-%d", 2 + ( 6 + pow ) / 7);
 }
 
 static string mi_calc_glaciate_damage(monster* mons)
@@ -346,7 +346,7 @@ static string mons_human_readable_spell_damage_string(monster* monster,
                                                       spell_type sp)
 {
     bolt spell_beam = mons_spell_beam(
-        monster, sp, mons_power_for_hd(sp, monster->spell_hd(sp), false), true);
+        monster, sp, mons_power_for_hd(sp, monster->spell_hd(sp)), true);
     switch (sp)
     {
         case SPELL_PORTAL_PROJECTILE:
@@ -703,7 +703,7 @@ int main(int argc, char* argv[])
     }
     else if (!strcmp(argv[1], "-name") || !strcmp(argv[1], "--name"))
     {
-        seed_rng();
+        rng::seed();
         printf("%s\n", make_name().c_str());
         return 0;
     }
@@ -886,7 +886,7 @@ int main(int argc, char* argv[])
             printf(" | %s", colour(LIGHTRED, "UNFINISHED").c_str());
 
         printf(" | Spd: %s",
-               monster_speed(mon, me, speed_min, speed_max).c_str());
+               monster_speed(mon, speed_min, speed_max).c_str());
 
         const int hd = mon.get_experience_level();
         printf(" | HD: %d", hd);

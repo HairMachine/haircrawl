@@ -50,9 +50,8 @@ mutations:
     MUT_ACUTE_VISION: 1
     MUT_UNBREATHING: 1
 fake_mutations:
-  - long: Your body is rotting away.
-    short: rotting body
-  - long: You thrive on raw meat.
+  - long: You do not eat.
+    short: no food
 recommended_jobs:
   - JOB_GLADIATOR
   - JOB_ASSASSIN

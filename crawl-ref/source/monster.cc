@@ -412,7 +412,7 @@ random_var monster::attack_delay(const item_def *projectile,
     return (random_var(10) + delay) / 2;
 }
 
-int monster::has_claws(bool allow_tran) const
+int monster::has_claws(bool /*allow_tran*/) const
 {
     for (int i = 0; i < MAX_NUM_ATTACKS; i++)
     {
@@ -639,11 +639,6 @@ bool monster::could_wield(const item_def &item, bool ignore_brand,
         if ((is_holy() || is_good_god(god)) && is_evil_item(item))
             return false;
 
-        // Monsters that are gifts/worshippers of Fedhas won't use
-        // corpse-violating weapons.
-        if (god == GOD_FEDHAS && is_corpse_violating_item(item))
-            return false;
-
         // Monsters that are gifts/worshippers of Zin won't use unclean
         // weapons.
         if (god == GOD_ZIN && is_unclean_item(item))
@@ -847,13 +842,14 @@ void monster::equip_weapon_message(item_def &item)
     {
         bool plural = true;
         string hand = hand_name(true, &plural);
-        mprf("%s %s briefly %s through it before %s manages to get a "
+        mprf("%s %s briefly %s through it before %s %s to get a "
              "firm grip on it.",
              pronoun(PRONOUN_POSSESSIVE).c_str(),
              hand.c_str(),
              // Not conj_verb: the monster isn't the subject.
              conjugate_verb("pass", plural).c_str(),
-             pronoun(PRONOUN_SUBJECTIVE).c_str());
+             pronoun(PRONOUN_SUBJECTIVE).c_str(),
+             conjugate_verb("manage", pronoun_plurality()).c_str());
     }
         break;
     case SPWPN_REAPING:
@@ -1378,12 +1374,9 @@ static bool _is_signature_weapon(const monster* mons, const item_def &weapon)
         if (mons->type == MONS_DONALD)
             return mons->hands_reqd(weapon) == HANDS_ONE;
 
-        // What kind of assassin would forget her blowgun or dagger somewhere else?
+        // What kind of assassin would forget her dagger somewhere else?
         if (mons->type == MONS_SONJA)
-        {
-            return item_attack_skill(weapon) == SK_SHORT_BLADES
-                   || wtype == WPN_BLOWGUN;
-        }
+            return item_attack_skill(weapon) == SK_SHORT_BLADES;
 
         if (mons->type == MONS_IMPERIAL_MYRMIDON)
             return item_attack_skill(weapon) == SK_LONG_BLADES;
@@ -1973,7 +1966,7 @@ bool monster::pickup_missile(item_def &item, bool msg, bool force)
 
         // Allow upgrading throwing weapon brands (XXX: improve this!)
         if (item.sub_type == miss->sub_type
-            && (item.sub_type == MI_TOMAHAWK || item.sub_type == MI_JAVELIN)
+            && (item.sub_type == MI_BOOMERANG || item.sub_type == MI_JAVELIN)
             && get_ammo_brand(*miss) == SPMSL_NORMAL
             && get_ammo_brand(item) != SPMSL_NORMAL)
         {
@@ -2172,7 +2165,7 @@ void monster::wield_melee_weapon(maybe_bool msg)
     }
 }
 
-item_def *monster::slot_item(equipment_type eq, bool include_melded) const
+item_def *monster::slot_item(equipment_type eq, bool /*include_melded*/) const
 {
     return mslot_item(equip_slot_to_mslot(eq));
 }
@@ -2352,6 +2345,15 @@ string monster::pronoun(pronoun_type pro, bool force_visible) const
                                pro);
     }
     return mons_pronoun(type, pro, seen);
+}
+
+bool monster::pronoun_plurality(bool force_visible) const
+{
+    const bool seen = force_visible || you.can_see(*this);
+    if (seen && props.exists(MON_GENDER_KEY))
+        return props[MON_GENDER_KEY].get_int() == GENDER_NEUTRAL;
+
+    return seen && mons_class_gender(type) == GENDER_NEUTRAL;
 }
 
 string monster::conj_verb(const string &verb) const
@@ -2925,11 +2927,6 @@ bool monster::has_chaotic_spell() const
     return search_spells(is_chaotic_spell);
 }
 
-bool monster::has_corpse_violating_spell() const
-{
-    return search_spells(is_corpse_violating_spell);
-}
-
 bool monster::has_attack_flavour(int flavour) const
 {
     for (int i = 0; i < 4; ++i)
@@ -3120,7 +3117,6 @@ bool monster::pacified() const
 bool monster::shielded() const
 {
     return shield()
-           || has_ench(ENCH_BONE_ARMOUR)
            || wearing(EQ_AMULET_PLUS, AMU_REFLECTION) > 0;
 }
 
@@ -3183,12 +3179,12 @@ void monster::ablate_deflection()
     // TODO: deduplicate this code
     if (has_ench(ENCH_DEFLECT_MISSILES))
     {
-        if (one_chance_in(2 + spell_hd(SPELL_DEFLECT_MISSILES)))
+        if (one_chance_in(2 + spell_hd()))
             del_ench(ENCH_DEFLECT_MISSILES);
     }
     else if (has_ench(ENCH_REPEL_MISSILES))
     {
-        if (one_chance_in(2 + spell_hd(SPELL_REPEL_MISSILES)))
+        if (one_chance_in(2 + spell_hd()))
             del_ench(ENCH_REPEL_MISSILES);
     }
 }
@@ -3349,8 +3345,6 @@ int monster::armour_class(bool calc_unid) const
         ac += 4 + get_hit_dice() / 3;
     if (has_ench(ENCH_ICEMAIL))
         ac += ICEMAIL_MAX;
-    if (has_ench(ENCH_BONE_ARMOUR))
-        ac += 6 + get_hit_dice() / 3;
     if (has_ench(ENCH_IDEALISED))
         ac += 4 + get_hit_dice() / 3;
 
@@ -3436,7 +3430,7 @@ int monster::base_evasion() const
  **/
 int monster::evasion(ev_ignore_type evit, const actor* /*act*/) const
 {
-    const bool calc_unid = !(evit & EV_IGNORE_UNIDED);
+    const bool calc_unid = !testbits(evit, ev_ignore::unided);
 
     int ev = base_evasion();
 
@@ -3465,7 +3459,7 @@ int monster::evasion(ev_ignore_type evit, const actor* /*act*/) const
     if (has_ench(ENCH_AGILE))
         ev += 5;
 
-    if (evit & EV_IGNORE_HELPLESS)
+    if (evit & ev_ignore::helpless)
         return max(ev, 0);
 
     if (paralysed() || petrified() || petrifying() || asleep())
@@ -3562,7 +3556,7 @@ bool monster::undead_or_demonic() const
     return bool(holi & (MH_UNDEAD | MH_DEMONIC));
 }
 
-bool monster::is_holy(bool check_spells) const
+bool monster::is_holy(bool /*check_spells*/) const
 {
     return bool(holiness() & MH_HOLY);
 }
@@ -4102,7 +4096,7 @@ int monster::res_magic(bool calc_unid) const
     return u;
 }
 
-bool monster::no_tele(bool calc_unid, bool permit_id, bool blinking) const
+bool monster::no_tele(bool calc_unid, bool /*permit_id*/, bool /*blinking*/) const
 {
     // Plants can't survive without roots, so it's either this or auto-kill.
     // Statues have pedestals so moving them is weird.
@@ -4176,7 +4170,7 @@ bool monster::poison(actor *agent, int amount, bool force)
     return poison_monster(this, agent, amount, force);
 }
 
-int monster::skill(skill_type sk, int scale, bool real, bool drained, bool temp) const
+int monster::skill(skill_type sk, int scale, bool /*real*/, bool /*drained*/, bool /*temp*/) const
 {
     // Let spectral weapons have necromancy skill for pain brand.
     if (mons_intel(*this) < I_HUMAN && !mons_is_avatar(type))
@@ -4275,7 +4269,7 @@ god_type monster::deity() const
     return god;
 }
 
-bool monster::drain_exp(actor *agent, bool quiet, int pow)
+bool monster::drain_exp(actor *agent, bool quiet, int /*pow*/)
 {
     if (res_negative_energy() >= 3)
         return false;
@@ -4348,9 +4342,10 @@ bool monster::corrode_equipment(const char* corrosion_source, int degree)
 
     if (you.see_cell(pos()))
     {
-        mprf("%s corrodes %s!",
-             corrosion_source,
-             name(DESC_THE).c_str());
+        if (!has_ench(ENCH_CORROSION))
+            mprf("%s corrodes %s!", corrosion_source, name(DESC_THE).c_str());
+        else
+            mprf("%s seems to be corroded for longer.", name(DESC_THE).c_str());
     }
 
     add_ench(mon_enchant(ENCH_CORROSION, 0));
@@ -4531,21 +4526,21 @@ int monster::hurt(const actor *agent, int amount, beam_type flavour,
 
 void monster::confuse(actor *atk, int strength)
 {
-    if (!check_clarity(false))
+    if (!check_clarity())
         enchant_actor_with_flavour(this, atk, BEAM_CONFUSION, strength);
 }
 
-void monster::paralyse(actor *atk, int strength, string cause)
+void monster::paralyse(actor *atk, int strength, string /*cause*/)
 {
     enchant_actor_with_flavour(this, atk, BEAM_PARALYSIS, strength);
 }
 
-void monster::petrify(actor *atk, bool force)
+void monster::petrify(actor *atk, bool /*force*/)
 {
     enchant_actor_with_flavour(this, atk, BEAM_PETRIFY);
 }
 
-bool monster::fully_petrify(actor *atk, bool quiet)
+bool monster::fully_petrify(actor */*atk*/, bool quiet)
 {
     bool msg = !quiet && simple_monster_message(*this, mons_is_immotile(*this) ?
                          " turns to stone!" : " stops moving altogether!");
@@ -5242,7 +5237,7 @@ bool monster::can_mutate() const
     return !(holi & (MH_UNDEAD | MH_NONLIVING));
 }
 
-bool monster::can_safely_mutate(bool temp) const
+bool monster::can_safely_mutate(bool /*temp*/) const
 {
     return can_mutate();
 }
@@ -5442,6 +5437,8 @@ void monster::check_redraw(const coord_def &old, bool clear_tiles) const
 #ifdef USE_TILE
             if (clear_tiles && !see_old)
                 tile_reset_fg(old);
+#else
+            UNUSED(clear_tiles);
 #endif
         }
         update_screen();
@@ -5601,12 +5598,9 @@ bool monster::do_shaft()
     if (!is_valid_shaft_level())
         return false;
 
-    // Tentacles & player ghosts are immune to shafting
-    if (mons_is_tentacle_or_tentacle_segment(type)
-        || type == MONS_PLAYER_GHOST)
-    {
+    // Tentacles are immune to shafting
+    if (mons_is_tentacle_or_tentacle_segment(type))
         return false;
-    }
 
     // Handle instances of do_shaft() being invoked magically when
     // the monster isn't standing over a shaft.
@@ -5616,7 +5610,7 @@ bool monster::do_shaft()
         return false;
     }
 
-    level_id lev = shaft_dest(false);
+    level_id lev = shaft_dest();
 
     if (lev == level_id::current())
         return false;
@@ -5642,7 +5636,7 @@ bool monster::do_shaft()
     return reveal;
 }
 
-void monster::put_to_sleep(actor *attacker, int strength, bool hibernate)
+void monster::put_to_sleep(actor */*attacker*/, int /*strength*/, bool hibernate)
 {
     const bool valid_target = hibernate ? can_hibernate() : can_sleep();
     if (!valid_target)
@@ -5669,7 +5663,7 @@ void monster::check_awaken(int)
     // XXX
 }
 
-int monster::beam_resists(bolt &beam, int hurted, bool doEffects, string source)
+int monster::beam_resists(bolt &beam, int hurted, bool doEffects, string /*source*/)
 {
     return mons_adjust_flavoured(this, beam, hurted, doEffects);
 }
@@ -5797,11 +5791,11 @@ bool monster::can_drink_potion(potion_type ptype) const
         case POT_CURING:
         case POT_HEAL_WOUNDS:
             return !(holiness() & (MH_NONLIVING | MH_PLANT));
-        case POT_BLOOD:
 #if TAG_MAJOR_VERSION == 34
+        case POT_BLOOD:
         case POT_BLOOD_COAGULATED:
-#endif
             return mons_species() == MONS_VAMPIRE;
+#endif
         case POT_BERSERK_RAGE:
             return can_go_berserk();
         case POT_HASTE:
@@ -5830,11 +5824,11 @@ bool monster::should_drink_potion(potion_type ptype) const
                || has_ench(ENCH_CONFUSION);
     case POT_HEAL_WOUNDS:
         return hit_points <= max_hit_points / 2;
-    case POT_BLOOD:
 #if TAG_MAJOR_VERSION == 34
+    case POT_BLOOD:
     case POT_BLOOD_COAGULATED:
-#endif
         return hit_points <= max_hit_points / 2;
+#endif
     case POT_BERSERK_RAGE:
         // this implies !berserk()
         return !has_ench(ENCH_MIGHT) && !has_ench(ENCH_HASTE)
@@ -5887,16 +5881,16 @@ bool monster::drink_potion_effect(potion_type pot_eff, bool card)
             simple_monster_message(*this, " is healed!");
         break;
 
-    case POT_BLOOD:
 #if TAG_MAJOR_VERSION == 34
+    case POT_BLOOD:
     case POT_BLOOD_COAGULATED:
-#endif
         if (mons_species() == MONS_VAMPIRE)
         {
             heal(10 + random2avg(28, 3));
             simple_monster_message(*this, " is healed!");
         }
         break;
+#endif
 
     case POT_BERSERK_RAGE:
         enchant_actor_with_flavour(this, this, BEAM_BERSERK);
@@ -6070,7 +6064,8 @@ void monster::react_to_damage(const actor *oppressor, int damage,
     {
         if (hit_points + damage > max_hit_points / 2)
             damage = max_hit_points / 2 - hit_points;
-        if (damage > 0 && x_chance_in_y(damage, damage + hit_points))
+        if (damage > 0 && x_chance_in_y(damage, damage + hit_points)
+            && flavour != BEAM_TORMENT_DAMAGE)
         {
             bool fly_died = coinflip();
             int old_hp                = hit_points;
@@ -6167,6 +6162,8 @@ void monster::react_to_damage(const actor *oppressor, int damage,
         }
         if (caught())
             check_net_will_hold_monster(this);
+        if (this->is_constricted())
+            this->stop_being_constricted();
 
         add_ench(ENCH_RING_OF_THUNDER);
     }
@@ -6581,12 +6578,9 @@ void monster::id_if_worn(mon_inv_type mslot, object_class_type base_type,
         set_ident_type(*item, true);
 }
 
-bool monster::check_clarity(bool silent) const
+bool monster::check_clarity() const
 {
-    if (!clarity())
-        return false;
-
-    return true;
+    return clarity();
 }
 
 bool monster::stasis() const
@@ -6628,6 +6622,7 @@ bool monster::is_jumpy() const
 // Currently only used for Aura of Brilliance and Hep ancestors.
 int monster::spell_hd(spell_type spell) const
 {
+    UNUSED(spell);
     int hd = get_hit_dice();
     if (mons_is_hepliaklqana_ancestor(type))
         hd = max(1, hd * 2 / 3);

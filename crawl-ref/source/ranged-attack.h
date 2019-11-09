@@ -32,11 +32,11 @@ private:
     int weapon_damage() override;
     int calc_base_unarmed_damage() override;
     int calc_mon_to_hit_base() override;
-    int apply_damage_modifiers(int damage, int damage_max) override;
+    int apply_damage_modifiers(int damage) override;
     bool apply_damage_brand(const char *what = nullptr) override;
     special_missile_type random_chaos_missile_brand();
-    bool blowgun_check(special_missile_type type);
-    int blowgun_duration_roll(special_missile_type type);
+    bool dart_check(special_missile_type type);
+    int dart_duration_roll(special_missile_type type);
     bool apply_missile_brand();
 
     /* Weapon Effects */

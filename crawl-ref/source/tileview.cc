@@ -70,15 +70,17 @@ void tile_new_level(bool first_time, bool init_unseen)
     for (unsigned int x = 0; x < GXM; x++)
         for (unsigned int y = 0; y < GYM; y++)
             tiles.update_minimap(coord_def(x, y));
+#else
+    UNUSED(init_unseen);
 #endif
 }
 
 void tile_init_default_flavour()
 {
-    tile_default_flv(you.where_are_you, you.depth, env.tile_default);
+    tile_default_flv(you.where_are_you, env.tile_default);
 }
 
-void tile_default_flv(branch_type br, int depth, tile_flavour &flv)
+void tile_default_flv(branch_type br, tile_flavour &flv)
 {
     flv.wall    = TILE_WALL_NORMAL;
     flv.floor   = TILE_FLOOR_NORMAL;
@@ -308,23 +310,36 @@ void tile_clear_flavour()
         tile_clear_flavour(*ri);
 }
 
+static bool _level_uses_dominoes()
+{
+    return you.where_are_you == BRANCH_CRYPT;
+}
+
 // For floors and walls that have not already been set to a particular tile,
 // set them to a random instance of the default floor and wall tileset.
 void tile_init_flavour()
 {
-    vector<unsigned int> output;
+    if (_level_uses_dominoes())
     {
-        domino::DominoSet<domino::EdgeDomino> dominoes(domino::cohen_set, 8);
-        uint64_t seed[] = { static_cast<uint64_t>(you.where_are_you ^ you.game_seed),
-            static_cast<uint64_t>(you.depth) };
-        PcgRNG rng(seed, ARRAYSZ(seed));
-        dominoes.Generate(X_WIDTH, Y_WIDTH, output, rng);
+        vector<unsigned int> output;
+
+        {
+            rng::subgenerator sub_rng(
+                static_cast<uint64_t>(you.where_are_you ^ you.game_seed),
+                static_cast<uint64_t>(you.depth));
+            output.reserve(X_WIDTH * Y_WIDTH);
+            domino::DominoSet<domino::EdgeDomino> dominoes(domino::cohen_set, 8);
+            // TODO: don't pass a PcgRNG object
+            dominoes.Generate(X_WIDTH, Y_WIDTH, output,
+                                                    rng::current_generator());
+        }
+
+        for (rectangle_iterator ri(0); ri; ++ri)
+            tile_init_flavour(*ri, output[ri->x + ri->y * GXM]);
     }
-    for (rectangle_iterator ri(0); ri; ++ri)
-    {
-        unsigned int idx = ri->x + ri->y * GXM;
-        tile_init_flavour(*ri, output[idx]);
-    }
+    else
+        for (rectangle_iterator ri(0); ri; ++ri)
+            tile_init_flavour(*ri, 0);
 }
 
 // 11111333333   55555555
@@ -791,9 +806,9 @@ void tile_floor_halo(dungeon_feature_type target, tileidx_t tile)
 
             // TODO: these conditions are guaranteed?
             int right_spc = x < GXM - 1 ? env.tile_flv[x+1][y].floor - tile
-                                        : SPECIAL_FULL;
+                                        : int{SPECIAL_FULL};
             int down_spc  = y < GYM - 1 ? env.tile_flv[x][y+1].floor - tile
-                                        : SPECIAL_FULL;
+                                        : int{SPECIAL_FULL};
 
             if (this_spc == SPECIAL_N && right_spc == SPECIAL_S)
             {
@@ -1024,11 +1039,6 @@ void tile_reset_feat(const coord_def &gc)
 
 static void _tile_place_cloud(const coord_def &gc, const cloud_info &cl)
 {
-    // In the Shoals, ink is handled differently. (jpeg)
-    // I'm not sure it is even possible anywhere else, but just to be safe...
-    if (cl.type == CLOUD_INK && player_in_branch(BRANCH_SHOALS))
-        return;
-
     if (you.see_cell(gc))
     {
         const coord_def ep = grid2show(gc);
@@ -1159,6 +1169,8 @@ void tile_apply_animations(tileidx_t bg, tile_flavour *flv)
         if (_is_torch(basetile))
             flv->wall = basetile + (flv->wall - basetile + 1) % tile_dngn_count(basetile);
     }
+#else
+    UNUSED(bg, flv);
 #endif
 }
 
@@ -1412,6 +1424,9 @@ void tile_apply_properties(const coord_def &gc, packed_cell &cell)
     else
         cell.halo = HALO_NONE;
 
+    if (mc.monsterinfo() && mc.monsterinfo()->is(MB_HIGHLIGHTED_SUMMONER))
+        cell.is_highlighted_summoner = true;
+
     if (mc.flags & MAP_LIQUEFIED)
         cell.is_liquefied = true;
     else if (print_blood && (_suppress_blood(mc)
@@ -1420,15 +1435,10 @@ void tile_apply_properties(const coord_def &gc, packed_cell &cell)
         print_blood = false;
     }
 
-    // Mold has the same restrictions as blood but takes precedence.
     if (print_blood)
     {
-        if (mc.flags & MAP_GLOWING_MOLDY)
-            cell.glowing_mold = true;
-        else if (mc.flags & MAP_MOLDY)
-            cell.is_moldy = true;
         // Corpses have a blood puddle of their own.
-        else if (mc.flags & MAP_BLOODY && !_top_item_is_corpse(mc))
+        if (mc.flags & MAP_BLOODY && !_top_item_is_corpse(mc))
         {
             cell.is_bloody = true;
             cell.blood_rotation = blood_rotation(gc);
@@ -1481,5 +1491,7 @@ void tile_apply_properties(const coord_def &gc, packed_cell &cell)
             }
         }
     }
+
+    cell.flv = env.tile_flv(gc);
 }
 #endif

@@ -45,7 +45,7 @@ LUAFN(debug_goto_place)
     {
         const level_id id = level_id::parse_level_id(luaL_checkstring(ls, 1));
         const int bind_entrance =
-            lua_isnumber(ls, 2)? luaL_checkint(ls, 2) : -1;
+            lua_isnumber(ls, 2)? luaL_safe_checkint(ls, 2) : -1;
 
         if (is_connected_branch(id.branch))
             you.level_stack.clear();
@@ -69,14 +69,12 @@ LUAFN(debug_goto_place)
     return 0;
 }
 
-LUAFN(debug_dungeon_setup)
-{
-    initial_dungeon_setup();
-    return 0;
-}
+LUAWRAP(debug_dungeon_setup, initial_dungeon_setup())
 
 LUAFN(debug_enter_dungeon)
 {
+    UNUSED(ls);
+
     init_level_connectivity();
 
     you.where_are_you = BRANCH_DUNGEON;
@@ -91,6 +89,7 @@ LUAWRAP(debug_up_stairs, up_stairs(DNGN_STONE_STAIRS_UP_I))
 
 LUAFN(debug_flush_map_memory)
 {
+    UNUSED(ls);
     dgn_flush_map_memory();
     init_level_connectivity();
     return 0;
@@ -105,22 +104,20 @@ LUAFN(debug_generate_level)
     tile_clear_flavour();
     tile_new_level(true);
     builder(lua_isboolean(ls, 1)? lua_toboolean(ls, 1) : true);
+    update_portal_entrances();
     return 0;
 }
 
 LUAFN(debug_reveal_mimics)
 {
+    UNUSED(ls);
     for (rectangle_iterator ri(1); ri; ++ri)
         if (mimic_at(*ri))
             discover_mimic(*ri);
     return 0;
 }
 
-LUAFN(debug_los_changed)
-{
-    los_changed();
-    return 0;
-}
+LUAWRAP(debug_los_changed, los_changed())
 
 LUAFN(debug_dump_map)
 {
@@ -141,6 +138,7 @@ LUAFN(debug_vault_names)
 
 LUAFN(_debug_test_explore)
 {
+    UNUSED(ls);
 #ifdef WIZARD
     debug_test_explore();
 #endif
@@ -152,11 +150,11 @@ LUAFN(debug_bouncy_beam)
     coord_def source;
     coord_def target;
 
-    source.x = luaL_checkint(ls, 1);
-    source.y = luaL_checkint(ls, 2);
-    target.x = luaL_checkint(ls, 3);
-    target.y = luaL_checkint(ls, 4);
-    int range = luaL_checkint(ls, 5);
+    source.x = luaL_safe_checkint(ls, 1);
+    source.y = luaL_safe_checkint(ls, 2);
+    target.x = luaL_safe_checkint(ls, 3);
+    target.y = luaL_safe_checkint(ls, 4);
+    int range = luaL_safe_checkint(ls, 5);
     bool findray = false;
     if (lua_gettop(ls) > 5)
         findray = lua_toboolean(ls, 6);
@@ -186,6 +184,8 @@ LUAFN(debug_bouncy_beam)
 // If menv[] is full, dismiss all monsters not near the player.
 LUAFN(debug_cull_monsters)
 {
+    UNUSED(ls);
+
     // At least one empty space in menv
     for (const auto &mons : menv_real)
         if (mons.type == MONS_NO_MONSTER)
@@ -208,6 +208,8 @@ LUAFN(debug_cull_monsters)
 
 LUAFN(debug_dismiss_adjacent)
 {
+    UNUSED(ls);
+
     for (adjacent_iterator ai(you.pos()); ai; ++ai)
     {
         monster* mon = monster_at(*ai);
@@ -224,6 +226,8 @@ LUAFN(debug_dismiss_adjacent)
 
 LUAFN(debug_dismiss_monsters)
 {
+    UNUSED(ls);
+
     for (monster_iterator mi; mi; ++mi)
     {
         if (mi)
@@ -272,18 +276,21 @@ static FixedBitVector<NUM_MONSTERS> saved_uniques;
 
 LUAFN(debug_save_uniques)
 {
+    UNUSED(ls);
     saved_uniques = you.unique_creatures;
     return 0;
 }
 
 LUAFN(debug_reset_uniques)
 {
+    UNUSED(ls);
     you.unique_creatures.reset();
     return 0;
 }
 
 LUAFN(debug_randomize_uniques)
 {
+    UNUSED(ls);
     you.unique_creatures.reset();
     for (monster_type mt = MONS_0; mt < NUM_MONSTERS; ++mt)
     {
@@ -339,11 +346,7 @@ LUAFN(debug_viewwindow)
     return 0;
 }
 
-LUAFN(debug_seen_monsters_react)
-{
-    seen_monsters_react();
-    return 0;
-}
+LUAWRAP(debug_seen_monsters_react, seen_monsters_react())
 
 static const char* disablements[] =
 {
@@ -399,18 +402,31 @@ LUAFN(debug_reset_rng)
 {
     // call this with care...
 
-    // quick and dirty - use only 32 bit seeds
-    unsigned int seed = (unsigned int) luaL_checkint(ls, 1);
-    Options.seed = (uint64_t) seed;
-    reset_rng();
-    return 0;
+    if (lua_type(ls, 1) == LUA_TSTRING)
+    {
+        const char *seed_string = lua_tostring(ls, 1);
+        uint64_t tmp_seed = 0;
+        if (!sscanf(seed_string, "%" SCNu64, &tmp_seed))
+            tmp_seed = 0;
+        Options.seed = tmp_seed;
+    }
+    else
+    {
+        // quick and dirty - use only 32 bit seeds
+        unsigned int seed = (unsigned int) luaL_safe_checkint(ls, 1);
+        Options.seed = (uint64_t) seed;
+    }
+    rng::reset();
+    const string ret = make_stringf("%" PRIu64, Options.seed);
+    lua_pushstring(ls, ret.c_str());
+    return 1;
 }
 
 LUAFN(debug_get_rng_state)
 {
     string r = make_stringf("seed: %" PRIu64 ", generator states: ",
         Options.seed);
-    vector<uint64_t> states = get_rng_states();
+    vector<uint64_t> states = rng::get_states();
     for (auto i : states)
         r += make_stringf("%" PRIu64 " ", i);
     lua_pushstring(ls, r.c_str());

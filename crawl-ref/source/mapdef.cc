@@ -47,6 +47,36 @@
 #include "tiledef-dngn.h"
 #include "tiledef-player.h"
 
+#ifdef DEBUG_TAG_PROFILING
+static map<string,int> _tag_profile;
+
+static void _profile_inc_tag(const string &tag)
+{
+    if (!_tag_profile.count(tag))
+        _tag_profile[tag] = 0;
+    _tag_profile[tag]++;
+}
+
+void tag_profile_out()
+{
+    long total = 0;
+    vector<pair<int, string>> resort;
+    fprintf(stderr, "\nTag hits:\n");
+    for (auto k : _tag_profile)
+    {
+        resort.emplace_back(k.second, k.first);
+        total += k.second;
+    }
+    sort(resort.begin(), resort.end());
+    for (auto p : resort)
+    {
+        long percent = ((long) p.first) * 100 / total;
+        fprintf(stderr, "%8d (%2ld%%): %s\n", p.first, percent, p.second.c_str());
+    }
+    fprintf(stderr, "Total: %ld\n", total);
+}
+#endif
+
 static const char *map_section_names[] =
 {
     "",
@@ -2172,7 +2202,8 @@ map_def::map_def()
       rock_colour(BLACK), floor_colour(BLACK), rock_tile(""),
       floor_tile(""), border_fill_type(DNGN_ROCK_WALL),
       tags(),
-      index_only(false), cache_offset(0L), validating_map_flag(false)
+      index_only(false), cache_offset(0L), validating_map_flag(false),
+      cache_minivault(false), cache_overwritable(false), cache_extra(false)
 {
     init();
 }
@@ -2231,17 +2262,18 @@ void map_def::reinit()
     mons.clear();
     feat_renames.clear();
     subvault_places.clear();
+    update_cached_tags();
 }
 
 bool map_def::map_already_used() const
 {
-    return you.uniq_map_names.count(name)
+    return get_uniq_map_names().count(name)
            || env.level_uniq_maps.find(name) !=
                env.level_uniq_maps.end()
            || env.new_used_subvault_names.find(name) !=
                env.new_used_subvault_names.end()
-           || has_any_tag(you.uniq_map_tags.begin(),
-                          you.uniq_map_tags.end())
+           || has_any_tag(get_uniq_map_tags().begin(),
+                          get_uniq_map_tags().end())
            || has_any_tag(env.level_uniq_map_tags.begin(),
                           env.level_uniq_map_tags.end())
            || has_any_tag(env.new_used_subvault_tags.begin(),
@@ -2320,7 +2352,7 @@ void map_def::write_full(writer& outf) const
     epilogue.write(outf);
 }
 
-void map_def::read_full(reader& inf, bool check_cache_version)
+void map_def::read_full(reader& inf)
 {
     // There's a potential race-condition here:
     // - If someone modifies a .des file while there are games in progress,
@@ -2417,7 +2449,7 @@ void map_def::load()
                 make_stringf("Map inf is invalid: %s", name.c_str()));
     }
     inf.advance(cache_offset);
-    read_full(inf, true);
+    read_full(inf);
 
     index_only = false;
 }
@@ -2577,16 +2609,22 @@ bool map_def::run_hook(const string &hook_name, bool die_on_lua_error)
     const dlua_set_map mset(this);
     if (!dlua.callfn("dgn_map_run_hook", "s", hook_name.c_str()))
     {
-        if (die_on_lua_error)
+        const string error = rewrite_chunk_errors(dlua.error);
+        // only show the error message if this isn't a hook map-placement
+        // failure, which should just lead to a silent veto.
+        if (error.find("Failed to place map") == string::npos)
         {
-            end(1, false, "Lua error running hook '%s' on map '%s': %s",
-                hook_name.c_str(), name.c_str(),
-                rewrite_chunk_errors(dlua.error).c_str());
+            if (die_on_lua_error)
+            {
+                end(1, false, "Lua error running hook '%s' on map '%s': %s",
+                    hook_name.c_str(), name.c_str(), error.c_str());
+            }
+            else
+            {
+                mprf(MSGCH_ERROR, "Lua error running hook '%s' on map '%s': %s",
+                     hook_name.c_str(), name.c_str(), error.c_str());
+            }
         }
-        else
-            mprf(MSGCH_ERROR, "Lua error running hook '%s' on map '%s': %s",
-                 hook_name.c_str(), name.c_str(),
-                 rewrite_chunk_errors(dlua.error).c_str());
         return false;
     }
     return true;
@@ -2726,7 +2764,7 @@ string map_def::validate_map_placeable()
     // Ok, the map wants to be placed by tag. In this case it should have
     // at least one tag that's not a map flag.
     bool has_selectable_tag = false;
-    for (const string &piece : get_tags())
+    for (const string &piece : tags)
     {
         if (_map_tag_is_selectable(piece))
         {
@@ -2776,6 +2814,8 @@ bool map_def::has_exit() const
 
 string map_def::validate_map_def(const depth_ranges &default_depths)
 {
+    UNUSED(default_depths);
+
     unwind_bool valid_flag(validating_map_flag, true);
 
     string err = run_lua(true);
@@ -2927,16 +2967,37 @@ bool map_def::has_depth() const
     return !depths.empty();
 }
 
+void map_def::update_cached_tags()
+{
+    cache_minivault = has_tag("minivault");
+    cache_overwritable = has_tag("overwritable");
+    cache_extra = has_tag("extra");
+}
+
 bool map_def::is_minivault() const
 {
-    return has_tag("minivault");
+#ifdef DEBUG_TAG_PROFILING
+    ASSERT(cache_minivault == has_tag("minivault"));
+#endif
+    return cache_minivault;
 }
 
 // Returns true if the map is a layout that allows other vaults to be
 // built on it.
 bool map_def::is_overwritable_layout() const
 {
-    return has_tag("overwritable");
+#ifdef DEBUG_TAG_PROFILING
+    ASSERT(cache_overwritable == has_tag("overwritable"));
+#endif
+    return cache_overwritable;
+}
+
+bool map_def::is_extra_vault() const
+{
+#ifdef DEBUG_TAG_PROFILING
+    ASSERT(cache_extra == has_tag("extra"));
+#endif
+    return cache_extra;
 }
 
 // Tries to dock a floating vault - push it to one edge of the level.
@@ -3239,21 +3300,18 @@ void map_def::fixup()
     }
 }
 
-bool map_def::has_tag(const set<string> &tagswanted) const
+bool map_def::has_all_tags(const string &tagswanted) const
 {
-    if (tags.empty() || tagswanted.size() == 0)
-        return false;
-
-    for (const string &tag : tagswanted)
-        if (!tags.count(tag))
-            return false;
-
-    return true;
+    const auto &tags_set = parse_tags(tagswanted);
+    return has_all_tags(tags_set.begin(), tags_set.end());
 }
 
-bool map_def::has_tag(const string &tagswanted) const
+bool map_def::has_tag(const string &tagwanted) const
 {
-    return has_tag(parse_tags(tagswanted));
+#ifdef DEBUG_TAG_PROFILING
+    _profile_inc_tag(tagwanted);
+#endif
+    return tags.count(tagwanted) > 0;
 }
 
 bool map_def::has_tag_prefix(const string &prefix) const
@@ -3276,15 +3334,25 @@ bool map_def::has_tag_suffix(const string &suffix) const
     return false;
 }
 
-const set<string> map_def::get_tags() const
+const unordered_set<string> map_def::get_tags_unsorted() const
 {
     return tags;
+}
+
+const vector<string> map_def::get_tags() const
+{
+    // this might seem inefficient, but get_tags is not called very much; the
+    // hotspot revealed by profiling is actually has_tag checks.
+    vector<string> result(tags.begin(), tags.end());
+    sort(result.begin(), result.end());
+    return result;
 }
 
 void map_def::add_tags(const string &tag)
 {
     auto parsed_tags = parse_tags(tag);
     tags.insert(parsed_tags.begin(), parsed_tags.end());
+    update_cached_tags();
 }
 
 bool map_def::remove_tags(const string &tag)
@@ -3293,23 +3361,27 @@ bool map_def::remove_tags(const string &tag)
     auto parsed_tags = parse_tags(tag);
     for (auto &t : parsed_tags)
         removed = tags.erase(t) || removed; // would iterator overload be ok?
+    update_cached_tags();
     return removed;
 }
 
 void map_def::clear_tags()
 {
     tags.clear();
+    update_cached_tags();
 }
 
 void map_def::set_tags(const string &tag)
 {
     clear_tags();
     add_tags(tag);
+    update_cached_tags();
 }
 
 string map_def::tags_string() const
 {
-    return join_strings(tags.begin(), tags.end());
+    auto sorted_tags = get_tags();
+    return join_strings(sorted_tags.begin(), sorted_tags.end());
 }
 
 keyed_mapspec *map_def::mapspec_at(const coord_def &c)
@@ -4921,8 +4993,8 @@ int str_to_ego(object_class_type item_type, string ego_str)
         "returning",
 #endif
         "chaos",
-        "evasion",
 #if TAG_MAJOR_VERSION == 34
+        "evasion",
         "confuse",
 #endif
         "penetration",
@@ -4937,23 +5009,28 @@ int str_to_ego(object_class_type item_type, string ego_str)
         "frost",
         "poisoned",
         "curare",
+#if TAG_MAJOR_VERSION == 34
         "returning",
+#endif
         "chaos",
+#if TAG_MAJOR_VERSION == 34
         "penetration",
+#endif
         "dispersal",
+#if TAG_MAJOR_VERSION == 34
         "exploding",
         "steel",
-        "silver",
-        "paralysis",
-#if TAG_MAJOR_VERSION == 34
-        "slow",
 #endif
+        "silver",
+#if TAG_MAJOR_VERSION == 34
+        "paralysis",
+        "slow",
         "sleep",
         "confusion",
-#if TAG_MAJOR_VERSION == 34
         "sickness",
 #endif
-        "frenzy",
+        "datura",
+        "atropa",
         nullptr
     };
     COMPILE_CHECK(ARRAYSZ(missile_brands) == NUM_REAL_SPECIAL_MISSILES);
@@ -5024,9 +5101,7 @@ int item_list::parse_acquirement_source(const string &source)
 
 bool item_list::monster_corpse_is_valid(monster_type *mons,
                                         const string &name,
-                                        bool corpse,
-                                        bool skeleton,
-                                        bool chunk)
+                                        bool skeleton)
 {
     if (*mons == RANDOM_NONBASE_DRACONIAN || *mons == RANDOM_NONBASE_DEMONSPAWN)
     {
@@ -5086,7 +5161,7 @@ bool item_list::parse_corpse_spec(item_spec &result, string s)
     // Get the actual monster spec:
     mons_spec spec = mlist.get_monster(0);
     monster_type mtype = static_cast<monster_type>(spec.type);
-    if (!monster_corpse_is_valid(&mtype, s, corpse, skeleton, chunk))
+    if (!monster_corpse_is_valid(&mtype, s, skeleton))
     {
         error = make_stringf("Requested corpse '%s' is invalid",
                              s.c_str());

@@ -19,13 +19,13 @@ static void _give_wanderer_weapon(skill_type wpn_skill, int plus)
         // get curare here.
         if (plus)
         {
-            newgame_make_item(OBJ_MISSILES, MI_NEEDLE, 1 + random2(4),
+            newgame_make_item(OBJ_MISSILES, MI_DART, 1 + random2(4),
                               0, SPMSL_CURARE);
         }
-        // Otherwise, we just get some poisoned needles.
+        // Otherwise, we just get some poisoned darts.
         else
         {
-            newgame_make_item(OBJ_MISSILES, MI_NEEDLE, 5 + roll_dice(2, 5),
+            newgame_make_item(OBJ_MISSILES, MI_DART, 5 + roll_dice(2, 5),
                               0, SPMSL_POISONED);
         }
     }
@@ -57,10 +57,6 @@ static void _give_wanderer_weapon(skill_type wpn_skill, int plus)
 
     case SK_STAVES:
         sub_type = WPN_QUARTERSTAFF;
-        break;
-
-    case SK_THROWING:
-        sub_type = WPN_BLOWGUN;
         break;
 
     case SK_BOWS:
@@ -409,7 +405,8 @@ static void _good_potion_or_scroll()
             (you.species == SP_MUMMY
              || you.species == SP_VINE_STALKER) ? 0 : 1 },
         { { OBJ_POTIONS, POT_HASTE },
-            you.species == SP_MUMMY ? 0 : 1 },
+            (you.species == SP_MUMMY
+             || you.species == SP_FORMICID) ? 0 : 1 },
         { { OBJ_POTIONS, POT_BERSERK_RAGE },
             (you.species == SP_FORMICID
              || you.is_lifeless_undead(false)) ? 0 : 1},
@@ -687,6 +684,12 @@ static void _wanderer_cover_equip_holes()
 // levels/equipment, but pretty randomised.
 void create_wanderer()
 {
+    // intentionally create the subgenerator either way, so that this has the
+    // same impact on the current main rng for all chars.
+    rng::subgenerator wn_rng;
+    if (you.char_class != JOB_WANDERER)
+        return;
+
     // Decide what our character roles are.
     stat_type primary_role   = _wanderer_choose_role();
     stat_type secondary_role = _wanderer_choose_role();

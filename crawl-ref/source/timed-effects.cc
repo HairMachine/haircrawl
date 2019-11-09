@@ -387,7 +387,7 @@ static void _jiyva_effects(int /*time_delta*/)
         jiyva_eat_offlevel_items();
 }
 
-static void _evolve(int time_delta)
+static void _evolve(int /*time_delta*/)
 {
     if (int lev = you.get_mutation_level(MUT_EVOLUTION))
         if (one_chance_in(2 / lev)
@@ -431,6 +431,8 @@ struct timed_effect
     bool              arena;
 };
 
+// If you add an entry to this list, remember to add a matching entry
+// to timed_effect_type in timef-effect-type.h!
 static struct timed_effect timed_effects[] =
 {
     { rot_floor_items,               200,   200, true  },
@@ -695,10 +697,6 @@ static void _catchup_monster_moves(monster* mon, int turns)
         return;
     }
 
-    // Don't shift ballistomycete spores since that would disrupt their trail.
-    if (mon->type == MONS_BALLISTOMYCETE_SPORE)
-        return;
-
     // special movement code for ioods
     if (mons_is_projectile(*mon))
     {
@@ -900,7 +898,7 @@ void update_level(int elapsedTime)
 #endif
 
     rot_floor_items(elapsedTime);
-    shoals_apply_tides(turns, true, turns < 5);
+    shoals_apply_tides(turns, true);
     timeout_tombs(turns);
 
     if (env.sanctuary_time)
@@ -1283,7 +1281,7 @@ void run_environment_effects()
 
     run_corruption_effects(you.time_taken);
     shoals_apply_tides(div_rand_round(you.time_taken, BASELINE_DELAY),
-                       false, true);
+                       false);
     timeout_tombs(you.time_taken);
     timeout_malign_gateways(you.time_taken);
     timeout_terrain_changes(you.time_taken);

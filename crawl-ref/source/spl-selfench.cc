@@ -31,13 +31,6 @@
 #include "view.h"
 #include "viewchar.h"
 
-int allowed_deaths_door_hp()
-{
-    int hp = calc_spell_power(SPELL_DEATHS_DOOR, true) / 10;
-
-    return max(hp, 1);
-}
-
 spret cast_deaths_door(int pow, bool fail)
 {
     fail_check();
@@ -47,7 +40,9 @@ spret cast_deaths_door(int pow, bool fail)
     you.set_duration(DUR_DEATHS_DOOR, 10 + random2avg(13, 3)
                                        + (random2(pow) / 10));
 
-    calc_hp(false, true);
+    const int hp = max(calc_spell_power(SPELL_DEATHS_DOOR, true) / 10, 1);
+    you.attribute[ATTR_DEATHS_DOOR_HP] = hp;
+    set_hp(hp);
 
     if (you.duration[DUR_DEATHS_DOOR] > 25 * BASELINE_DELAY)
         you.duration[DUR_DEATHS_DOOR] = (23 + random2(5)) * BASELINE_DELAY;
@@ -72,12 +67,6 @@ spret ice_armour(int pow, bool fail)
     else
         mpr("A film of ice covers your body!");
 
-    if (you.attribute[ATTR_BONE_ARMOUR] > 0)
-    {
-        you.attribute[ATTR_BONE_ARMOUR] = 0;
-        mpr("Your corpse armour falls away.");
-    }
-
     you.increase_duration(DUR_ICY_ARMOUR, random_range(40, 50), 50);
     you.props[ICY_ARMOUR_KEY] = pow;
     you.redraw_armour_class = true;
@@ -85,7 +74,7 @@ spret ice_armour(int pow, bool fail)
     return spret::success;
 }
 
-spret deflection(int pow, bool fail)
+spret deflection(int /*pow*/, bool fail)
 {
     fail_check();
     you.attribute[ATTR_DEFLECT_MISSILES] = 1;
@@ -181,7 +170,6 @@ int cast_selective_amnesia(const string &pre_msg)
         }
     }
 
-    canned_msg(MSG_OK);
     return -1;
 }
 

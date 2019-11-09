@@ -84,6 +84,7 @@ void game_state::reset_game()
     need_save = false;
     type = GAME_TYPE_UNSPECIFIED;
     updating_scores = false;
+    clear_mon_acting();
     reset_cmd_repeat();
     reset_cmd_again();
 }
@@ -192,7 +193,7 @@ void game_state::zero_turns_taken()
     cancel_cmd_repeat();
 }
 
-bool interrupt_cmd_repeat(activity_interrupt_type ai,
+bool interrupt_cmd_repeat(activity_interrupt ai,
                            const activity_interrupt_data &at)
 {
     if (crawl_state.cmd_repeat_start)
@@ -203,12 +204,12 @@ bool interrupt_cmd_repeat(activity_interrupt_type ai,
 
     switch (ai)
     {
-    case AI_HUNGRY:
-    case AI_TELEPORT:
-    case AI_FORCE_INTERRUPT:
-    case AI_HP_LOSS:
-    case AI_MONSTER_ATTACKS:
-    case AI_MIMIC:
+    case activity_interrupt::hungry:
+    case activity_interrupt::teleport:
+    case activity_interrupt::force:
+    case activity_interrupt::hp_loss:
+    case activity_interrupt::monster_attacks:
+    case activity_interrupt::mimic:
         crawl_state.cancel_cmd_repeat("Command repetition interrupted.");
         return true;
 
@@ -216,7 +217,7 @@ bool interrupt_cmd_repeat(activity_interrupt_type ai,
         break;
     }
 
-    if (ai == AI_SEE_MONSTER)
+    if (ai == activity_interrupt::see_monster)
     {
         const monster* mon = at.mons_data;
         ASSERT(mon);
@@ -235,7 +236,6 @@ bool interrupt_cmd_repeat(activity_interrupt_type ai,
         if (at.context == SC_NEWLY_SEEN)
         {
             monster_info mi(mon);
-            set_auto_exclude(mon);
 
             mprf(MSGCH_WARN, "%s comes into view.",
                  get_monster_equipment_desc(mi, DESC_WEAPON).c_str());
@@ -261,9 +261,9 @@ bool interrupt_cmd_repeat(activity_interrupt_type ai,
     // then everything interrupts it.
     if (crawl_state.repeat_cmd == CMD_WAIT)
     {
-        if (ai == AI_FULL_MP)
+        if (ai == activity_interrupt::full_mp)
             crawl_state.cancel_cmd_repeat("Magic restored.");
-        else if (ai == AI_FULL_HP)
+        else if (ai == activity_interrupt::full_hp)
             crawl_state.cancel_cmd_repeat("HP restored");
         else
             crawl_state.cancel_cmd_repeat("Command repetition interrupted.");
@@ -274,7 +274,7 @@ bool interrupt_cmd_repeat(activity_interrupt_type ai,
     if (crawl_state.cmd_repeat_started_unsafe)
         return false;
 
-    if (ai == AI_HIT_MONSTER)
+    if (ai == activity_interrupt::hit_monster)
     {
         // This check is for when command repetition is used to
         // whack away at a 0xp monster, since the player feels safe
@@ -552,34 +552,39 @@ bool game_state::game_standard_levelgen() const
     return game_is_normal() || game_is_hints();
 }
 
+bool game_state::game_is_valid_type() const
+{
+    return type < NUM_GAME_TYPE;
+}
+
 bool game_state::game_is_normal() const
 {
-    ASSERT(type < NUM_GAME_TYPE);
+    ASSERT(game_is_valid_type());
     return type == GAME_TYPE_NORMAL || type == GAME_TYPE_CUSTOM_SEED
-                                    ||type == GAME_TYPE_UNSPECIFIED;
+                                    || type == GAME_TYPE_UNSPECIFIED;
 }
 
 bool game_state::game_is_tutorial() const
 {
-    ASSERT(type < NUM_GAME_TYPE);
+    ASSERT(game_is_valid_type());
     return type == GAME_TYPE_TUTORIAL;
 }
 
 bool game_state::game_is_arena() const
 {
-    ASSERT(type < NUM_GAME_TYPE);
+    ASSERT(game_is_valid_type());
     return type == GAME_TYPE_ARENA;
 }
 
 bool game_state::game_is_sprint() const
 {
-    ASSERT(type < NUM_GAME_TYPE);
+    ASSERT(game_is_valid_type());
     return type == GAME_TYPE_SPRINT;
 }
 
 bool game_state::game_is_hints() const
 {
-    ASSERT(type < NUM_GAME_TYPE);
+    ASSERT(game_is_valid_type());
     return type == GAME_TYPE_HINTS;
 }
 
@@ -611,11 +616,15 @@ string game_state::game_type_name_for(game_type _type)
         return "Arena";
     case GAME_TYPE_SPRINT:
         return "Dungeon Sprint";
+    case NUM_GAME_TYPE:
+        return "Unknown";
     }
 }
 
 string game_state::game_savedir_path() const
 {
+    if (!game_is_valid_type())
+        return ""; // a game from the future -- avoid the ASSERT below
     return game_is_sprint()? "sprint/" : "";
 }
 

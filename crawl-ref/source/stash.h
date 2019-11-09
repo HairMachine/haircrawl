@@ -22,7 +22,8 @@ class Stash
 {
 public:
     Stash(coord_def pos_ = coord_def());
-    Stash(const Stash &other) { *this = other; };
+    Stash(const Stash &other) = default;
+    Stash& operator=(const Stash& other) = default;
 
     static bool is_boring_feature(dungeon_feature_type feat);
 
@@ -110,6 +111,15 @@ private:
     friend class ST_ItemIterator;
 };
 
+enum stash_match_type
+{
+    MATCH_UNKNOWN,
+    MATCH_ITEM,
+    MATCH_SHOP,
+    MATCH_FEATURE,
+    MATCH_NUM_MATCH_TYPE
+};
+
 struct stash_search_result
 {
     // Where's this thingummy of interest.
@@ -118,6 +128,9 @@ struct stash_search_result
     // Number of levels the player must cross to reach the level the stash/shop
     // is on.
     int player_distance;
+
+    // Type of thing found.
+    stash_match_type match_type;
 
     // Text that describes this search result - usually the name of
     // the first matching item in the stash or the name of the shop.
@@ -129,8 +142,14 @@ struct stash_search_result
     // Item that was matched.
     item_def item;
 
-    // The shop in question, if this is result is for a shop name.
+    // The shop in question, if this result is for a shop name.
     const ShopInfo *shop;
+
+    // Type of feature, if this result is for a feature.
+    dungeon_feature_type feat;
+
+    // Type of trap, if this result is for a trap.
+    trap_type trap;
 
     // Whether the found items are in the player's inventory.
     bool in_inventory;
@@ -139,8 +158,10 @@ struct stash_search_result
     int duplicates;
     int duplicate_piles;
 
-    stash_search_result() : pos(), player_distance(0), match(), primary_sort(), item(),
-                            shop(nullptr), in_inventory(false), duplicates(0), duplicate_piles(0)
+    stash_search_result() : pos(), player_distance(0), match_type(), match(),
+                            primary_sort(), item(), shop(nullptr), feat(),
+                            trap(TRAP_UNASSIGNED), in_inventory(false),
+                            duplicates(0), duplicate_piles(0)
     {
     }
 
@@ -223,7 +244,7 @@ public:
     {
     }
 
-    void search_stashes();
+    void search_stashes(string search_term = "");
 
     LevelStashes &get_current_level();
     LevelStashes *find_current_level();
@@ -249,7 +270,7 @@ public:
     // Mark nets at (x,y) on current level as no longer trapping an actor.
     bool unmark_trapping_nets(const coord_def &c);
 
-    void  add_stash(coord_def p);
+    void add_stash(coord_def p);
 
     void save(writer&) const;
     void load(reader&);
@@ -322,10 +343,8 @@ void describe_stash(const coord_def& c);
 
 vector<item_def> item_list_in_stash(const coord_def& pos);
 
-string userdef_annotate_item(const char *s, const item_def *item,
-                             bool exclusive = false);
-string stash_annotate_item(const char *s, const item_def *item,
-                           bool exclusive = false);
+string userdef_annotate_item(const char *s, const item_def *item);
+string stash_annotate_item(const char *s, const item_def *item);
 
 #define STASH_LUA_SEARCH_ANNOTATE "ch_stash_search_annotate_item"
 #define STASH_LUA_DUMP_ANNOTATE   "ch_stash_dump_annotate_item"

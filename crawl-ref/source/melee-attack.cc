@@ -68,7 +68,7 @@
 */
 melee_attack::melee_attack(actor *attk, actor *defn,
                            int attack_num, int effective_attack_num,
-                           bool is_cleaving, coord_def attack_pos)
+                           bool is_cleaving)
     :  // Call attack's constructor
     ::attack(attk, defn),
 
@@ -694,9 +694,11 @@ static void _hydra_consider_devouring(monster &defender)
     if (defender.is_shapeshifter())
     {
         // handle this carefully, so the player knows what's going on
-        mprf("You spit out %s as %s twists & changes in your mouth!",
+        mprf("You spit out %s as %s %s & %s in your mouth!",
              defender.name(DESC_THE).c_str(),
-             defender.pronoun(PRONOUN_SUBJECTIVE).c_str());
+             defender.pronoun(PRONOUN_SUBJECTIVE).c_str(),
+             conjugate_verb("twist", defender.pronoun_plurality()).c_str(),
+             conjugate_verb("change", defender.pronoun_plurality()).c_str());
         return;
     }
 
@@ -834,7 +836,7 @@ bool melee_attack::attack()
 
     // Calculate various ev values and begin to check them to determine the
     // correct handle_phase_ handler.
-    const int ev = defender->evasion(EV_IGNORE_NONE, attacker);
+    const int ev = defender->evasion(ev_ignore::none, attacker);
     ev_margin = test_hit(to_hit, ev, !attacker->is_player());
     bool shield_blocked = attack_shield_blocked(true);
 
@@ -1280,7 +1282,7 @@ bool melee_attack::player_aux_test_hit()
     // XXX We're clobbering did_hit
     did_hit = false;
 
-    const int evasion = defender->evasion(EV_IGNORE_NONE, attacker);
+    const int evasion = defender->evasion(ev_ignore::none, attacker);
 
     if (player_under_penance(GOD_ELYVILON)
         && god_hates_your_god(GOD_ELYVILON)
@@ -1330,7 +1332,7 @@ bool melee_attack::player_aux_unarmed()
         if (atk == UNAT_CONSTRICT && !attacker->can_constrict(defender, true))
             continue;
 
-        to_hit = random2(calc_your_to_hit_unarmed(atk));
+        to_hit = random2(calc_your_to_hit_unarmed());
 
         handle_noise(defender->pos());
         alert_nearby_monsters();
@@ -1475,7 +1477,7 @@ void melee_attack::player_announce_aux_hit()
 
 string melee_attack::player_why_missed()
 {
-    const int ev = defender->evasion(EV_IGNORE_NONE, attacker);
+    const int ev = defender->evasion(ev_ignore::none, attacker);
     const int combined_penalty =
         attacker_armour_tohit_penalty + attacker_shield_tohit_penalty;
     if (to_hit < ev && to_hit + combined_penalty >= ev)
@@ -1943,9 +1945,7 @@ bool melee_attack::consider_decapitation(int dam, int damage_type)
 {
     const int dam_type = (damage_type != -1) ? damage_type :
                                                attacker->damage_type();
-    const brand_type wpn_brand = attacker->damage_brand();
-
-    if (!attack_chops_heads(dam, dam_type, wpn_brand))
+    if (!attack_chops_heads(dam, dam_type))
         return false;
 
     decapitate(dam_type);
@@ -1961,7 +1961,7 @@ bool melee_attack::consider_decapitation(int dam, int damage_type)
     const int limit = defender->type == MONS_LERNAEAN_HYDRA ? 27
                                                             : MAX_HYDRA_HEADS;
 
-    if (wpn_brand == SPWPN_FLAMING)
+    if (attacker->damage_brand() == SPWPN_FLAMING)
     {
         if (defender_visible)
             mpr("The flame cauterises the wound!");
@@ -2007,7 +2007,7 @@ static bool actor_can_lose_heads(const actor* defender)
  * @param wpn_brand     The brand_type of the attack.
  * @return              Whether the attack will chop off a head.
  */
-bool melee_attack::attack_chops_heads(int dam, int dam_type, int wpn_brand)
+bool melee_attack::attack_chops_heads(int dam, int dam_type)
 {
     // hydras and hydra-like things only.
     if (!actor_can_lose_heads(defender))
@@ -2949,8 +2949,7 @@ void melee_attack::mons_apply_attack_flavour()
     case AF_ENGULF:
         if (x_chance_in_y(2, 3) && attacker->can_constrict(defender, true))
         {
-            if (defender->is_player() && !you.duration[DUR_WATER_HOLD]
-                && !you.duration[DUR_WATER_HOLD_IMMUNITY])
+            if (defender->is_player() && !you.duration[DUR_WATER_HOLD])
             {
                 you.duration[DUR_WATER_HOLD] = 10;
                 you.props["water_holder"].get_int() = attacker->as_monster()->mid;
@@ -2980,7 +2979,7 @@ void melee_attack::mons_apply_attack_flavour()
         if (attacker->type == MONS_FIRE_VORTEX)
             attacker->as_monster()->suicide(-10);
 
-        special_damage = defender->apply_ac(base_damage, 0, AC_HALF);
+        special_damage = defender->apply_ac(base_damage, 0, ac_type::half);
         special_damage = resist_adjust_damage(defender,
                                               BEAM_FIRE,
                                               special_damage);
@@ -3115,7 +3114,7 @@ void melee_attack::mons_do_eyeball_confusion()
             mprf("The eyeballs on your body gaze at %s.",
                  mon->name(DESC_THE).c_str());
 
-            if (!mon->check_clarity(false))
+            if (!mon->check_clarity())
             {
                 mon->add_ench(mon_enchant(ENCH_CONFUSION, 0, &you,
                                           30 + random2(100)));
@@ -3322,6 +3321,9 @@ bool melee_attack::do_knockback(bool trample)
     if (defender->is_stationary())
         return false; // don't even print a message
 
+    if (attacker->cannot_move())
+        return false;
+
     const int size_diff =
         attacker->body_size(PSIZE_BODY) - defender->body_size(PSIZE_BODY);
     const coord_def old_pos = defender->pos();
@@ -3501,7 +3503,7 @@ bool melee_attack::_extra_aux_attack(unarmed_attack_type atk)
 // to-hit method
 // Returns the to-hit for your extra unarmed attacks.
 // DOES NOT do the final roll (i.e., random2(your_to_hit)).
-int melee_attack::calc_your_to_hit_unarmed(int uattack)
+int melee_attack::calc_your_to_hit_unarmed()
 {
     int your_to_hit;
 
@@ -3554,7 +3556,7 @@ int melee_attack::calc_mon_to_hit_base()
  * Add modifiers to the base damage.
  * Currently only relevant for monsters.
  */
-int melee_attack::apply_damage_modifiers(int damage, int damage_max)
+int melee_attack::apply_damage_modifiers(int damage)
 {
     ASSERT(attacker->is_monster());
     monster *as_mon = attacker->as_monster();
@@ -3644,17 +3646,13 @@ bool melee_attack::_player_vampire_draws_blood(const monster* mon, const int dam
         }
     }
 
-    // Gain nutrition.
-    if (you.hunger_state != HS_ENGORGED)
-        lessen_hunger(30 + random2avg(59, 2), false);
-
     return true;
 }
 
 bool melee_attack::_vamp_wants_blood_from_monster(const monster* mon)
 {
     return you.species == SP_VAMPIRE
-           && you.hunger_state < HS_SATIATED
+           && !you.vampire_alive
            && actor_is_susceptible_to_vampirism(*mon)
            && mons_has_blood(mon->type);
 }

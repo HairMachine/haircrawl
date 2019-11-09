@@ -36,6 +36,7 @@
 #include "dgn-event.h"
 #include "directn.h"
 #include "dungeon.h"
+#include "english.h"
 #include "env.h"
 #include "food.h"
 #include "god-passive.h"
@@ -134,7 +135,7 @@ static bool will_autoinscribe = false;
 
 static inline string _autopickup_item_name(const item_def &item)
 {
-    return userdef_annotate_item(STASH_LUA_SEARCH_ANNOTATE, &item, true)
+    return userdef_annotate_item(STASH_LUA_SEARCH_ANNOTATE, &item)
            + item_prefix(item, false) + " " + item.name(DESC_PLAIN);
 }
 
@@ -962,7 +963,7 @@ static bool _id_floor_item(item_def &item)
             bool should_pickup = item_needs_autopickup(item);
             set_ident_type(item, true);
             if (!should_pickup)
-                you.force_autopickup[item.base_type][item.sub_type] = -1;
+                set_item_autopickup(item, AP_FORCE_OFF);
             return true;
         }
     }
@@ -996,7 +997,7 @@ void pickup_menu(int item_link)
     if (items.size() == 1 && items[0]->quantity > 1)
         prompt = "Select pick up quantity by entering a number, then select the item";
     vector<SelItem> selected = select_items(items, prompt.c_str(), false,
-                                            MT_PICKUP);
+                                            menu_type::pickup);
     if (selected.empty())
         canned_msg(MSG_OK);
     redraw_screen();
@@ -1151,7 +1152,7 @@ void origin_set(const coord_def& where)
     }
 }
 
-static void _origin_freeze(item_def &item, const coord_def& where)
+static void _origin_freeze(item_def &item)
 {
     if (!origin_known(item))
     {
@@ -1190,7 +1191,7 @@ bool origin_describable(const item_def &item)
            && (item.base_type != OBJ_FOOD || item.sub_type != FOOD_CHUNK);
 }
 
-static string _article_it(const item_def &item)
+static string _article_it(const item_def &/*item*/)
 {
     // "it" is always correct, since gloves and boots also come in pairs.
     return "it";
@@ -1733,7 +1734,7 @@ void get_gold(const item_def& item, int quant, bool quiet)
 void note_inscribe_item(item_def &item)
 {
     _autoinscribe_item(item);
-    _origin_freeze(item, you.pos());
+    _origin_freeze(item);
     _check_note_item(item);
 }
 
@@ -1910,11 +1911,8 @@ static void _get_rune(const item_def& it, bool quiet)
 
 /**
  * Place the Orb of Zot into the player's inventory.
- *
- * @param it      The ORB!
- * @param quiet   Unused.
  */
-static void _get_orb(const item_def &it, bool quiet)
+static void _get_orb()
 {
     run_animation(ANIMATION_ORB, UA_PICKUP);
 
@@ -2189,7 +2187,7 @@ static bool _merge_items_into_inv(item_def &it, int quant_got,
     // The Orb is also handled specially.
     if (item_is_orb(it))
     {
-        _get_orb(it, quiet);
+        _get_orb();
         return true;
     }
 
@@ -2614,7 +2612,7 @@ bool drop_item(int item_dropped, int quant_drop)
 
     // If you drop an item in as a merfolk, it is below the water line and
     // makes no noise falling.
-    if (silenced(you.pos()) || you.swimming())
+    if (!you.swimming())
         feat_splash_noise(grd(you.pos()));
 
     // XP evoker has been handled in copy_item_to_grid
@@ -2629,6 +2627,8 @@ bool drop_item(int item_dropped, int quant_drop)
     you.turn_is_over = true;
 
     you.last_pickup.erase(item_dropped);
+    if (you.last_unequip == item.link)
+        you.last_unequip = -1;
 
     return true;
 }
@@ -2713,6 +2713,38 @@ static bool _drop_item_order(const SelItem &first, const SelItem &second)
     return first.slot < second.slot;
 }
 
+void set_item_autopickup(const item_def &item, autopickup_level_type ap)
+{
+    you.force_autopickup[item.base_type][_autopickup_subtype(item)] = ap;
+}
+
+int item_autopickup_level(const item_def &item)
+{
+    return you.force_autopickup[item.base_type][_autopickup_subtype(item)];
+}
+
+static void _disable_autopickup_for_starred_items(vector<SelItem> &items)
+{
+    int autopickup_remove_count = 0;
+    const item_def *last_touched_item;
+    for (SelItem &si : items)
+    {
+        if (si.has_star && item_autopickup_level(si.item[0]) != AP_FORCE_OFF)
+        {
+            last_touched_item = si.item;
+            ++autopickup_remove_count;
+            set_item_autopickup(*last_touched_item, AP_FORCE_OFF);
+        }
+    }
+    if (autopickup_remove_count == 1)
+    {
+        mprf("Autopickup disabled for %s.",
+             pluralise(last_touched_item->name(DESC_DBNAME)).c_str());
+    }
+    else if (autopickup_remove_count > 1)
+        mprf("Autopickup disabled for %d items.", autopickup_remove_count);
+}
+
 /**
  * Prompts the user for an item to drop.
  */
@@ -2734,6 +2766,7 @@ void drop()
         return;
     }
 
+    _disable_autopickup_for_starred_items(tmp_items);
     _multidrop(tmp_items);
 }
 
@@ -2884,8 +2917,6 @@ static int _autopickup_subtype(const item_def &item)
     case OBJ_POTIONS:
     case OBJ_STAVES:
         return item_type_known(item) ? item.sub_type : max_type;
-    case OBJ_MISCELLANY:
-        return max_type;
     case OBJ_BOOKS:
         if (item.sub_type == BOOK_MANUAL || item_type_known(item))
             return item.sub_type;
@@ -2908,9 +2939,9 @@ static bool _is_option_autopickup(const item_def &item, bool ignore_force)
 
     if (item.base_type < NUM_OBJECT_CLASSES)
     {
-        const int force = you.force_autopickup[item.base_type][_autopickup_subtype(item)];
-        if (!ignore_force && force != 0)
-            return force == 1;
+        const int force = item_autopickup_level(item);
+        if (!ignore_force && force != AP_FORCE_NONE)
+            return force == AP_FORCE_ON;
     }
     else
         return false;
@@ -3003,7 +3034,7 @@ static bool _identical_types(const item_def& pickup_item,
     return pickup_item.is_type(inv_item.base_type, inv_item.sub_type);
 }
 
-static bool _edible_food(const item_def& pickup_item,
+static bool _edible_food(const item_def& /*pickup_item*/,
                          const item_def& inv_item)
 {
     return inv_item.base_type == OBJ_FOOD && !is_inedible(inv_item);
@@ -3045,6 +3076,8 @@ static bool _similar_wands(const item_def& pickup_item,
 #if TAG_MAJOR_VERSION == 34
     // Not similar if wand in inventory is empty.
     return !is_known_empty_wand(inv_item);
+#else
+    return true;
 #endif
 }
 
@@ -3212,10 +3245,8 @@ static void _do_autopickup()
                 if (you_are_delayed() && current_delay()->want_autoeat())
                     butchery(&mi);
                 else
-                {
                     o = next;
-                    continue;
-                }
+                continue;
             }
 
             // Do this before it's picked up, otherwise the picked up
@@ -3499,16 +3530,16 @@ colour_t item_def::missile_colour() const
     {
         case MI_STONE:
             return BROWN;
-#if TAG_MAJOR_VERSION == 34
-        case MI_DART:
-#endif
         case MI_SLING_BULLET:
             return CYAN;
         case MI_LARGE_ROCK:
             return LIGHTGREY;
         case MI_ARROW:
             return BLUE;
+#if TAG_MAJOR_VERSION == 34
         case MI_NEEDLE:
+#endif
+        case MI_DART:
             return WHITE;
         case MI_BOLT:
             return LIGHTBLUE;
@@ -3516,10 +3547,9 @@ colour_t item_def::missile_colour() const
             return RED;
         case MI_THROWING_NET:
             return MAGENTA;
-        case MI_TOMAHAWK:
+        case MI_BOOMERANG:
             return GREEN;
         case NUM_SPECIAL_MISSILES:
-        case NUM_REAL_SPECIAL_MISSILES:
         default:
             die("invalid missile type");
     }
@@ -4208,6 +4238,8 @@ static bool _book_from_spell(const char* specs, item_def &item)
 bool get_item_by_name(item_def *item, const char* specs,
                       object_class_type class_wanted, bool create_for_real)
 {
+    // used only for wizmode and item lookup
+
     int            type_wanted    = -1;
     int            special_wanted = 0;
 
@@ -4626,7 +4658,7 @@ item_info get_item_info(const item_def& item)
         break;
 #endif
     case OBJ_STAVES:
-        ii.sub_type = item_type_known(item) ? item.sub_type : NUM_STAVES;
+        ii.sub_type = item_type_known(item) ? item.sub_type : int{NUM_STAVES};
         ii.subtype_rnd = item.subtype_rnd;
         break;
     case OBJ_MISCELLANY:

@@ -334,9 +334,7 @@ bool player_tracer(zap_type ztype, int power, bolt &pbolt, int range)
 // Returns true if the player wants / needs to abort based on god displeasure
 // with targeting this target with this spell. Returns false otherwise.
 static bool _stop_because_god_hates_target_prompt(monster* mon,
-                                                  spell_type spell,
-                                                  beam_type flavour,
-                                                  item_def *item)
+                                                  spell_type spell)
 {
     if (spell == SPELL_TUKIMAS_DANCE)
     {
@@ -546,6 +544,8 @@ bool bolt::can_affect_actor(const actor *act) const
 // this and SPWPN_CHAOS to use the same tables.
 static beam_type _chaos_beam_flavour(bolt* beam)
 {
+    UNUSED(beam);
+
     beam_type flavour;
     flavour = random_choose_weighted(
          // SPWPN_CHAOS randomizes to brands analogous to these beam effects
@@ -2513,7 +2513,7 @@ void bolt::drop_object()
         return;
     }
 
-    if (!thrown_object_destroyed(item, pos()))
+    if (!thrown_object_destroyed(item))
     {
         if (item->sub_type == MI_THROWING_NET)
         {
@@ -2555,43 +2555,6 @@ void bolt::affect_ground()
     if (is_tracer)
         return;
 
-    // Spore explosions might spawn a fungus. The spore explosion
-    // covers 21 tiles in open space, so the expected number of spores
-    // produced is the x in x_chance_in_y() in the conditional below.
-    if (is_explosion && flavour == BEAM_SPORE
-        && agent() && !agent()->is_summoned())
-    {
-        if (env.grid(pos()) == DNGN_FLOOR)
-            env.pgrid(pos()) |= FPROP_MOLD;
-
-        if (x_chance_in_y(2, 21)
-           && mons_class_can_pass(MONS_BALLISTOMYCETE, env.grid(pos()))
-           && !actor_at(pos()))
-        {
-            beh_type beh = attitude_creation_behavior(attitude);
-            // A friendly spore or hyperactive can exist only with Fedhas
-            // in which case the inactive ballistos spawned should be
-            // good_neutral to avoid hidden piety costs of Fedhas abilities
-            if (beh == BEH_FRIENDLY)
-                beh = BEH_GOOD_NEUTRAL;
-
-            const god_type god = agent()->deity();
-
-            if (create_monster(mgen_data(MONS_BALLISTOMYCETE,
-                                         beh,
-                                         pos(),
-                                         MHITNOT,
-                                         MG_FORCE_PLACE,
-                                         god)))
-            {
-                remove_mold(pos());
-                if (you.see_cell(pos()))
-                    mpr("A fungus suddenly grows.");
-
-            }
-        }
-    }
-
     affect_place_clouds();
 }
 
@@ -2622,7 +2585,7 @@ bool bolt::can_affect_wall(const coord_def& p, bool map_knowledge) const
         return true;
     }
 
-    // Temporary trees (from Summon Forest) can't be burned/distintegrated.
+    // Temporary trees (from Summon Forest) can't be burned.
     if (feat_is_tree(wall) && is_temp_terrain(p))
         return false;
 
@@ -3615,7 +3578,7 @@ static const vector<pie_effect> pie_effects = {
         [](const actor &defender) {
             return defender.is_player();
         },
-        [](actor &defender, const bolt &/*beam*/) {
+        [](actor &/*defender*/, const bolt &/*beam*/) {
             if (you.duration[DUR_VERTIGO])
                 mpr("You feel your light-headedness will last longer.");
             else
@@ -3630,7 +3593,7 @@ static const vector<pie_effect> pie_effects = {
         [](const actor &defender) {
             return defender.is_player() && !you_foodless();
         },
-        [](actor &defender, const bolt &beam) {
+        [](actor &/*defender*/, const bolt &/*beam*/) {
             if (you.duration[DUR_NO_POTIONS])
                 mpr("You feel your inability to drink will last longer.");
             else
@@ -3672,7 +3635,7 @@ static const vector<pie_effect> pie_effects = {
         [](const actor &defender) {
             return defender.is_player();
         },
-        [](actor &defender, const bolt &beam) {
+        [](actor &/*defender*/, const bolt &/*beam*/) {
             for (int i = 0; i < NUM_STATS; ++i)
                 lose_stat(static_cast<stat_type>(i), 1 + random2(3));
         },
@@ -3714,7 +3677,7 @@ static const vector<pie_effect> pie_effects = {
         [](const actor &defender) {
             return defender.can_polymorph();
         },
-        [](actor &defender, const bolt &beam) {
+        [](actor &defender, const bolt &/*beam*/) {
             defender.polymorph(100, false);
         },
         4
@@ -3761,9 +3724,12 @@ void bolt::affect_player()
     if (!YOU_KILL(thrower))
     {
         if (agent() && agent()->is_monster())
-            interrupt_activity(AI_MONSTER_ATTACKS, agent()->as_monster());
+        {
+            interrupt_activity(activity_interrupt::monster_attacks,
+                               agent()->as_monster());
+        }
         else
-            interrupt_activity(AI_MONSTER_ATTACKS);
+            interrupt_activity(activity_interrupt::monster_attacks);
     }
 
     if (flavour == BEAM_MISSILE && item)
@@ -4017,11 +3983,11 @@ int bolt::apply_AC(const actor *victim, int hurted)
     switch (flavour)
     {
     case BEAM_DAMNATION:
-        ac_rule = AC_NONE; break;
+        ac_rule = ac_type::none; break;
     case BEAM_ELECTRICITY:
-        ac_rule = AC_HALF; break;
+        ac_rule = ac_type::half; break;
     case BEAM_FRAG:
-        ac_rule = AC_TRIPLE; break;
+        ac_rule = ac_type::triple; break;
     default: ;
     }
 
@@ -4087,8 +4053,7 @@ void bolt::tracer_enchantment_affect_monster(monster* mon)
 }
 
 // Return false if we should skip handling this monster.
-bool bolt::determine_damage(monster* mon, int& preac, int& postac, int& final,
-                            vector<string>& messages)
+bool bolt::determine_damage(monster* mon, int& preac, int& postac, int& final)
 {
     preac = postac = final = 0;
 
@@ -4180,11 +4145,23 @@ void bolt::handle_stop_attack_prompt(monster* mon)
     bool prompted = false;
 
     if (stop_attack_prompt(mon, true, target, &prompted)
-        || _stop_because_god_hates_target_prompt(mon, origin_spell, flavour,
-                                                 item))
+        || _stop_because_god_hates_target_prompt(mon, origin_spell))
     {
         beam_cancelled = true;
         finish_beam();
+    }
+    // Handle enslaving monsters when OTR is up: give a prompt for attempting
+    // to enslave monsters that don't have rPois with Toxic status.
+    else if (flavour == BEAM_ENSLAVE && you.duration[DUR_TOXIC_RADIANCE]
+             && mon->res_poison() <= 0)
+    {
+        string verb = make_stringf("enslave %s", mon->name(DESC_THE).c_str());
+        if (otr_stop_summoning_prompt(verb))
+        {
+            beam_cancelled = true;
+            finish_beam();
+            prompted = true;
+        }
     }
 
     if (prompted)
@@ -4196,10 +4173,9 @@ void bolt::handle_stop_attack_prompt(monster* mon)
 
 void bolt::tracer_nonenchantment_affect_monster(monster* mon)
 {
-    vector<string> messages;
     int preac, post, final;
 
-    if (!determine_damage(mon, preac, post, final, messages))
+    if (!determine_damage(mon, preac, post, final))
         return;
 
     // Check only if actual damage and the monster is worth caring about.
@@ -4238,13 +4214,6 @@ void bolt::tracer_nonenchantment_affect_monster(monster* mon)
     handle_stop_attack_prompt(mon);
     if (beam_cancelled)
         return;
-
-    // Check only if actual damage.
-    if (!is_tracer && final > 0)
-    {
-        for (const string &msg : messages)
-            mprf(MSGCH_MONSTER_DAMAGE, "%s", msg.c_str());
-    }
 
     // Either way, we could hit this monster, so update range used.
     extra_range_used += range_used_on_hit();
@@ -4420,7 +4389,6 @@ void bolt::monster_post_hit(monster* mon, int dmg)
     // did no damage. Hostiles will still take umbrage.
     if (dmg > 0 || !mon->wont_attack() || !YOU_KILL(thrower))
     {
-        bool was_asleep = mon->asleep();
         special_missile_type m_brand = SPMSL_FORBID_BRAND;
         if (item && item->base_type == OBJ_MISSILES)
             m_brand = get_ammo_brand(*item);
@@ -4433,11 +4401,6 @@ void bolt::monster_post_hit(monster* mon, int dmg)
             if (!mon->alive())
                 return;
         }
-
-
-        // Don't allow needles of sleeping to awaken monsters.
-        if (m_brand == SPMSL_SLEEP && was_asleep && !mon->asleep())
-            mon->put_to_sleep(agent(), 0);
     }
 
     if (YOU_KILL(thrower) && !mon->wont_attack() && !mons_is_firewood(*mon))
@@ -4828,9 +4791,8 @@ void bolt::affect_monster(monster* mon)
 
     // We need to know how much the monster _would_ be hurt by this,
     // before we decide if it actually hits.
-    vector<string> messages;
     int preac, postac, final;
-    if (!determine_damage(mon, preac, postac, final, messages))
+    if (!determine_damage(mon, preac, postac, final))
         return;
 
 #ifdef DEBUG_DIAGNOSTICS
@@ -4976,12 +4938,6 @@ void bolt::affect_monster(monster* mon)
              && YOU_KILL(thrower))
     {
         mprf(MSGCH_SOUND, "The %s hits something.", name.c_str());
-    }
-
-    if (final > 0)
-    {
-        for (const string &msg : messages)
-            mprf(MSGCH_MONSTER_DAMAGE, "%s", msg.c_str());
     }
 
     // Apply flavoured specials.
@@ -5500,7 +5456,7 @@ mon_resist_type bolt::apply_enchantment_to_monster(monster* mon)
     case BEAM_SPORE:
     case BEAM_CONFUSION:
     case BEAM_IRRESISTIBLE_CONFUSION:
-        if (mon->check_clarity(false))
+        if (mon->check_clarity())
         {
             if (you.can_see(*mon))
                 obvious_effect = true;

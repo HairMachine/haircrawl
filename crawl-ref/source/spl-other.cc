@@ -30,7 +30,7 @@ spret cast_sublimation_of_blood(int pow, bool fail)
     bool success = false;
 
     if (you.duration[DUR_DEATHS_DOOR])
-        mpr("You can't draw power from your own body while in Death's door.");
+        mpr("You can't draw power from your own body while in death's door.");
     else if (!you.can_bleed())
     {
         if (you.species == SP_VAMPIRE)
@@ -428,7 +428,7 @@ static int _intoxicate_monsters(coord_def where, int pow)
     if (mons == nullptr
         || mons_intel(*mons) < I_HUMAN
         || !(mons->holiness() & MH_NATURAL)
-        || mons->check_clarity(false)
+        || mons->check_clarity()
         || monster_resists_this_poison(*mons))
     {
         return 0;

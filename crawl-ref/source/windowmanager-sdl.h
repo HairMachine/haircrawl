@@ -32,11 +32,13 @@ public:
     virtual void set_mod_state(tiles_key_mod mod) override;
     virtual void set_mouse_cursor(mouse_cursor_type id) override;
     virtual unsigned short get_mouse_state(int *x, int *y) const override;
+    virtual string get_clipboard() override;
+    virtual bool has_clipboard() override;
 
     // System time functions
     virtual unsigned int set_timer(unsigned int interval,
                                    wm_timer_callback callback) override;
-    virtual void remove_timer(unsigned int timer_id) override;
+    virtual void remove_timer(unsigned int& timer_id) override;
     virtual unsigned int get_ticks() const override;
     virtual void delay(unsigned int ms) override;
 

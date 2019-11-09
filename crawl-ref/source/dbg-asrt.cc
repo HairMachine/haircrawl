@@ -197,7 +197,8 @@ static void _dump_player(FILE *file)
     }
 
     fprintf(file, "Skills (mode: %s)\n", you.auto_training ? "auto" : "manual");
-    fprintf(file, "Name            | can_train | train | training | level | points | progress\n");
+    fprintf(file, "Name            | can_currently_train | train | training |"
+                  " level | points | progress\n");
     for (size_t i = 0; i < NUM_SKILLS; ++i)
     {
         const skill_type sk = skill_type(i);
@@ -210,9 +211,9 @@ static void _dump_player(FILE *file)
         if (sk >= 0 && you.skills[sk] < 27)
             needed_max = skill_exp_needed(you.skills[sk] + 1, sk);
 
-        fprintf(file, "%-16s|     %c     |   %u   |   %3u    |   %2d  | %6d | %d/%d\n",
+        fprintf(file, "%-16s|          %c          |   %u   |   %3u    |   %2d  | %6d | %d/%d\n",
                 skill_name(sk),
-                you.can_train[sk] ? 'X' : ' ',
+                you.can_currently_train[sk] ? 'X' : ' ',
                 you.train[sk],
                 you.training[sk],
                 you.skills[sk],
@@ -563,6 +564,13 @@ static void _dump_ver_stuff(FILE* file)
 #else
     fprintf(file, "Tiles: no\n\n");
 #endif
+    if (you.fully_seeded)
+    {
+        fprintf(file, "Seed: %" PRIu64 ", deterministic pregen: %d\n",
+            crawl_state.seed, (int) you.deterministic_levelgen);
+    }
+    if (Version::history_size() > 1)
+        fprintf(file, "Version history:\n%s\n\n", Version::history().c_str());
 }
 
 static void _dump_command_line(FILE *file)
@@ -603,7 +611,7 @@ void do_crash_dump()
         _dump_ver_stuff(stderr);
 
         fprintf(stderr, "%s\n\n", crash_signal_info().c_str());
-        write_stack_trace(stderr, 0);
+        write_stack_trace(stderr);
         call_gdb(stderr);
 
         return;
@@ -671,7 +679,7 @@ void do_crash_dump()
     // might themselves cause crashes.
     if (!signal_info.empty())
         fprintf(file, "%s\n\n", signal_info.c_str());
-    write_stack_trace(file, 0);
+    write_stack_trace(file);
     fprintf(file, "\n");
 
     call_gdb(file);
@@ -775,6 +783,7 @@ void do_crash_dump()
 
 NORETURN static void _BreakStrToDebugger(const char *mesg, bool assert)
 {
+    UNUSED(assert);
 // FIXME: this needs a way to get the SDL_window in windowmanager-sdl.cc
 #if 0
 #if defined(USE_TILE_LOCAL) && defined(TARGET_OS_WINDOWS)

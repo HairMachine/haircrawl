@@ -29,7 +29,6 @@
 #include "act-iter.h"
 #include "areas.h"
 #include "branch.h"
-#include "butcher.h" // for fedhas_rot_all_corpses
 #include "chardump.h"
 #include "cloud.h"
 #include "coordit.h"
@@ -45,12 +44,12 @@
 #include "food.h" //for HUNGER_MAXIMUM
 #include "ghost.h"
 #include "god-abil.h"
-#include "god-conduct.h" // for fedhas_rot_all_corpses
 #include "god-companions.h"
 #include "god-passive.h"
 #include "hints.h"
 #include "initfile.h"
 #include "item-name.h"
+#include "item-status-flag-type.h"
 #include "items.h"
 #include "jobs.h"
 #include "kills.h"
@@ -68,7 +67,7 @@
 #include "prompt.h"
 #include "species.h"
 #include "spl-summoning.h"
-#include "stash.h"  // for fedhas_rot_all_corpses
+#include "stairs.h"
 #include "state.h"
 #include "stringutil.h"
 #include "syscalls.h"
@@ -82,6 +81,7 @@
 #include "tileview.h"
 #include "tiles-build-specific.h"
 #include "timed-effects.h"
+#include "ui.h"
 #include "unwind.h"
 #include "version.h"
 #include "view.h"
@@ -862,8 +862,7 @@ static void _write_tagged_chunk(const string &chunkname, tag_type tag)
     tag_write(tag, outf);
 }
 
-static int _get_dest_stair_type(branch_type old_branch,
-                                dungeon_feature_type stair_taken,
+static int _get_dest_stair_type(dungeon_feature_type stair_taken,
                                 bool &find_first)
 {
     // Order is important here.
@@ -944,15 +943,13 @@ static int _get_dest_stair_type(branch_type old_branch,
     return DNGN_FLOOR;
 }
 
-static void _place_player_on_stair(branch_type old_branch,
-                                   int stair_taken, const coord_def& dest_pos,
+static void _place_player_on_stair(int stair_taken, const coord_def& dest_pos,
                                    const string &hatch_name)
 
 {
     bool find_first = true;
     dungeon_feature_type stair_type = static_cast<dungeon_feature_type>(
-            _get_dest_stair_type(old_branch,
-                                 static_cast<dungeon_feature_type>(stair_taken),
+            _get_dest_stair_type(static_cast<dungeon_feature_type>(stair_taken),
                                  find_first));
 
     you.moveto(dgn_find_nearby_stair(stair_type, dest_pos, find_first,
@@ -1127,45 +1124,6 @@ static void _do_lost_items()
             item_was_lost(item);
 }
 
-/// Rot all corpses remaining on the level, giving Fedhas piety for doing so.
-static void _fedhas_rot_all_corpses(const level_id& old_level)
-{
-    bool messaged = false;
-    for (size_t mitm_index = 0; mitm_index < mitm.size(); ++mitm_index)
-    {
-        item_def &item = mitm[mitm_index];
-        if (!item.defined()
-            || !item.is_type(OBJ_CORPSES, CORPSE_BODY)
-            || item.props.exists(CORPSE_NEVER_DECAYS))
-        {
-            continue;
-        }
-
-        if (mons_skeleton(item.mon_type))
-            ASSERT(turn_corpse_into_skeleton(item));
-        else
-        {
-            item_was_destroyed(item);
-            destroy_item(mitm_index);
-        }
-
-        if (!messaged)
-        {
-            simple_god_message("'s fungi set to work.");
-            messaged = true;
-        }
-
-        const int piety = x_chance_in_y(2, 5) ? 2 : 1; // match fungal_bloom()
-        // XXX: deduplicate above ^
-        did_god_conduct(DID_ROT_CARRION, piety);
-    }
-
-    // assumption: CORPSE_NEVER_DECAYS is never set for seen corpses
-    LevelStashes *ls = StashTrack.find_level(old_level);
-    if (ls) // assert?
-        ls->rot_all_corpses();
-}
-
 /**
  * Perform cleanup when leaving a level.
  *
@@ -1183,9 +1141,6 @@ static bool _leave_level(dungeon_feature_type stair_taken,
                          const level_id& old_level, coord_def *return_pos)
 {
     bool popped = false;
-
-    if (you.religion == GOD_FEDHAS)
-        _fedhas_rot_all_corpses(old_level);
 
     if (!you.level_stack.empty()
         && you.level_stack.back().id == level_id::current())
@@ -1232,52 +1187,15 @@ static bool _leave_level(dungeon_feature_type stair_taken,
     return popped;
 }
 
-
-/**
- * Generate a new level.
- *
- * Cleanup the environment, build the level, and possibly place a ghost or
- * handle initial AK entrance.
- *
- * @param stair_taken   The means used to leave the last level.
- * @param old_level     The ID of the previous level.
- */
-static void _make_level(dungeon_feature_type stair_taken,
-                        const level_id& old_level)
-{
-
-    env.turns_on_level = -1;
-
-    tile_init_default_flavour();
-    tile_clear_flavour();
-    env.tile_names.clear();
-
-    // XXX: This is ugly.
-    bool dummy;
-    dungeon_feature_type stair_type = static_cast<dungeon_feature_type>(
-        _get_dest_stair_type(old_level.branch,
-                             static_cast<dungeon_feature_type>(stair_taken),
-                             dummy));
-
-    _clear_env_map();
-    builder(true, stair_type);
-
-    env.turns_on_level = 0;
-    // sanctuary
-    env.sanctuary_pos  = coord_def(-1, -1);
-    env.sanctuary_time = 0;
-}
-
 /**
  * Move the player to the appropriate entrance location in a level.
  *
  * @param stair_taken   The means used to leave the last level.
- * @param old_branch    The previous level's branch.
  * @param return_pos    The location of the entrance portal, if applicable.
  * @param dest_pos      The player's location on the last level.
  */
 static void _place_player(dungeon_feature_type stair_taken,
-                          branch_type old_branch, const coord_def &return_pos,
+                          const coord_def &return_pos,
                           const coord_def &dest_pos, const string &hatch_name)
 {
     if (player_in_branch(BRANCH_ABYSS))
@@ -1285,7 +1203,7 @@ static void _place_player(dungeon_feature_type stair_taken,
     else if (!return_pos.origin())
         you.moveto(return_pos);
     else
-        _place_player_on_stair(old_branch, stair_taken, dest_pos, hatch_name);
+        _place_player_on_stair(stair_taken, dest_pos, hatch_name);
 
     // Don't return the player into walls, deep water, or a trap.
     for (distance_iterator di(you.pos(), true, false); di; ++di)
@@ -1319,7 +1237,7 @@ static void _place_player(dungeon_feature_type stair_taken,
 }
 
 // Update the trackers after the player changed level.
-void trackers_init_new_level(bool transit)
+void trackers_init_new_level()
 {
     travel_init_new_level();
 }
@@ -1338,53 +1256,6 @@ static string _get_hatch_name()
         }
     }
     return "";
-}
-
-
-static void _count_gold()
-{
-    vector<item_def *> gold_piles;
-    vector<coord_def> gold_places;
-    int gold = 0;
-    for (rectangle_iterator ri(0); ri; ++ri)
-    {
-        for (stack_iterator j(*ri); j; ++j)
-        {
-            if (j->base_type == OBJ_GOLD)
-            {
-                gold += j->quantity;
-                gold_piles.push_back(&(*j));
-                gold_places.push_back(*ri);
-            }
-        }
-    }
-
-    if (!player_in_branch(BRANCH_ABYSS))
-        you.attribute[ATTR_GOLD_GENERATED] += gold;
-
-    // TODO: this probably should fire when you join gozag, too?
-    if (have_passive(passive_t::detect_gold))
-    {
-        for (unsigned int i = 0; i < gold_places.size(); i++)
-        {
-            bool detected = false;
-            int dummy = gold_piles[i]->index();
-            coord_def &pos = gold_places[i];
-            unlink_item(dummy);
-            move_item_to_grid(&dummy, pos, true);
-            if (!env.map_knowledge(pos).item()
-                || env.map_knowledge(pos).item()->base_type != OBJ_GOLD)
-            {
-                detected = true;
-            }
-            update_item_at(pos, true);
-            if (detected)
-            {
-                ASSERT(env.map_knowledge(pos).item());
-                env.map_knowledge(pos).flags |= MAP_DETECTED_ITEM;
-            }
-        }
-    }
 }
 
 static const string VISITED_LEVELS_KEY = "visited_levels";
@@ -1421,17 +1292,365 @@ void player::set_level_visited(const level_id &level)
     visited[level.describe()] = true;
 }
 
+/**
+ * Has the player visited the level currently stored in the save under the id
+ * `level`, if there is one? Returns false if there isn't one. This stores
+ * *token level* visited state, not type-level -- it does not answer questions
+ * like, e.g. has the player ever visited a trove? For that, see place_info.
+ * This distinction matters mainly for portal branches, especially ones that can
+ * be revisited, e.g. Pan levels and zigs.
+ */
 bool player::level_visited(const level_id &level)
 {
-    // this will mean that portal maps that the player is not currently on
-    // return false, since the map gets deleted. A continuation of legacy
-    // behavior...
     // `is_existing_level` is not reliable after the game end, because the
     // save no longer exists, so we ignore it for printing morgues
     if (!is_existing_level(level) && you.save)
         return false;
     const auto &visited = props[VISITED_LEVELS_KEY].get_table();
     return visited.exists(level.describe());
+}
+
+static void _generic_level_reset()
+{
+    // TODO: can more be pulled into here?
+
+    you.prev_targ = MHITNOT;
+    you.prev_grd_targ.reset();
+
+    // Lose all listeners.
+    dungeon_events.clear();
+    clear_travel_trail();
+}
+
+
+// used to resolve generation order for cases where a single level has multiple
+// portals.
+static const vector<branch_type> portal_generation_order =
+{
+    BRANCH_SEWER,
+    BRANCH_OSSUARY,
+    BRANCH_ICE_CAVE,
+    BRANCH_VOLCANO,
+    BRANCH_BAILEY,
+    BRANCH_GAUNTLET,
+#if TAG_MAJOR_VERSION == 34
+    BRANCH_LABYRINTH,
+#endif
+    // do not pregenerate bazaar (TODO: this is non-ideal)
+    // do not pregenerate trove
+    BRANCH_WIZLAB,
+    BRANCH_DESOLATION,
+};
+
+void update_portal_entrances()
+{
+    unordered_set<branch_type, std::hash<int>> seen_portals;
+    auto const cur_level = level_id::current();
+    // add any portals not currently registered
+    for (rectangle_iterator ri(0); ri; ++ri)
+    {
+        dungeon_feature_type feat = env.grid(*ri);
+        // excludes pan, hell, abyss.
+        if (feat_is_portal_entrance(feat) && !feature_mimic_at(*ri))
+        {
+            level_id whither = stair_destination(feat, "", false);
+            if (whither.branch == BRANCH_ZIGGURAT // not (quite) pregenerated
+                || whither.branch == BRANCH_TROVE // not pregenerated
+                || whither.branch == BRANCH_BAZAAR) // multiple bazaars possible
+            {
+                continue; // handle these differently
+            }
+            dprf("Setting up entry for %s.", whither.describe().c_str());
+            ASSERT(count(portal_generation_order.begin(),
+                         portal_generation_order.end(),
+                         whither.branch) == 1);
+            if (brentry[whither.branch] != level_id())
+            {
+                mprf(MSGCH_ERROR, "Second portal entrance for %s!",
+                    whither.describe().c_str());
+            }
+            brentry[whither.branch] = cur_level;
+            seen_portals.insert(whither.branch);
+        }
+    }
+    // clean up any portals that aren't actually here -- comes up for wizmode
+    // and test mode cases.
+    for (auto b : portal_generation_order)
+        if (!seen_portals.count(b) && brentry[b] == cur_level)
+            brentry[b] = level_id();
+}
+
+void reset_portal_entrances()
+{
+    for (auto b : portal_generation_order)
+        if (brentry[b].is_valid())
+            brentry[b] = level_id();
+}
+
+static bool _generate_portal_levels()
+{
+    // find any portals that branch off of the current level.
+    level_id here = level_id::current();
+    vector<level_id> to_build;
+    for (auto b : portal_generation_order)
+        if (brentry[b] == here)
+            for (int i = 1; i <= branches[b].numlevels; i++)
+                to_build.push_back(level_id(b, i));
+
+    bool generated = false;
+    for (auto lid : to_build)
+        generated = generate_level(lid) || generated;
+    return generated;
+}
+
+/**
+ * Ensure that the level given by `l` is generated. This does not do much in
+ * the way of cleanup, and the caller must ensure the player ends up somewhere
+ * sensible afterwards (this will not place the player, and will wipe out their
+ * current location state if a level is built). Does not do anything if the
+ * save already contains the relevant level.
+ *
+ * @param l the level to try to build.
+ * @return whether a level was built.
+ */
+bool generate_level(const level_id &l)
+{
+    const string level_name = l.describe();
+    if (you.save->has_chunk(level_name))
+        return false;
+
+    unwind_var<int> depth(you.depth, l.depth);
+    unwind_var<branch_type> branch(you.where_are_you, l.branch);
+    unwind_var<coord_def> saved_position(you.position);
+    you.position.reset();
+
+    // simulate a reasonable stair to enter the level with
+    const dungeon_feature_type stair_taken =
+          you.depth == 1
+        ? (you.where_are_you == BRANCH_DUNGEON
+           ? DNGN_UNSEEN
+           : branches[you.where_are_you].entry_stairs)
+        : DNGN_STONE_STAIRS_DOWN_I;
+
+    unwind_var<dungeon_feature_type> stair(you.transit_stair, stair_taken);
+    // TODO how necessary is this?
+    unwind_bool ylev(you.entering_level, true);
+    // n.b. crawl_state.generating_level is handled in builder
+
+    _generic_level_reset();
+    delete_all_clouds();
+    los_changed(); // invalidate the los cache, which impacts monster placement
+
+    // initialize env for builder
+    env.turns_on_level = -1;
+    tile_init_default_flavour();
+    tile_clear_flavour();
+    env.tile_names.clear();
+    _clear_env_map();
+
+    // finally -- everything is set up, call the builder.
+    dprf("Generating new level for '%s'.", level_name.c_str());
+    builder(true);
+
+    auto &vault_list =  you.vault_list[level_id::current()];
+#ifdef DEBUG
+    // places where a level can generate multiple times.
+    // could add portals to this list for debugging purposes?
+    if (   you.where_are_you == BRANCH_ABYSS
+        || you.where_are_you == BRANCH_PANDEMONIUM
+        || you.where_are_you == BRANCH_BAZAAR
+        || you.where_are_you == BRANCH_ZIGGURAT)
+    {
+        vault_list.push_back("[gen]");
+    }
+#endif
+    const auto &level_vaults = level_vault_names();
+    vault_list.insert(vault_list.end(),
+                        level_vaults.begin(), level_vaults.end());
+
+    // initialize env for a new level
+    env.turns_on_level = 0;
+    env.sanctuary_pos  = coord_def(-1, -1);
+    env.sanctuary_time = 0;
+    env.markers.init_all(); // init first, activation happens when entering
+    show_update_emphasis(); // Clear map knowledge stair emphasis in env.
+    update_portal_entrances();
+
+    // save the level and associated env state
+    _save_level(level_id::current());
+
+    const string save_name = level_id::current().describe(); // should be same as level_name...
+
+    // generate levels for all portals that branch off from here
+    if (_generate_portal_levels())
+    {
+        // if portals were generated, we're currently elsewhere.
+        ASSERT(you.save->has_chunk(save_name));
+        dprf("Reloading new level '%s'.", save_name.c_str());
+        _restore_tagged_chunk(you.save, save_name, TAG_LEVEL,
+            "Level file is invalid.");
+    }
+    return true;
+}
+
+// bel's original proposal generated D to lair depth, then lair, then D
+// to orc depth, then orc, then the rest of D. I have simplified this to
+// just generate whole branches at a time -- I am not sure how much real
+// impact this has. One idea might be to shuffle this slightly based on
+// the seed.
+// TODO: probably need to do portal vaults too?
+// Should this use something like logical_branch_order?
+static const vector<branch_type> branch_generation_order =
+{
+    BRANCH_DUNGEON,
+    BRANCH_TEMPLE,
+    BRANCH_LAIR,
+    BRANCH_ORC,
+    BRANCH_SPIDER,
+    BRANCH_SNAKE,
+    BRANCH_SHOALS,
+    BRANCH_SWAMP,
+    BRANCH_VAULTS,
+    BRANCH_CRYPT,
+    BRANCH_DEPTHS,
+    BRANCH_VESTIBULE,
+    BRANCH_ELF,
+    BRANCH_ZOT,
+    BRANCH_SLIME,
+    BRANCH_TOMB,
+    BRANCH_TARTARUS,
+    BRANCH_COCYTUS,
+    BRANCH_DIS,
+    BRANCH_GEHENNA,
+    BRANCH_PANDEMONIUM,
+    BRANCH_ZIGGURAT,
+    NUM_BRANCHES,
+};
+
+static bool _branch_pregenerates(branch_type b)
+{
+    if (!you.deterministic_levelgen)
+        return false;
+    if (b == NUM_BRANCHES || !brentry[b].is_valid() && is_random_subbranch(b))
+        return false;
+    return count(branch_generation_order.begin(),
+        branch_generation_order.end(), b) > 0;
+}
+
+/**
+* Generate dungeon branches in a stable order until the level `stopping_point`
+* is found; `stopping_point` will be generated if it doesn't already exist. If
+* it does exist, the function is a noop.
+*
+* If `stopping_point` is not in the generation order, it will be generated on
+* its own.
+*
+* To generate all generatable levels, pass a level_id with NUM_BRANCHES as the
+* branch.
+*/
+bool pregen_dungeon(const level_id &stopping_point)
+{
+    // TODO: the is_valid() check here doesn't look quite right to me, but so
+    // far I can't get it to break anything...
+    if (stopping_point.is_valid()
+        || stopping_point.branch != NUM_BRANCHES &&
+           is_random_subbranch(stopping_point.branch) && you.wizard)
+    {
+        if (you.save->has_chunk(stopping_point.describe()))
+            return false;
+
+        if (!_branch_pregenerates(stopping_point.branch))
+            return generate_level(stopping_point);
+    }
+
+    vector<level_id> to_generate;
+    bool at_end = false;
+    for (auto br : branch_generation_order)
+    {
+        if (br == BRANCH_ZIGGURAT &&
+            stopping_point.branch == BRANCH_ZIGGURAT)
+        {
+            // zigs delete levels as they go, so don't catchup when we're
+            // already in one. Zigs are only handled this way so that everything
+            // else generates first.
+            to_generate.push_back(stopping_point);
+            continue;
+        }
+        // TODO: why is dungeon invalid? it's not set up properly in
+        // `initialise_branch_depths` for some reason. The vestibule is invalid
+        // because its depth isn't set until the player actually enters a
+        // portal, similarly for other portal branches.
+        if (br < NUM_BRANCHES &&
+            (brentry[br].is_valid()
+             || br == BRANCH_DUNGEON || br == BRANCH_VESTIBULE
+             || !is_connected_branch(br)))
+        {
+            for (int i = 1; i <= branches[br].numlevels; i++)
+            {
+                level_id new_level = level_id(br, i);
+                if (you.save->has_chunk(new_level.describe()))
+                    continue;
+                to_generate.push_back(new_level);
+
+                if (br == stopping_point.branch
+                    && (i == stopping_point.depth
+                        || i == branches[br].numlevels))
+                {
+                    at_end = true;
+                    break;
+                }
+            }
+        }
+        if (at_end)
+            break;
+    }
+
+    if (to_generate.size() == 0)
+    {
+        dprf("levelgen: No valid levels to generate.");
+        return false;
+    }
+    else if (to_generate.size() == 1)
+        return generate_level(to_generate[0]); // no popup for this case
+    else
+    {
+        // be sure that AK start doesn't interfere with the builder
+        unwind_var<game_chapter> chapter(you.chapter, CHAPTER_ORB_HUNTING);
+
+        ui::progress_popup progress("Generating dungeon...\n\n", 35);
+        progress.advance_progress();
+
+        // in normal usage if we get to here, something will generate. But it
+        // is possible to call this in a way that doesn't lead to generation.
+        bool generated = false;
+
+        for (const level_id &new_level : to_generate)
+        {
+            string status = "\nbuilding ";
+
+            switch (new_level.branch)
+            {
+            case BRANCH_SPIDER:
+            case BRANCH_SNAKE:
+                status += "a lair branch";
+                break;
+            case BRANCH_SHOALS:
+            case BRANCH_SWAMP:
+                status += "another lair branch";
+                break;
+            default:
+                status += branches[new_level.branch].longname;
+                break;
+            }
+            progress.set_status_text(status);
+            dprf("Pregenerating %s:%d",
+                branches[new_level.branch].abbrevname, new_level.depth);
+            progress.advance_progress();
+            generated = generate_level(new_level) || generated;
+        }
+
+        return generated;
+    }
 }
 
 /**
@@ -1445,6 +1664,9 @@ bool load_level(dungeon_feature_type stair_taken, load_mode_type load_mode,
                 const level_id& old_level)
 {
     const string level_name = level_id::current().describe();
+    if (!you.save->has_chunk(level_name) && load_mode == LOAD_VISITOR)
+        return false;
+
     const bool make_changes =
         (load_mode == LOAD_START_GAME || load_mode == LOAD_ENTER_LEVEL);
 
@@ -1463,7 +1685,7 @@ bool load_level(dungeon_feature_type stair_taken, load_mode_type load_mode,
     if (feat_is_escape_hatch(stair_taken))
         hatch_name = _get_hatch_name();
 
-    if (load_mode != LOAD_VISITOR && load_mode != LOAD_GENERATE)
+    if (load_mode != LOAD_VISITOR)
         popped = _leave_level(stair_taken, old_level, &return_pos);
 
     unwind_var<dungeon_feature_type> stair(
@@ -1478,16 +1700,12 @@ bool load_level(dungeon_feature_type stair_taken, load_mode_type load_mode,
     // Save position for hatches to place a marker on the destination level.
     coord_def dest_pos = you.pos();
 
-    you.prev_targ     = MHITNOT;
-    you.prev_grd_targ.reset();
+    _generic_level_reset();
 
     // We clear twice - on save and on load.
     // Once would be enough...
     if (make_changes)
         delete_all_clouds();
-
-    // Lose all listeners.
-    dungeon_events.clear();
 
     // This block is to grab followers and save the old level to disk.
     if (load_mode == LOAD_ENTER_LEVEL)
@@ -1505,19 +1723,14 @@ bool load_level(dungeon_feature_type stair_taken, load_mode_type load_mode,
                 _save_level(old_level);
         }
 
-        // TODO: for staged pregeneration this also needs to happen on
-        // LOAD_GENERATE. However, it's a bit tricky, because player position
-        // does need to be saved for the later LOAD_ENTER_LEVEL call. postpone.
         // The player is now between levels.
         you.position.reset();
 
         update_companions();
     }
 
-    clear_travel_trail();
-
 #ifdef USE_TILE
-    if (load_mode != LOAD_VISITOR && load_mode != LOAD_GENERATE)
+    if (load_mode != LOAD_VISITOR)
     {
         tiles.clear_minimap();
         crawl_view_buffer empty_vbuf;
@@ -1525,9 +1738,7 @@ bool load_level(dungeon_feature_type stair_taken, load_mode_type load_mode,
     }
 #endif
 
-    bool just_created_level = false;
-
-    if (load_mode != LOAD_GENERATE
+    if (load_mode != LOAD_VISITOR
         && you.chapter == CHAPTER_POCKET_ABYSS
         && player_in_branch(BRANCH_DUNGEON))
     {
@@ -1537,26 +1748,16 @@ bool load_level(dungeon_feature_type stair_taken, load_mode_type load_mode,
         you.chapter = CHAPTER_ORB_HUNTING;
     }
 
-    // GENERATE new level when the file can't be opened:
-    if (!you.save->has_chunk(level_name))
+    // GENERATE new level(s) when the file can't be opened:
+    if (!pregen_dungeon(level_id::current()))
     {
-        ASSERT(load_mode != LOAD_VISITOR);
-        dprf("Generating new level for '%s'.", level_name.c_str());
-        _make_level(stair_taken, old_level);
-        you.vault_list[level_id::current()] = level_vault_names();
-        just_created_level = true;
-    }
-    else
-    {
+        ASSERT(you.save->has_chunk(level_name));
         dprf("Loading old level '%s'.", level_name.c_str());
         _restore_tagged_chunk(you.save, level_name, TAG_LEVEL, "Level file is invalid.");
-
-        if (load_mode != LOAD_GENERATE)
-            _redraw_all(); // TODO why is there a redraw call here?
+        _redraw_all(); // TODO why is there a redraw call here?
     }
 
-    if (just_created_level)
-        env.markers.init_all(); // init first, activation happens when entering
+    const bool just_created_level = !you.level_visited(level_id::current());
 
     // Clear map knowledge stair emphasis.
     show_update_emphasis();
@@ -1565,16 +1766,6 @@ bool load_level(dungeon_feature_type stair_taken, load_mode_type load_mode,
     deleteAll(env.final_effects);
 
     los_changed();
-
-    if (load_mode == LOAD_GENERATE)
-    {
-        if (just_created_level)
-            _save_level(level_id::current());
-        return just_created_level;
-    }
-
-    if (env.turns_on_level == 0)
-        just_created_level = true; // in case level was pre-generated
 
     if (load_mode != LOAD_VISITOR)
         you.set_level_visited(level_id::current());
@@ -1588,19 +1779,21 @@ bool load_level(dungeon_feature_type stair_taken, load_mode_type load_mode,
     if (make_changes && env.elapsed_time && !just_created_level)
         update_level(you.elapsed_time - env.elapsed_time);
 
-    // Apply all delayed actions, if any.
+    // Apply all delayed actions, if any. TODO: logic for marshalling this is
+    // kind of odd.
     if (just_created_level)
-        env.dactions_done = you.dactions.size();
-    else
-        catchup_dactions();
+        env.dactions_done = 0;
 
     // Here's the second cloud clearing, on load (see above).
     if (make_changes)
     {
+        // this includes various things that are irrelevant for new levels, but
+        // also some things that aren't, such as bribe branch.
+        catchup_dactions();
+
         delete_all_clouds();
 
-        _place_player(stair_taken, old_level.branch, return_pos, dest_pos,
-                      hatch_name);
+        _place_player(stair_taken, return_pos, dest_pos, hatch_name);
     }
 
     crawl_view.set_player_at(you.pos(), load_mode != LOAD_VISITOR);
@@ -1619,7 +1812,7 @@ bool load_level(dungeon_feature_type stair_taken, load_mode_type load_mode,
     if (make_changes)
     {
         // Tell stash-tracker and travel that we've changed levels.
-        trackers_init_new_level(true);
+        trackers_init_new_level();
         tile_new_level(just_created_level);
     }
     else if (load_mode == LOAD_RESTART_GAME)
@@ -1699,13 +1892,32 @@ bool load_level(dungeon_feature_type stair_taken, load_mode_type load_mode,
              "curr_PlaceInfo:: num_visits: %d, levels_seen: %d",
              curr_PlaceInfo.num_visits, curr_PlaceInfo.levels_seen);
 #endif
+#if TAG_MAJOR_VERSION == 34
+        // this fixup is for a bug where turns_on_level==0 was used to set
+        // just_created_level, and there were some obscure ways to have 0
+        // turns on a level that you had entered previously. It only applies
+        // to a narrow version range (basically 0.23.0) but there's no way to
+        // do a sensible minor version check here and the fixup can't happen
+        // on load.
+        if (is_connected_branch(curr_PlaceInfo.branch)
+            && brdepth[curr_PlaceInfo.branch] > 0
+            && static_cast<int>(curr_PlaceInfo.levels_seen)
+                                        > brdepth[curr_PlaceInfo.branch])
+        {
+            mprf(MSGCH_ERROR,
+                "Fixing up corrupted PlaceInfo for %s (levels_seen is %d)",
+                branches[curr_PlaceInfo.branch].shortname,
+                curr_PlaceInfo.levels_seen);
+            curr_PlaceInfo.levels_seen = brdepth[curr_PlaceInfo.branch];
+        }
+#endif
         curr_PlaceInfo.assert_validity();
     }
 
     if (just_created_level)
     {
         you.attribute[ATTR_ABYSS_ENTOURAGE] = 0;
-        _count_gold();
+        gozag_detect_level_gold(true);
     }
 
 
@@ -1754,8 +1966,11 @@ bool load_level(dungeon_feature_type stair_taken, load_mode_type load_mode,
 
     // Maybe make a note if we reached a new level.
     // Don't do so if we are just moving around inside Pan, though.
-    if (just_created_level && stair_taken != DNGN_TRANSIT_PANDEMONIUM)
+    if (just_created_level && make_changes
+        && stair_taken != DNGN_TRANSIT_PANDEMONIUM)
+    {
         take_note(Note(NOTE_DUNGEON_LEVEL_CHANGE));
+    }
 
     // If the player entered the level from a different location than they last
     // exited it, have monsters lose track of where they are
@@ -1783,7 +1998,8 @@ bool load_level(dungeon_feature_type stair_taken, load_mode_type load_mode,
 
 static void _save_level(const level_id& lid)
 {
-    travel_cache.get_level_info(lid).update();
+    if (you.level_visited(lid))
+        travel_cache.get_level_info(lid).update();
 
     // Nail all items to the ground.
     fix_item_coordinates();
@@ -1984,7 +2200,7 @@ static string _bones_permastore_file()
     while ((size = fread(buf, sizeof(char), BUFSIZ, src)) > 0)
         fwrite(buf, sizeof(char), size, target);
 
-    lk_close(target, full_path);
+    lk_close(target);
 
     if (!feof(src))
     {
@@ -2097,7 +2313,7 @@ static bool _backup_bones_for_upgrade(string ghost_filename, save_version &v)
     {
         mprf(MSGCH_ERROR, "Unable to open bones backup file %s for writing",
             upgrade_filename.c_str());
-        lk_close(backup_src, ghost_filename);
+        lk_close(backup_src);
         return false;
     }
 
@@ -2107,7 +2323,7 @@ static bool _backup_bones_for_upgrade(string ghost_filename, save_version &v)
     while ((size = fread(buf, sizeof(char), BUFSIZ, backup_src)) > 0)
         fwrite(buf, sizeof(char), size, backup_target);
 
-    lk_close(backup_target, upgrade_filename);
+    lk_close(backup_target);
 
     if (!feof(backup_src))
     {
@@ -2119,10 +2335,10 @@ static bool _backup_bones_for_upgrade(string ghost_filename, save_version &v)
                 "Failed to unlink probably corrupt bones file: %s",
                 upgrade_filename.c_str());
         }
-        lk_close(backup_src, ghost_filename);
+        lk_close(backup_src);
         return false;
     }
-    lk_close(backup_src, ghost_filename);
+    lk_close(backup_src);
     return true;
 }
 
@@ -2290,7 +2506,7 @@ static vector<ghost_demon> _load_permastore_ghosts(bool backup_on_upgrade=false)
  */
 bool define_ghost_from_bones(monster& mons)
 {
-    rng_generator rng(RNG_SYSTEM_SPECIFIC);
+    rng::generator rng(rng::SYSTEM_SPECIFIC);
 
     bool used_permastore = false;
 
@@ -2411,6 +2627,12 @@ bool load_ghosts(int max_ghosts, bool creating_level)
     return true;
 }
 
+static string _type_name_processed(game_type t)
+{
+    string name = game_state::game_type_name_for(t);
+    return name.size() ? name : "regular";
+}
+
 // returns false if a new game should start instead
 static bool _restore_game(const string& filename)
 {
@@ -2421,6 +2643,7 @@ static bool _restore_game(const string& filename)
     // to send enough information to the webtiles client to render the display.
     // This is just cosmetic for other build targets.
     unwind_bool save_more(crawl_state.show_more_prompt, false);
+    game_type menu_game_type = crawl_state.type;
 
     clear_message_store();
 
@@ -2430,7 +2653,8 @@ static bool _restore_game(const string& filename)
     {
         // Note: if we are here, the save info was properly read, it would
         // raise an exception otherwise.
-        if (yesno(("This game comes from an incompatible version of Crawl ("
+        if (yesno(("There is an existing game for name '" + you.your_name +
+                   "' from an incompatible version of Crawl ("
                    + you.prev_save_version + ").\n"
                    "Unless you reinstall that version, you can't load it.\n"
                    "Do you want to DELETE that game and start a new one?"
@@ -2441,7 +2665,8 @@ static bool _restore_game(const string& filename)
             you.save = 0;
             return false;
         }
-        crawl_state.default_startup_name = you.your_name; // for main menu
+        if (Options.remember_name)
+            crawl_state.default_startup_name = you.your_name; // for main menu
         you.save->abort();
         delete you.save;
         you.save = 0;
@@ -2449,7 +2674,26 @@ static bool _restore_game(const string& filename)
             you.your_name + " is from an incompatible version and can't be loaded.");
     }
 
-    crawl_state.default_startup_name = you.your_name; // for main menu
+    if (!crawl_state.bypassed_startup_menu
+        && menu_game_type != crawl_state.type)
+    {
+        if (!yesno(("You already have a "
+                        + _type_name_processed(crawl_state.type) +
+                    " game saved under the name '" + you.your_name + "';\n"
+                    "do you want to load that instead?").c_str(),
+                   true, 'n'))
+        {
+            you.save->abort(); // don't even rewrite the header
+            delete you.save;
+            you.save = 0;
+            game_ended(game_exit::abort,
+                "Please use a different name to start a new " +
+                _type_name_processed(menu_game_type) + " game, then.");
+        }
+    }
+
+    if (Options.remember_name)
+        crawl_state.default_startup_name = you.your_name; // for main menu
 
     if (numcmp(you.prev_save_version.c_str(), Version::Long, 2) == -1
         && version_is_stable(you.prev_save_version.c_str()))
@@ -2579,6 +2823,10 @@ void delete_level(const level_id &level)
 
     if (you.save)
         you.save->delete_chunk(level.describe());
+
+    auto &visited = you.props[VISITED_LEVELS_KEY].get_table();
+    visited.erase(level.describe());
+
     if (level.branch == BRANCH_ABYSS)
     {
         save_abyss_uniques();
@@ -2599,13 +2847,22 @@ void level_excursion::go_to(const level_id& next)
 {
     if (level_id::current() != next)
     {
+        if (!you.level_visited(level_id::current()))
+            travel_cache.erase_level_info(level_id::current());
+
         ever_changed_levels = true;
 
         _save_level(level_id::current());
         _load_level(next);
 
-        LevelInfo &li = travel_cache.get_level_info(next);
-        li.set_level_excludes();
+        if (you.level_visited(next))
+        {
+            LevelInfo &li = travel_cache.get_level_info(next);
+            li.set_level_excludes();
+        }
+        // TODO: this won't clear excludes on an excursion to an unvisited
+        // level. Does this matter? Not right now, this case is only used for
+        // abyss procgen.
     }
 
     you.on_current_level = (level_id::current() == original);
@@ -2875,7 +3132,7 @@ static size_t _ghost_permastore_size()
 
 static vector<ghost_demon> _update_permastore(const vector<ghost_demon> &ghosts)
 {
-    rng_generator rng(RNG_SYSTEM_SPECIFIC);
+    rng::generator rng(rng::SYSTEM_SPECIFIC);
     if (ghosts.empty())
         return ghosts;
 
@@ -2954,7 +3211,7 @@ static vector<ghost_demon> _update_permastore(const vector<ghost_demon> &ghosts)
         write_ghost_version(outw);
         tag_write_ghosts(outw, permastore);
 
-        lk_close(ghost_file, permastore_file);
+        lk_close(ghost_file);
     }
     return leftovers;
 }
@@ -2985,7 +3242,11 @@ void save_ghosts(const vector<ghost_demon> &ghosts, bool force, bool use_store)
         return;
     }
 
-    vector<ghost_demon> leftovers = _update_permastore(ghosts);
+    vector<ghost_demon> leftovers;
+    if (use_store)
+        leftovers = _update_permastore(ghosts);
+    else
+        leftovers = ghosts;
     if (leftovers.size() == 0)
         return;
 
@@ -3009,7 +3270,7 @@ void save_ghosts(const vector<ghost_demon> &ghosts, bool force, bool use_store)
     write_ghost_version(outw);
     tag_write_ghosts(outw, leftovers);
 
-    lk_close(ghost_file, g_file_name);
+    lk_close(ghost_file);
 
     _ghost_dprf("Saved ghosts (%s).", g_file_name.c_str());
 }
@@ -3077,7 +3338,7 @@ FILE *lk_open_exclusive(const string &file)
     return fdopen(fd, "wb");
 }
 
-void lk_close(FILE *handle, const string &file)
+void lk_close(FILE *handle)
 {
     if (handle == nullptr || handle == stdin)
         return;
@@ -3103,7 +3364,7 @@ file_lock::file_lock(const string &s, const char *_mode, bool die_on_fail)
 file_lock::~file_lock()
 {
     if (handle)
-        lk_close(handle, filename);
+        lk_close(handle);
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -6,6 +6,7 @@
 
 #include "l-libs.h"
 
+#include "branch.h"
 #include "chardump.h"
 #include "cluautil.h"
 #include "command.h"
@@ -63,7 +64,7 @@ static int crawl_mpr(lua_State *ls)
 
     int ch = MSGCH_PLAIN;
     if (lua_isnumber(ls, 2))
-        ch = luaL_checkint(ls, 2);
+        ch = luaL_safe_checkint(ls, 2);
     else
     {
         const char *channel = lua_tostring(ls, 2);
@@ -94,7 +95,7 @@ static int crawl_formatted_mpr(lua_State *ls)
 
     int ch = MSGCH_PLAIN;
     if (lua_isnumber(ls, 2))
-        ch = luaL_checkint(ls, 2);
+        ch = luaL_safe_checkint(ls, 2);
     else
     {
         const char *channel = lua_tostring(ls, 2);
@@ -131,6 +132,8 @@ LUAFN(crawl_dpr)
     const char *text = luaL_checkstring(ls, 1);
     if (crawl_state.io_inited)
         dprf("%s", text);
+#else
+    UNUSED(ls);
 #endif
     return 0;
 }
@@ -139,7 +142,7 @@ LUAFN(crawl_dpr)
  * @tparam int ms delay in milliseconds
  * @function delay
  */
-LUAWRAP(crawl_delay, delay(luaL_checkint(ls, 1)))
+LUAWRAP(crawl_delay, delay(luaL_safe_checkint(ls, 1)))
 /*** Display a `--- more ---` prompt
  * @function more
  */
@@ -319,7 +322,7 @@ static void crawl_sendkeys_proc(lua_State *ls, int argi)
         }
     }
     else if (lua_isnumber(ls, argi))
-        macro_sendkeys_end_add_expanded(luaL_checkint(ls, argi));
+        macro_sendkeys_end_add_expanded(luaL_safe_checkint(ls, argi));
 }
 
 /*** Send keypresses to crawl.
@@ -627,7 +630,7 @@ static int crawl_msgch_num(lua_State *ls)
  */
 static int crawl_msgch_name(lua_State *ls)
 {
-    int num = luaL_checkint(ls, 1);
+    int num = luaL_safe_checkint(ls, 1);
     string name = channel_to_str(num);
     lua_pushstring(ls, name.c_str());
     return 1;
@@ -651,7 +654,7 @@ static int crawl_take_note(lua_State *ls)
  */
 static int crawl_messages(lua_State *ls)
 {
-    const int count = luaL_checkint(ls, 1);
+    const int count = luaL_safe_checkint(ls, 1);
     lua_pushstring(ls, get_last_messages(count).c_str());
     return 1;
 }
@@ -745,7 +748,7 @@ static int crawl_message_filter(lua_State *ls)
     if (!pattern)
         return 0;
 
-    int num = lua_isnumber(ls, 2)? luaL_checkint(ls, 2) : -1;
+    int num = lua_isnumber(ls, 2)? luaL_safe_checkint(ls, 2) : -1;
     message_filter **mf =
             clua_new_userdata< message_filter* >(ls, MESSF_METATABLE);
     if (mf)
@@ -770,7 +773,7 @@ static int crawl_messf_matches(lua_State *ls)
         return 0;
 
     const char *pattern = luaL_checkstring(ls, 2);
-    int ch = luaL_checkint(ls, 3);
+    int ch = luaL_safe_checkint(ls, 3);
     if (pattern)
     {
         bool filt = (*mf)->is_filtered(ch, pattern);
@@ -846,6 +849,23 @@ static int crawl_split(lua_State *ls)
     return 1;
 }
 
+/*** Compare two strings in a locale-independent way.
+ * Lua's built in comparison operations for strings are dependent on locale,
+ * which isn't always desireable. This is just a wrapper on
+ * std::basic_string::compare.
+ *
+ * @tparam string s1 the first string.
+ * @tparam string s2 the second sring.
+ * @treturn -1 if s1 < s2, 1 if s2 < s1, 0 if s1 == s2.
+ */
+static int crawl_string_compare(lua_State *ls)
+{
+    const string s1 = luaL_checkstring(ls, 1),
+                 s2 = luaL_checkstring(ls, 2);
+    lua_pushnumber(ls, s1.compare(s2));
+    return 1;
+}
+
 /*** Grammatically describe something.
  * Crawl provides the following description types:
  *
@@ -913,13 +933,13 @@ LUARET1(crawl_stat_gain_prompt, boolean, crawl_state.stat_gain_prompt)
  * @treturn int
  * @function random2
  * */
-LUARET1(crawl_random2, number, random2(luaL_checkint(ls, 1)))
+LUARET1(crawl_random2, number, random2(luaL_safe_checkint(ls, 1)))
 /*** Perform a weighted coinflip.
  * @tparam int in
  * @treturn boolean
  * @function one_chance_in
  */
-LUARET1(crawl_one_chance_in, boolean, one_chance_in(luaL_checkint(ls, 1)))
+LUARET1(crawl_one_chance_in, boolean, one_chance_in(luaL_safe_checkint(ls, 1)))
 /*** Average num random rolls from [0, max).
  * @tparam int max
  * @tparam int num
@@ -927,7 +947,7 @@ LUARET1(crawl_one_chance_in, boolean, one_chance_in(luaL_checkint(ls, 1)))
  * @function random2avg
  */
 LUARET1(crawl_random2avg, number,
-        random2avg(luaL_checkint(ls, 1), luaL_checkint(ls, 2)))
+        random2avg(luaL_safe_checkint(ls, 1), luaL_safe_checkint(ls, 2)))
 /*** Random number in a range.
  * @tparam int min
  * @tparam int max
@@ -935,8 +955,8 @@ LUARET1(crawl_random2avg, number,
  * @function random_range
  */
 LUARET1(crawl_random_range, number,
-        random_range(luaL_checkint(ls, 1), luaL_checkint(ls, 2),
-                      lua_isnumber(ls, 3)? luaL_checkint(ls, 3) : 1))
+        random_range(luaL_safe_checkint(ls, 1), luaL_safe_checkint(ls, 2),
+                      lua_isnumber(ls, 3)? luaL_safe_checkint(ls, 3) : 1))
 /*** Flip a coin.
  * @treturn boolean
  * @function coinflip
@@ -950,24 +970,24 @@ LUARET1(crawl_coinflip, boolean, coinflip())
  */
 LUARET1(crawl_roll_dice, number,
         lua_gettop(ls) == 1
-        ? roll_dice(1, luaL_checkint(ls, 1))
-        : roll_dice(luaL_checkint(ls, 1), luaL_checkint(ls, 2)))
+        ? roll_dice(1, luaL_safe_checkint(ls, 1))
+        : roll_dice(luaL_safe_checkint(ls, 1), luaL_safe_checkint(ls, 2)))
 /*** Do a random draw.
  * @tparam int x
  * @tparam int y
  * @treturn boolean
  * @function x_chance_in_y
  */
-LUARET1(crawl_x_chance_in_y, boolean, x_chance_in_y(luaL_checkint(ls, 1),
-                                                    luaL_checkint(ls, 2)))
+LUARET1(crawl_x_chance_in_y, boolean, x_chance_in_y(luaL_safe_checkint(ls, 1),
+                                                    luaL_safe_checkint(ls, 2)))
 /*** Random-round integer division.
  * @tparam int numerator
  * @tparam int denominator
  * @treturn int
  * @function div_rand_round
  */
-LUARET1(crawl_div_rand_round, number, div_rand_round(luaL_checkint(ls, 1),
-                                                     luaL_checkint(ls, 2)))
+LUARET1(crawl_div_rand_round, number, div_rand_round(luaL_safe_checkint(ls, 1),
+                                                     luaL_safe_checkint(ls, 2)))
 /*** A random floating point number in [0,1.0)
  * @treturn number
  * @function random_real
@@ -1188,8 +1208,8 @@ static int crawl_get_command(lua_State *ls)
 }
 
 LUAWRAP(crawl_endgame, screen_end_game(luaL_checkstring(ls, 1)))
-LUAWRAP(crawl_tutorial_hunger, set_tutorial_hunger(luaL_checkint(ls, 1)))
-LUAWRAP(crawl_tutorial_skill, set_tutorial_skill(luaL_checkstring(ls, 1), luaL_checkint(ls, 2)))
+LUAWRAP(crawl_tutorial_hunger, set_tutorial_hunger(luaL_safe_checkint(ls, 1)))
+LUAWRAP(crawl_tutorial_skill, set_tutorial_skill(luaL_checkstring(ls, 1), luaL_safe_checkint(ls, 2)))
 LUAWRAP(crawl_tutorial_hint, tutorial_init_hint(luaL_checkstring(ls, 1)))
 LUAWRAP(crawl_print_hint, print_hint(luaL_checkstring(ls, 1)))
 
@@ -1390,6 +1410,7 @@ static const struct luaL_reg crawl_clib[] =
     { "message_filter",     crawl_message_filter },
     { "trim",               crawl_trim },
     { "split",              crawl_split },
+    { "string_compare",     crawl_string_compare },
     { "grammar",            _crawl_grammar },
     { "article_a",          crawl_article_a },
     { "game_started",       crawl_game_started },
@@ -1456,11 +1477,7 @@ LUAFN(_crawl_milestone)
  * @within dlua
  * @function redraw_view
  */
-LUAFN(_crawl_redraw_view)
-{
-    viewwindow();
-    return 0;
-}
+LUAWRAP(_crawl_redraw_view, viewwindow())
 
 /*** Redraw the player stats.
  * You probably want @{redraw_screen} unless you specifically want only the
@@ -1470,6 +1487,8 @@ LUAFN(_crawl_redraw_view)
  */
 LUAFN(_crawl_redraw_stats)
 {
+    UNUSED(ls);
+
     you.wield_change         = true;
     you.redraw_title         = true;
     you.redraw_quiver        = true;
@@ -1510,7 +1529,7 @@ LUAFN(_crawl_millis)
 #endif
     return 1;
 }
-static string _crawl_make_name(lua_State *ls)
+static string _crawl_make_name(lua_State */*ls*/)
 {
     // A quick wrapper around itemname:make_name.
     return make_name();
@@ -1600,7 +1619,7 @@ LUAFN(_crawl_god_speaks)
  */
 LUAFN(_crawl_set_max_runes)
 {
-    int max_runes = luaL_checkinteger(ls, 1);
+    int max_runes = luaL_safe_checkint(ls, 1);
     if (max_runes < 0 || max_runes > NUM_RUNE_TYPES)
         luaL_error(ls, make_stringf("Bad number of max runes: %d", max_runes).c_str());
     else
@@ -1634,6 +1653,50 @@ LUAFN(crawl_hints_type)
     return 1;
 }
 
+LUAFN(crawl_rng_wrap)
+{
+    if (!lua_isstring(ls, 2))
+        luaL_error(ls, "rng_wrap missing rng name");
+    string rng_name = lua_tostring(ls, 2);
+    if (!rng_name.size())
+        luaL_error(ls, "rng_wrap missing rng name");
+    rng::rng_type r = rng::NUM_RNGS;
+    if (rng_name == "gameplay")
+        r = rng::GAMEPLAY;
+    else if (rng_name == "ui")
+        r = rng::UI;
+    else if (rng_name == "system_specific")
+        r = rng::SYSTEM_SPECIFIC;
+    else if (rng_name == "subgenerator")
+        r = rng::SUB_GENERATOR;
+    else
+    {
+        branch_type b = NUM_BRANCHES;
+        if ((b = branch_by_shortname(rng_name)) == NUM_BRANCHES)
+            if ((b = branch_by_abbrevname(rng_name)) == NUM_BRANCHES)
+                luaL_error(ls, "Unknown rng name %s", rng_name.c_str());
+        r = rng::get_branch_generator(b);
+    }
+
+    lua_pop(ls, 1); // get rid of the rng name
+    if (!lua_isfunction(ls, 1))
+        luaL_error(ls, "rng_wrap missing function");
+    int result;
+    if (r == rng::SUB_GENERATOR)
+    {
+        rng::subgenerator subgen; // TODO: implement seed + seq?
+        result = lua_pcall(ls, 0, LUA_MULTRET, 0);
+    }
+    else
+    {
+        rng::generator gen(r); // generator to use
+        result = lua_pcall(ls, 0, LUA_MULTRET, 0);
+    }
+    if (result != 0)
+        luaL_error(ls, "Failed to run rng-wrapped function (%d)", result);
+    return lua_gettop(ls);
+}
+
 static const struct luaL_reg crawl_dlib[] =
 {
 { "args", _crawl_args },
@@ -1651,6 +1714,7 @@ static const struct luaL_reg crawl_dlib[] =
 { "mark_game_won", _crawl_mark_game_won },
 { "hints_type", crawl_hints_type },
 { "unavailable_god", _crawl_unavailable_god },
+{ "rng_wrap", crawl_rng_wrap },
 
 { nullptr, nullptr }
 };

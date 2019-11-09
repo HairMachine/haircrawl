@@ -39,9 +39,9 @@ bool actor::will_trigger_shaft() const
                 && mons_is_elven_twin(static_cast<const monster* >(this)));
 }
 
-level_id actor::shaft_dest(bool known = false) const
+level_id actor::shaft_dest() const
 {
-    return generic_shaft_dest(pos(), known);
+    return generic_shaft_dest(level_id::current());
 }
 
 /**
@@ -275,6 +275,8 @@ int actor::archmagi(bool calc_unid, bool items) const
  */
 int actor::spec_evoke(bool calc_unid, bool items) const
 {
+    UNUSED(calc_unid);
+    UNUSED(items);
     return 0;
 }
 
@@ -347,23 +349,23 @@ int actor::apply_ac(int damage, int max_damage, ac_type ac_rule,
     int saved = 0;
     switch (ac_rule)
     {
-    case AC_NONE:
+    case ac_type::none:
         return damage; // no GDR, too
-    case AC_PROPORTIONAL:
+    case ac_type::proportional:
         ASSERT(stab_bypass == 0);
         saved = damage - apply_chunked_AC(damage, ac);
         saved = max(saved, div_rand_round(max_damage * gdr, 100));
         return max(damage - saved, 0);
 
-    case AC_NORMAL:
+    case ac_type::normal:
         saved = random2(1 + ac);
         break;
-    case AC_HALF:
+    case ac_type::half:
         saved = random2(1 + ac) / 2;
         ac /= 2;
         gdr /= 2;
         break;
-    case AC_TRIPLE:
+    case ac_type::triple:
         saved = random2(1 + ac);
         saved += random2(1 + ac);
         saved += random2(1 + ac);

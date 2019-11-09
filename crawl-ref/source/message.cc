@@ -680,11 +680,14 @@ public:
      */
     void more(bool full, bool user=false)
     {
+        rng::generator rng(rng::UI);
+
         if (_pre_more())
             return;
 
-        print_stats();
-        show();
+        mouse_control mc(MOUSE_MODE_MORE);
+        redraw_screen();
+
         int last_row = crawl_view.msgsz.y;
         if (first_col_more())
         {
@@ -942,6 +945,49 @@ static bool suppress_messages = false;
 static msg_colour_type prepare_message(const string& imsg,
                                        msg_channel_type channel,
                                        int param);
+
+static unordered_set<message_tee *> current_message_tees;
+
+message_tee::message_tee()
+    : target(nullptr)
+{
+    current_message_tees.insert(this);
+}
+
+message_tee::message_tee(string &_target)
+    : target(&_target)
+{
+    current_message_tees.insert(this);
+}
+
+message_tee::~message_tee()
+{
+    if (target)
+        *target += get_store();
+    current_message_tees.erase(this);
+}
+
+void message_tee::append(const string &s, msg_channel_type /*ch*/)
+{
+    // could use a more c++y external interface -- but that just complicates things
+    store << s;
+}
+
+void message_tee::append_line(const string &s, msg_channel_type ch)
+{
+    append(s + "\n", ch);
+}
+
+string message_tee::get_store() const
+{
+    return store.str();
+}
+
+static void _append_to_tees(const string &s, msg_channel_type ch)
+{
+    for (auto tee : current_message_tees)
+        tee->append(s, ch);
+}
 
 no_messages::no_messages() : msuppressed(suppress_messages)
 {
@@ -1229,6 +1275,8 @@ static bool _updating_view = false;
 static bool _check_option(const string& line, msg_channel_type channel,
                           const vector<message_filter>& option)
 {
+    if (crawl_state.generating_level)
+        return false;
     return any_of(begin(option),
                   end(option),
                   bind(mem_fn(&message_filter::is_filtered),
@@ -1245,7 +1293,7 @@ static bool _check_flash_screen(const string& line, msg_channel_type channel)
     return _check_option(line, channel, Options.flash_screen_message);
 }
 
-static bool _check_join(const string& line, msg_channel_type channel)
+static bool _check_join(const string& /*line*/, msg_channel_type channel)
 {
     switch (channel)
     {
@@ -1355,13 +1403,15 @@ static int _last_msg_turn = -1; // Turn of last message.
 static void _mpr(string text, msg_channel_type channel, int param, bool nojoin,
                  bool cap)
 {
+    rng::generator rng(rng::UI);
+
     if (_msg_dump_file != nullptr)
         fprintf(_msg_dump_file, "%s\n", text.c_str());
 
     if (crawl_state.game_crashed)
         return;
 
-    if (crawl_state.game_is_arena())
+    if (crawl_state.game_is_valid_type() && crawl_state.game_is_arena())
         _debug_channel_arena(channel);
 
 #ifdef DEBUG_FATAL
@@ -1410,6 +1460,9 @@ static void _mpr(string text, msg_channel_type channel, int param, bool nojoin,
     string col = colour_to_str(colour_msg(colour));
     text = "<" + col + ">" + text + "</" + col + ">"; // XXX
 
+    if (current_message_tees.size())
+        _append_to_tees(text + "\n", channel);
+
     formatted_string fs = formatted_string::parse_string(text);
 
     // TODO: this kind of check doesn't really belong in logging code...
@@ -1430,7 +1483,7 @@ static void _mpr(string text, msg_channel_type channel, int param, bool nojoin,
     _last_msg_turn = msg.turn;
 
     if (channel == MSGCH_ERROR)
-        interrupt_activity(AI_FORCE_INTERRUPT);
+        interrupt_activity(activity_interrupt::force);
 
     if (channel == MSGCH_PROMPT || channel == MSGCH_ERROR)
         set_more_autoclear(false);
@@ -1594,6 +1647,8 @@ static void mpr_check_patterns(const string& message,
                                msg_channel_type channel,
                                int param)
 {
+    if (crawl_state.generating_level)
+        return;
     for (const text_pattern &pat : Options.note_messages)
     {
         if (channel == MSGCH_EQUIPMENT || channel == MSGCH_FLOOR_ITEMS
@@ -1612,7 +1667,10 @@ static void mpr_check_patterns(const string& message,
     }
 
     if (channel != MSGCH_DIAGNOSTICS && channel != MSGCH_EQUIPMENT)
-        interrupt_activity(AI_MESSAGE, channel_to_str(channel) + ":" + message);
+    {
+        interrupt_activity(activity_interrupt::message,
+                           channel_to_str(channel) + ":" + message);
+    }
 }
 
 static bool channel_message_history(msg_channel_type channel)
@@ -1648,12 +1706,15 @@ static msg_colour_type prepare_message(const string& imsg,
     if (colour != MSGCOL_MUTED)
         mpr_check_patterns(imsg, channel, param);
 
-    for (const message_colour_mapping &mcm : Options.message_colour_mappings)
+    if (!crawl_state.generating_level)
     {
-        if (mcm.message.is_filtered(channel, imsg))
+        for (const message_colour_mapping &mcm : Options.message_colour_mappings)
         {
-            colour = mcm.colour;
-            break;
+            if (mcm.message.is_filtered(channel, imsg))
+            {
+                colour = mcm.colour;
+                break;
+            }
         }
     }
 
@@ -1759,6 +1820,8 @@ static bool _pre_more()
 
 void more(bool user_forced)
 {
+    rng::generator rng(rng::UI);
+
     if (!crawl_state.io_inited)
         return;
     flush_prev_message();
@@ -2114,7 +2177,7 @@ static void _replay_messages_core(formatted_scroller &hist)
             }
         }
 
-    hist.add_formatted_string(lines, !lines.empty());
+    hist.add_formatted_string(lines);
     hist.show();
 }
 
@@ -2131,8 +2194,7 @@ void replay_messages_during_startup()
     formatted_scroller hist(FS_PREWRAPPED_TEXT);
     hist.set_more();
     hist.set_more(formatted_string::parse_string(
-                        "<cyan>Press Esc or Enter to continue, "
-                        "arrows/pgup/pgdn to scroll.</cyan>"));
+            "<cyan>Press Esc to close, arrows/pgup/pgdn to scroll.</cyan>"));
     hist.set_title(formatted_string::parse_string(recent_error_messages()
         ? "<yellow>Crawl encountered errors during initialization:</yellow>"
         : "<yellow>Initialization log:</yellow>"));

@@ -47,6 +47,7 @@
 #    USE_ICC       -- set to use Intel's compiler
 #    LTO           -- set for better optimization but slower compilation,
 #                     requires gcc4.6+
+#    NO_TRY_LLD    -- if set don't try to detect a working lld linker
 #    NO_TRY_GOLD   -- if set don't try to detect a working gold linker
 #    NOASSERTS     -- set to disable assertion checks (ignored in debug mode)
 #    NOWIZARD      -- set to disable wizard mode.  Use if you have untrusted
@@ -109,10 +110,29 @@ include Makefile.obj
 STDFLAG = -std=c++11
 
 CFOTHERS := -pipe $(EXTERNAL_FLAGS)
+# Build with FORCE_SSE=y to get better seed stability on 32 bit x86 builds. It
+# is not recommended to do this unless you are building with contrib lua.
+# On any 64bit  builds where the arch supports it, (at least) sse2 is implied.
+ifdef FORCE_SSE
+CFOTHERS += -mfpmath=sse -msse2
+endif
+
 CFWARN := 
 CFWARN_L := -Wall -Wformat-security -Wundef
 
-DEFINES := -DTOURNEY='"0.23"' $(EXTERNAL_DEFINES)
+# Exceptions:
+#  -Wmissing-field-initializers: need c++14 to set default struct fields
+#  -Wimplicit-fallthrough: need c++17 for [[fallthrough]]
+#  -Wtype-limits: mostly complains about ASSERT_RANGE, and _Pragma is buggy on
+#      old g++ anyway: re-enable when we bump the minimum g++ version
+#  -Wuninitialized: added later in this makefile, conditional on NO_OPTIMIZE
+CFWARN_L += -Wextra \
+	    -Wno-missing-field-initializers \
+	    -Wno-implicit-fallthrough \
+	    -Wno-type-limits \
+	    -Wno-uninitialized \
+
+DEFINES := -DTOURNEY='"0.24"' $(EXTERNAL_DEFINES)
 
 ifndef ANDROID
 LDFLAGS :=
@@ -167,7 +187,7 @@ ARCH := $(HOST)
 
 ifdef CROSSHOST
 	ARCH := $(CROSSHOST)
-	ifneq (,$($shell which $(ARCH)-pkg-config 2>/dev/null))
+	ifneq (,$(shell which $(ARCH)-pkg-config 2>/dev/null))
 	  PKGCONFIG = $(ARCH)-pkg-config
 	else
 	  ifneq (,$(wildcard /usr/$(ARCH)/lib/pkgconfig))
@@ -254,10 +274,17 @@ ifneq (,$(findstring CYGWIN,$(uname_S)))
 endif
 
 ifdef BUILD_ALL
-	BUILD_FREETYPE = YesPlease
+	ifdef TILES
+		BUILD_FREETYPE = YesPlease
+		BUILD_SDL2 = YesPlease
+		BUILD_SDL2IMAGE = YesPlease
+		BUILD_LIBPNG = YesPlease
+	endif
+	ifdef WEBTILES
+		BUILD_LIBPNG = YesPlease
+	endif
+
 	BUILD_PCRE = YesPlease
-	BUILD_SDL2 = YesPlease
-	BUILD_SDL2IMAGE = YesPlease
 	ifdef SOUND
 		ifndef WIN32 
 			BUILD_SDL2MIXER = YesPlease
@@ -265,7 +292,6 @@ ifdef BUILD_ALL
 	endif
 	BUILD_SQLITE = YesPlease
 	BUILD_LUA = YesPlease
-	BUILD_LIBPNG = YesPlease
 	BUILD_ZLIB = YesPlease
 endif
 
@@ -492,21 +518,6 @@ WINDRES := $(CROSSHOST)-windres
 
 endif
 
-# Define this to automatically generate code optimized for your machine
-# (GCC only as of now).
-#
-# NOTE: Don't use this with a release build, since the generated code
-# won't work for all machines.
-ifdef HURRY
-NO_AUTO_OPT = YesPlease
-endif
-
-ifdef AUTO_OPT
-ifndef NO_AUTO_OPT
-CFOPTIMIZE += -march=native
-endif
-endif
-
 ifdef USE_ICC
 # If you have a Core 2 processor, this _really_ makes things fly:
 #CFOPTIMIZE := -O2 -parallel -xT
@@ -526,6 +537,21 @@ else
   else
     CFOPTIMIZE := -O2
   endif
+endif
+
+# Define this to automatically generate code optimized for your machine
+# (GCC only as of now).
+#
+# NOTE: Don't use this with a release build, since the generated code
+# won't work for all machines.
+ifdef HURRY
+NO_AUTO_OPT = YesPlease
+endif
+
+ifdef AUTO_OPT
+ifndef NO_AUTO_OPT
+CFOPTIMIZE += -march=native
+endif
 endif
 
 ifdef LTO
@@ -1002,10 +1028,21 @@ CFWARN := -wd383,810,869,981,1418 -we14,193,304
 CFWARN_L :=
 endif
 
+LINKER_LDFLAG=
+ifndef NO_TRY_LLD
+ifeq (,$(shell echo 'int main(){return 1;}'|$(GXX) -x c++ - -o /dev/null -fuse-ld=lld 2>&1))
+ LINKER_LDFLAG = -fuse-ld=lld
+endif
+endif
+ifeq ($(LINKER_LDFLAG),)
 ifndef NO_TRY_GOLD
 ifeq (,$(shell echo 'int main(){return 1;}'|$(GXX) -x c++ - -o /dev/null -fuse-ld=gold 2>&1))
-  LDFLAGS += -fuse-ld=gold
+  LINKER_LDFLAG = -fuse-ld=gold
 endif
+endif
+endif
+ifneq ($(LINKER_LDFLAG),)
+LDFLAGS += $(LINKER_LDFLAG)
 endif
 
 LDFLAGS += $(CFOPTIMIZE) $(CFOPTIMIZE_L) $(EXTERNAL_LDFLAGS)
@@ -1189,7 +1226,10 @@ TITLEIMGS = denzi_dragon denzi_kitchen_duty denzi_summoner \
             psiweapon_kiku white_noise_entering_the_dungeon \
             white_noise_grabbing_the_orb pooryurik_knight \
             psiweapon_roxanne baconkid_gastronok baconkid_mnoleg \
-            peileppe_bloax_eye baconkid_duvessa_dowan
+            peileppe_bloax_eye baconkid_duvessa_dowan ploomutoo_ijyb \
+	    froggy_thunder_fist_nikola froggy_rune_and_run_failed_on_dis \
+	    froggy_natasha_and_boris froggy_jiyva_felid \
+	    froggy_goodgod_tengu_gold Cws_Minotauros
 
 STATICFILES = $(TILEIMAGEFILES:%=webserver/game_data/static/%.png) \
               webserver/static/stone_soup_icon-32x32.png \
@@ -1749,9 +1789,9 @@ ifneq ($(GAME),crawl.exe)
 	@echo "This is only for Windows; please specify CROSSHOST.";false
 endif
 	+$(MAKE) clean
-	+$(MAKE) TILES=y DESTDIR=build-win SAVEDIR='~/crawl' install
+	+$(MAKE) TILES=y DESTDIR=build-win FORCE_SSE=y SAVEDIR='~/crawl' install
 	mv build-win/crawl.exe build-win/crawl-tiles.exe
-	+$(MAKE) TILES=  DESTDIR=build-win SAVEDIR='~/crawl' install
+	+$(MAKE) TILES=  DESTDIR=build-win FORCE_SSE=y SAVEDIR='~/crawl' install
 	mv build-win/crawl.exe build-win/crawl-console.exe
 	mv build-win/docs/CREDITS.txt build-win/
 	echo $(SRC_VERSION) >build-win/version.txt
@@ -1762,11 +1802,11 @@ ifneq ($(GAME),crawl.exe)
 	@echo "This is only for Windows; please specify CROSSHOST.";false
 endif
 	+$(MAKE) clean
-	+$(MAKE) TILES=y DESTDIR=build-win/stone_soup-tiles-$(MAJOR_VERSION) install
+	+$(MAKE) TILES=y DESTDIR=build-win/stone_soup-tiles-$(MAJOR_VERSION) FORCE_SSE=y install
 	cp -p $(ZIP_DOCS) build-win/stone_soup-tiles-$(MAJOR_VERSION)/
 	cd build-win && zip -9r ../stone_soup-$(SRC_VERSION)-tiles-win32.zip *
 	rm -rf build-win
-	+$(MAKE) DESTDIR=build-win/stone_soup-$(MAJOR_VERSION) install
+	+$(MAKE) DESTDIR=build-win/stone_soup-$(MAJOR_VERSION) FORCE_SSE=y install
 	cp -p $(ZIP_DOCS) build-win/stone_soup-$(MAJOR_VERSION)/
 	cd build-win && zip -9r ../stone_soup-$(SRC_VERSION)-win32.zip *
 	rm -rf build-win

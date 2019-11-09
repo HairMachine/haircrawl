@@ -102,7 +102,10 @@ bool handle_seen_interrupt(monster* mons, vector<string>* msgs_buf)
         aid.context = SC_NEWLY_SEEN;
 
     if (!mons_is_safe(mons))
-        return interrupt_activity(AI_SEE_MONSTER, aid, msgs_buf);
+    {
+        return interrupt_activity(activity_interrupt::see_monster,
+                                  aid, msgs_buf);
+    }
 
     return false;
 }
@@ -199,7 +202,7 @@ static string _desc_mons_type_map(map<monster_type, int> types)
             message += ", ";
         ++count;
     }
-    return make_stringf("%s come into view.", message.c_str());
+    return message;
 }
 
 static monster_type _mons_genus_keep_uniques(monster_type mc)
@@ -267,7 +270,7 @@ static bool _is_weapon_worth_listing(const item_def *wpn)
 
 /// Return a warning for the player about newly-seen monsters, as appropriate.
 static string _monster_headsup(const vector<monster*> &monsters,
-                               map<monster_type, int> &types,
+                               const map<monster_type, int> &types,
                                bool divine)
 {
     string warning_msg = "";
@@ -296,13 +299,18 @@ static string _monster_headsup(const vector<monster*> &monsters,
             monname = mon->pronoun(PRONOUN_SUBJECTIVE);
         else if (mon->type == MONS_DANCING_WEAPON)
             monname = "There";
-        else if (types[mon->type] == 1)
+        else if (types.at(mon->type) == 1)
             monname = mon->full_name(DESC_THE);
         else
             monname = mon->full_name(DESC_A);
         warning_msg += uppercase_first(monname);
 
-        warning_msg += " is";
+        warning_msg += " ";
+        if (monsters.size() == 1)
+            warning_msg += conjugate_verb("are", mon->pronoun_plurality());
+        else
+            warning_msg += "is";
+
         if (!divine)
         {
             warning_msg += get_monster_equipment_desc(mi, DESC_WEAPON_WARNING,
@@ -333,7 +341,7 @@ static string _monster_headsup(const vector<monster*> &monsters,
 
 /// Let Ash/Zin warn the player about newly-seen monsters, as appropriate.
 static void _divine_headsup(const vector<monster*> &monsters,
-                            map<monster_type, int> &types)
+                            const map<monster_type, int> &types)
 {
     const string warnings = _monster_headsup(monsters, types, true);
     if (!warnings.size())
@@ -349,12 +357,41 @@ static void _divine_headsup(const vector<monster*> &monsters,
 }
 
 static void _secular_headsup(const vector<monster*> &monsters,
-                             map<monster_type, int> &types)
+                             const map<monster_type, int> &types)
 {
     const string warnings = _monster_headsup(monsters, types, false);
     if (!warnings.size())
         return;
     mprf(MSGCH_MONSTER_WARNING, "%s", warnings.c_str());
+}
+
+static map<monster_type, int> _count_monster_types(const vector<monster*>& monsters,
+                                                   const unsigned int max_types = UINT_MAX)
+{
+    map<monster_type, int> types;
+    map<monster_type, int> genera; // This is the plural for genus!
+    for (const monster *mon : monsters)
+    {
+        const monster_type type = mon->type;
+        types[type]++;
+        genera[_mons_genus_keep_uniques(type)]++;
+    }
+
+    while (types.size() > max_types && !genera.empty())
+        _genus_factoring(types, genera);
+
+    return types;
+}
+
+/**
+ * Return a string listing monsters in a human readable form.
+ * E.g. "a hydra and 2 liches".
+ *
+ * @param monsters      A list of monsters that just became visible.
+ */
+string describe_monsters_condensed(const vector<monster*>& monsters)
+{
+    return _desc_mons_type_map(_count_monster_types(monsters, 4));
 }
 
 /**
@@ -368,28 +405,13 @@ static void _secular_headsup(const vector<monster*> &monsters,
 static void _handle_comes_into_view(const vector<string> &msgs,
                                     const vector<monster*> monsters)
 {
-    const unsigned int max_msgs = 4;
-
-    map<monster_type, int> types;
-    map<monster_type, int> genera; // This is the plural for genus!
-    for (const monster *mon : monsters)
-    {
-        const monster_type type = mon->type;
-        types[type]++;
-        genera[_mons_genus_keep_uniques(type)]++;
-    }
-
-    unsigned int size = monsters.size();
-    if (size == 1)
+    if (monsters.size() == 1)
         mprf(MSGCH_MONSTER_WARNING, "%s", msgs[0].c_str());
     else
-    {
-        while (types.size() > max_msgs && !genera.empty())
-            _genus_factoring(types, genera);
-        mprf(MSGCH_MONSTER_WARNING, "%s",
-             _desc_mons_type_map(types).c_str());
-    }
+        mprf(MSGCH_MONSTER_WARNING, "%s come into view.",
+             describe_monsters_condensed(monsters).c_str());
 
+    const auto& types = _count_monster_types(monsters);
     _divine_headsup(monsters, types);
     _secular_headsup(monsters, types);
 }
@@ -571,6 +593,13 @@ static const FixedArray<uint8_t, GXM, GYM>& _tile_difficulties(bool random)
     return cache;
 }
 
+static colour_t _feat_default_map_colour(dungeon_feature_type feat)
+{
+    if (player_in_branch(BRANCH_SEWER) && feat_is_water(feat))
+        return feat == DNGN_DEEP_WATER ? GREEN : LIGHTGREEN;
+    return BLACK;
+}
+
 // Returns true if it succeeded.
 bool magic_mapping(int map_radius, int proportion, bool suppress_msg,
                    bool force, bool deterministic,
@@ -669,12 +698,16 @@ bool magic_mapping(int map_radius, int proportion, bool suppress_msg,
         {
             if (wizard_map)
             {
-                knowledge.set_feature(grd(pos), 0,
+                knowledge.set_feature(feat, _feat_default_map_colour(feat),
                     feat_is_trap(grd(pos)) ? get_trap_type(pos)
                                            : TRAP_UNASSIGNED);
             }
             else if (!knowledge.feat())
-                knowledge.set_feature(magic_map_base_feat(grd(pos)));
+            {
+                auto base_feat = magic_map_base_feat(feat);
+                auto colour = _feat_default_map_colour(base_feat);
+                knowledge.set_feature(base_feat, colour);
+            }
             if (emphasise(pos))
                 knowledge.flags |= MAP_EMPHASIZE;
 
@@ -901,6 +934,8 @@ void flash_monster_colour(const monster* mon, colour_t fmc_colour,
         view_update_at(c);
         update_screen();
     }
+#else
+    UNUSED(fmc_colour, fmc_delay);
 #endif
 }
 
@@ -1094,6 +1129,8 @@ static void _draw_outside_los(screen_cell_t *cell, const coord_def &gc,
         cell->tile.bg = env.tile_bg(ep);
 
     tileidx_out_of_los(&cell->tile.fg, &cell->tile.bg, &cell->tile.cloud, gc);
+#else
+    UNUSED(ep);
 #endif
 }
 
@@ -1123,7 +1160,7 @@ static void _draw_player(screen_cell_t *cell,
     if (anim_updates)
         tile_apply_animations(cell->tile.bg, &env.tile_flv(gc));
 #else
-    UNUSED(anim_updates);
+    UNUSED(ep, anim_updates);
 #endif
 }
 
@@ -1142,7 +1179,7 @@ static void _draw_los(screen_cell_t *cell,
     if (anim_updates)
         tile_apply_animations(cell->tile.bg, &env.tile_flv(gc));
 #else
-    UNUSED(anim_updates);
+    UNUSED(ep, anim_updates);
 #endif
 }
 
@@ -1151,14 +1188,14 @@ class shake_viewport_animation: public animation
 public:
     shake_viewport_animation() { frames = 5; frame_delay = 40; }
 
-    void init_frame(int frame) override
+    void init_frame(int /*frame*/) override
     {
         offset = coord_def();
         offset.x = random2(3) - 1;
         offset.y = random2(3) - 1;
     }
 
-    coord_def cell_cb(const coord_def &pos, int &colour) override
+    coord_def cell_cb(const coord_def &pos, int &/*colour*/) override
     {
         return pos + offset;
     }
@@ -1176,7 +1213,7 @@ public:
         current_frame = frame;
     }
 
-    coord_def cell_cb(const coord_def &pos, int &colour) override
+    coord_def cell_cb(const coord_def &pos, int &/*colour*/) override
     {
         if (current_frame % 2 == (pos.x + pos.y) % 2 && pos != you.pos())
             return coord_def(-1, -1);
@@ -1211,7 +1248,7 @@ public:
         remaining = false;
     }
 
-    coord_def cell_cb(const coord_def &pos, int &colour) override
+    coord_def cell_cb(const coord_def &pos, int &/*colour*/) override
     {
         if (pos == you.pos())
             return pos;
@@ -1245,7 +1282,7 @@ public:
         current_frame = frame;
     }
 
-    coord_def cell_cb(const coord_def &pos, int &colour) override
+    coord_def cell_cb(const coord_def &pos, int &/*colour*/) override
     {
         coord_def ret;
         if (pos.y % 2)
@@ -1410,6 +1447,10 @@ void viewwindow(bool show_updates, bool tiles_only, animation *a)
 
         bool run_dont_draw = you.running && Options.travel_delay < 0
                     && (!you.running.is_explore() || Options.explore_delay < 0);
+        if (you.running && you.running.is_rest())
+            run_dont_draw = Options.rest_delay == -1;
+        if (mouse_control::current_mode() != MOUSE_MODE_NORMAL)
+            run_dont_draw = false;
 
         if (run_dont_draw || you.asleep())
         {
@@ -1449,6 +1490,8 @@ void viewwindow(bool show_updates, bool tiles_only, animation *a)
             puttext(crawl_view.viewp.x, crawl_view.viewp.y, crawl_view.vbuf);
             update_monster_pane();
         }
+#else
+        UNUSED(tiles_only);
 #endif
 #ifdef USE_TILE
         tiles.set_need_redraw(you.running ? Options.tile_runrest_rate : 0);
@@ -1492,6 +1535,10 @@ void draw_cell(screen_cell_t *cell, const coord_def &gc,
         _draw_los(cell, gc, ep, anim_updates);
     else
         _draw_outside_los(cell, gc, ep); // in los bounds but not visible
+
+#ifdef USE_TILE
+    cell->tile.map_knowledge = map_bounds(gc) ? env.map_knowledge(gc) : map_cell();
+#endif
 
     cell->flash_colour = BLACK;
 
@@ -1700,7 +1747,7 @@ void reset_show_terrain()
 ////////////////////////////////////////////////////////////////////////////
 // Term resize handling (generic).
 
-void handle_terminal_resize(bool redraw)
+void handle_terminal_resize()
 {
     crawl_state.terminal_resized = false;
 
@@ -1709,6 +1756,5 @@ void handle_terminal_resize(bool redraw)
     else
         crawl_view.init_geometry();
 
-    if (redraw)
-        redraw_screen();
+    redraw_screen();
 }

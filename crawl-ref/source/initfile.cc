@@ -110,11 +110,13 @@ static bool _first_greater(const pair<int, int> &l, const pair<int, int> &r)
 
 const vector<GameOption*> game_options::build_options_list()
 {
+#ifndef DEBUG
     const bool USING_TOUCH =
 #if defined(TOUCH_UI)
         true;
 #else
         false;
+#endif
 #endif
     const bool USING_DGL =
 #if defined(DGAMELAUNCH)
@@ -194,7 +196,11 @@ const vector<GameOption*> game_options::build_options_list()
         new BoolGameOption(SIMPLE_NAME(note_chat_messages), false),
         new BoolGameOption(SIMPLE_NAME(note_dgl_messages), true),
         new BoolGameOption(SIMPLE_NAME(clear_messages), false),
+#ifdef DEBUG
+        new BoolGameOption(SIMPLE_NAME(show_more), false),
+#else
         new BoolGameOption(SIMPLE_NAME(show_more), !USING_TOUCH),
+#endif
         new BoolGameOption(SIMPLE_NAME(small_more), false),
         new BoolGameOption(SIMPLE_NAME(pickup_thrown), true),
         new BoolGameOption(SIMPLE_NAME(show_travel_trail), USING_DGL),
@@ -216,7 +222,6 @@ const vector<GameOption*> game_options::build_options_list()
         new BoolGameOption(SIMPLE_NAME(wall_jump_prompt), false),
         new BoolGameOption(SIMPLE_NAME(wall_jump_move), false),
         new BoolGameOption(SIMPLE_NAME(darken_beyond_range), true),
-        new BoolGameOption(SIMPLE_NAME(dump_book_spells), true),
         new BoolGameOption(SIMPLE_NAME(arena_dump_msgs), false),
         new BoolGameOption(SIMPLE_NAME(arena_dump_msgs_all), false),
         new BoolGameOption(SIMPLE_NAME(arena_list_eq), false),
@@ -294,9 +299,6 @@ const vector<GameOption*> game_options::build_options_list()
         new ColourThresholdOption(stat_colour, {"stat_colour", "stat_color"},
                                   "3:red", _first_less),
         new StringGameOption(SIMPLE_NAME(sound_file_path), ""),
-#ifndef DGAMELAUNCH
-        new BoolGameOption(SIMPLE_NAME(pregen_dungeon), false),
-#endif
 
 #ifdef DGL_SIMPLE_MESSAGING
         new BoolGameOption(SIMPLE_NAME(messaging), false),
@@ -553,7 +555,7 @@ static map<string, weapon_type> _special_weapon_map = {
 
     {"thrown",      WPN_THROWN},
     {"rocks",       WPN_THROWN},
-    {"tomahawks",   WPN_THROWN},
+    {"boomerangs",   WPN_THROWN},
     {"javelins",    WPN_THROWN},
 
     {"random",      WPN_RANDOM},
@@ -631,12 +633,12 @@ static fire_type _str_to_fire_types(const string &str)
         return FIRE_ROCK;
     else if (str == "javelin")
         return FIRE_JAVELIN;
-    else if (str == "tomahawk")
-        return FIRE_TOMAHAWK;
+    else if (str == "boomerang")
+        return FIRE_BOOMERANG;
+    else if (str == "dart")
+        return FIRE_DART;
     else if (str == "net")
         return FIRE_NET;
-    else if (str == "return" || str == "returning")
-        return FIRE_RETURNING;
     else if (str == "inscribed")
         return FIRE_INSCRIBED;
 
@@ -838,8 +840,8 @@ void game_options::set_default_activity_interrupts()
         "interrupt_jewellery_on = interrupt_armour_on",
         "interrupt_memorise = hp_loss, monster_attack, stat",
         "interrupt_butcher = interrupt_armour_on, teleport, stat",
-        "interrupt_bottle_blood = interrupt_butcher",
-        "interrupt_vampire_feed = interrupt_butcher",
+        "interrupt_exsanguinate = interrupt_butcher",
+        "interrupt_revivify = interrupt_butcher",
         "interrupt_multidrop = hp_loss, monster_attack, teleport, stat",
         "interrupt_macro = interrupt_multidrop",
         "interrupt_travel = interrupt_butcher, hungry, hit_monster, "
@@ -863,7 +865,7 @@ void game_options::set_default_activity_interrupts()
 }
 
 void game_options::set_activity_interrupt(
-        FixedBitVector<NUM_AINTERRUPTS> &eints,
+        FixedBitVector<NUM_ACTIVITY_INTERRUPTS> &eints,
         const string &interrupt)
 {
     if (starts_with(interrupt, interrupt_prefix))
@@ -873,21 +875,21 @@ void game_options::set_activity_interrupt(
         if (!activity_interrupts.count(delay_name))
             return report_error("Unknown delay: %s\n", delay_name.c_str());
 
-        FixedBitVector<NUM_AINTERRUPTS> &refints =
+        FixedBitVector<NUM_ACTIVITY_INTERRUPTS> &refints =
             activity_interrupts[delay_name];
 
         eints |= refints;
         return;
     }
 
-    activity_interrupt_type ai = get_activity_interrupt(interrupt);
-    if (ai == NUM_AINTERRUPTS)
+    activity_interrupt ai = get_activity_interrupt(interrupt);
+    if (ai == activity_interrupt::COUNT)
     {
         return report_error("Delay interrupt name \"%s\" not recognised.\n",
                             interrupt.c_str());
     }
 
-    eints.set(ai);
+    eints.set(static_cast<int>(ai));
 }
 
 void game_options::set_activity_interrupt(const string &activity_name,
@@ -900,11 +902,11 @@ void game_options::set_activity_interrupt(const string &activity_name,
 
     if (remove_interrupts)
     {
-        FixedBitVector<NUM_AINTERRUPTS> refints;
+        FixedBitVector<NUM_ACTIVITY_INTERRUPTS> refints;
         for (const string &interrupt : interrupts)
             set_activity_interrupt(refints, interrupt);
 
-        for (int i = 0; i < NUM_AINTERRUPTS; ++i)
+        for (int i = 0; i < NUM_ACTIVITY_INTERRUPTS; ++i)
             if (refints[i])
                 eints.set(i, false);
     }
@@ -917,12 +919,13 @@ void game_options::set_activity_interrupt(const string &activity_name,
             set_activity_interrupt(eints, interrupt);
     }
 
-    eints.set(AI_FORCE_INTERRUPT);
+    eints.set(static_cast<int>(activity_interrupt::force));
 }
 
 #if defined(DGAMELAUNCH)
 static string _resolve_dir(string path, string suffix)
 {
+    UNUSED(suffix);
     return catpath(path, "");
 }
 #else
@@ -1031,6 +1034,9 @@ void game_options::reset_options()
 
     char_set      = CSET_DEFAULT;
 
+    incremental_pregen = true;
+    pregen_dungeon = false;
+
     // set it to the .crawlrc default
     autopickups.reset();
     autopickups.set(OBJ_GOLD);
@@ -1041,10 +1047,10 @@ void game_options::reset_options()
     autopickups.set(OBJ_WANDS);
     autopickups.set(OBJ_FOOD);
 
-    confirm_butcher        = CONFIRM_AUTO;
+    confirm_butcher        = confirm_butcher_type::normal;
     auto_butcher           = HS_VERY_HUNGRY;
-    easy_confirm           = CONFIRM_SAFE_EASY;
-    allow_self_target      = CONFIRM_PROMPT;
+    easy_confirm           = easy_confirm_type::safe;
+    allow_self_target      = confirm_prompt_type::prompt;
     skill_focus            = SKM_FOCUS_ON;
 
     user_note_prefix       = "";
@@ -1076,8 +1082,8 @@ void game_options::reset_options()
     fire_items_start       = 0;           // start at slot 'a'
 
     // Clear fire_order and set up the defaults.
-    set_fire_order("launcher, return, "
-                   "javelin / tomahawk / stone / rock / net, "
+    set_fire_order("launcher,"
+                   "javelin / boomerang / stone / rock / net / dart, "
                    "inscribed",
                    false, false);
 
@@ -1131,6 +1137,8 @@ void game_options::reset_options()
     tile_weapon_offsets.second = INT_MAX;
     tile_shield_offsets.first  = INT_MAX;
     tile_shield_offsets.second = INT_MAX;
+    tile_viewport_scale = 100;
+    tile_map_scale      = 60;
 #endif
 
 #ifdef USE_TILE_WEB
@@ -1149,10 +1157,8 @@ void game_options::reset_options()
     dump_order.clear();
     new_dump_fields("header,hiscore,stats,misc,inventory,"
                     "skills,spells,overview,mutations,messages,"
-                    "screenshot,monlist,kills,notes");
-    if (Version::ReleaseType == VER_ALPHA)
-        new_dump_fields("vaults");
-    new_dump_fields("skill_gains,action_counts");
+                    "screenshot,monlist,kills,notes,vaults,"
+                    "skill_gains,action_counts");
     // Currently enabled by default for testing in trunk.
     if (Version::ReleaseType == VER_ALPHA)
         new_dump_fields("xp_by_level");
@@ -1333,7 +1339,7 @@ cglyph_t game_options::parse_mon_glyph(const string &s) const
     return md;
 }
 
-void game_options::remove_mon_glyph_override(const string &text, bool prepend)
+void game_options::remove_mon_glyph_override(const string &text, bool /*prepend*/)
 {
     vector<string> override = split_string(":", text);
 
@@ -1354,7 +1360,7 @@ void game_options::remove_mon_glyph_override(const string &text, bool prepend)
         mon_glyph_overrides.erase(m);;
 }
 
-void game_options::add_mon_glyph_override(const string &text, bool prepend)
+void game_options::add_mon_glyph_override(const string &text, bool /*prepend*/)
 {
     vector<string> override = split_string(":", text);
     if (override.size() != 2u)
@@ -1392,7 +1398,7 @@ void game_options::add_mon_glyph_override(const string &text, bool prepend)
             mon_glyph_overrides[m] = mdisp;
 }
 
-void game_options::remove_item_glyph_override(const string &text, bool prepend)
+void game_options::remove_item_glyph_override(const string &text, bool /*prepend*/)
 {
     string key = text;
     trim_string(key);
@@ -1421,7 +1427,7 @@ void game_options::add_item_glyph_override(const string &text, bool prepend)
     }
 }
 
-void game_options::remove_feature_override(const string &text, bool prepend)
+void game_options::remove_feature_override(const string &text, bool /*prepend*/)
 {
     string fname;
     string::size_type epos = text.rfind("}");
@@ -1440,7 +1446,7 @@ void game_options::remove_feature_override(const string &text, bool prepend)
     }
 }
 
-void game_options::add_feature_override(const string &text, bool prepend)
+void game_options::add_feature_override(const string &text, bool /*prepend*/)
 {
     string::size_type epos = text.rfind("}");
     if (epos == string::npos)
@@ -1690,6 +1696,10 @@ newgame_def read_startup_prefs()
         temp.game.job = temp.game.allowed_jobs[0];
     if (!temp.game.allowed_weapons.empty())
         temp.game.weapon = temp.game.allowed_weapons[0];
+    if (!Options.seed_from_rc)
+        Options.seed = temp.seed_from_rc;
+    if (!Options.remember_name)
+        temp.game.name = "";
     return temp.game;
 #endif // !DISABLE_STICKY_STARTUP_OPTIONS
 }
@@ -1710,6 +1720,8 @@ static void write_newgame_options(const newgame_def& prefs, FILE *f)
         fprintf(f, "background = %s\n", _job_to_str(prefs.job).c_str());
     if (prefs.weapon != WPN_UNKNOWN)
         fprintf(f, "weapon = %s\n", _weapon_to_str(prefs.weapon).c_str());
+    if (prefs.seed != 0)
+        fprintf(f, "game_seed = %" PRIu64 "\n", prefs.seed);
     fprintf(f, "fully_random = %s\n", prefs.fully_random ? "yes" : "no");
 }
 #endif // !DISABLE_STICKY_STARTUP_OPTIONS
@@ -1759,6 +1771,24 @@ void save_player_name()
     write_newgame_options_file(prefs);
 #endif // !DISABLE_STICKY_STARTUP_OPTIONS
 }
+
+#ifndef DISABLE_STICKY_STARTUP_OPTIONS
+// TODO: can these functions be generalized? This is called on game end, maybe
+// the entire pref should be updated then?
+void save_seed_pref()
+{
+#ifndef DGAMELAUNCH
+    if (!crawl_state.game_standard_levelgen())
+        return;
+    // Read other preferences
+    newgame_def prefs = read_startup_prefs();
+    prefs.seed = crawl_state.seed;
+
+    // And save
+    write_newgame_options_file(prefs);
+#endif
+}
+#endif // !DISABLE_STICKY_STARTUP_OPTIONS
 
 void read_options(const string &s, bool runscript, bool clear_aliases)
 {
@@ -2305,7 +2335,7 @@ void game_options::set_menu_sort(string field)
     menu_sort_condition cond(field);
 
     // Overrides all previous settings.
-    if (cond.mtype == MT_ANY)
+    if (cond.mtype == menu_type::any)
         sort_menus.clear();
 
     // Override existing values, if necessary.
@@ -2339,7 +2369,7 @@ void game_options::split_parse(const string &s, const string &separator,
     }
 }
 
-void game_options::set_option_fragment(const string &s, bool prepend)
+void game_options::set_option_fragment(const string &s, bool /*prepend*/)
 {
     if (s.empty())
         return;
@@ -2632,29 +2662,29 @@ void game_options::read_option_line(const string &str, bool runscript)
     {
         // decide when to allow both 'Y'/'N' and 'y'/'n' on yesno() prompts
         if (field == "none")
-            easy_confirm = CONFIRM_NONE_EASY;
+            easy_confirm = easy_confirm_type::none;
         else if (field == "safe")
-            easy_confirm = CONFIRM_SAFE_EASY;
+            easy_confirm = easy_confirm_type::safe;
         else if (field == "all")
-            easy_confirm = CONFIRM_ALL_EASY;
+            easy_confirm = easy_confirm_type::all;
     }
     else if (key == "allow_self_target")
     {
         if (field == "yes")
-            allow_self_target = CONFIRM_NONE;
+            allow_self_target = confirm_prompt_type::none;
         else if (field == "no")
-            allow_self_target = CONFIRM_CANCEL;
+            allow_self_target = confirm_prompt_type::cancel;
         else if (field == "prompt")
-            allow_self_target = CONFIRM_PROMPT;
+            allow_self_target = confirm_prompt_type::prompt;
     }
     else if (key == "confirm_butcher")
     {
         if (field == "always")
-            confirm_butcher = CONFIRM_ALWAYS;
+            confirm_butcher = confirm_butcher_type::always;
         else if (field == "never")
-            confirm_butcher = CONFIRM_NEVER;
+            confirm_butcher = confirm_butcher_type::never;
         else if (field == "auto")
-            confirm_butcher = CONFIRM_AUTO;
+            confirm_butcher = confirm_butcher_type::normal;
     }
     else if (key == "auto_butcher")
     {
@@ -3410,7 +3440,6 @@ void game_options::read_option_line(const string &str, bool runscript)
         else
             constants.insert(field);
     }
-#ifndef DGAMELAUNCH
     else if (key == "game_seed")
     {
         // special handling because of the large type.
@@ -3419,13 +3448,66 @@ void game_options::read_option_line(const string &str, bool runscript)
         {
             // seed_from_rc is only ever set here, or by the CLO. The CLO gets
             // first crack, so don't overwrite it here.
-            // Options.seed can be updated in-game from the custom seed menu,
-            // so also don't overwrite it when the CLO has set it, or the
-            // player has set it in-game.
-            if (!Options.seed_from_rc)
-                Options.seed_from_rc = tmp_seed;
-            if (!Options.seed)
-                Options.seed = tmp_seed;
+            if (!seed_from_rc)
+                seed_from_rc = tmp_seed;
+        }
+    }
+    else if (key == "pregen_dungeon")
+    {
+        // TODO: probably convert the underlying values to some kind of enum
+        // TODO: store these options in a save?
+        if (field == "true" || field == "full")
+        {
+#ifdef DGAMELAUNCH
+            report_error(
+                "Full pregeneration is not allowed on this build of crawl.");
+#else
+            pregen_dungeon = true;
+            incremental_pregen = true; // still affects loading games not
+                                       // started with full pregen
+#endif
+        }
+        else if (field == "incremental")
+        {
+            pregen_dungeon = false;
+            incremental_pregen = true;
+        }
+        else if (field == "false" || field == "classic")
+            pregen_dungeon = incremental_pregen = false;
+        else
+        {
+            report_error("Unknown value '%s' for pregen_dungeon.",
+                                                            field.c_str());
+        }
+    }
+#ifdef USE_TILE
+    // TODO: generalize these to an option type?
+    else if (key == "tile_viewport_scale")
+    {
+        float tmp_scale;
+        if (sscanf(field.c_str(), "%f", &tmp_scale))
+        {
+            tile_viewport_scale = min(1600, max(20,
+                                        static_cast<int>(tmp_scale * 100)));
+        }
+        else
+        {
+            report_error("Expected a decimal value for tile_viewport_scale,"
+                " but got '%s'.", field.c_str());
+        }
+    }
+    else if (key == "tile_map_scale")
+    {
+        float tmp_scale;
+        if (sscanf(field.c_str(), "%f", &tmp_scale))
+        {
+            tile_map_scale = min(1600, max(20,
+                                        static_cast<int>(tmp_scale * 100)));
+        }
+        else
+        {
+            report_error("Expected a decimal value for tile_map_scale,"
+                " but got '%s'.", field.c_str());
         }
     }
 #endif
@@ -3529,7 +3611,7 @@ static string _supported_language_listing()
     return comma_separated_fn(&lang_data[0], &lang_data[ARRAYSZ(lang_data)],
                               [](language_def ld){return ld.code ? ld.code : "en";},
                               ",", ",",
-                              [](language_def ld){return true;});
+                              [](language_def){return true;});
 }
 
 bool game_options::set_lang(const char *lc)
@@ -4160,7 +4242,7 @@ static void _write_bones(const string &filename, vector<ghost_demon> ghosts)
     write_ghost_version(outw);
     tag_write_ghosts(outw, ghosts);
 
-    lk_close(ghost_file, filename);
+    lk_close(ghost_file);
 }
 
 static void _bones_ls(const string &filename, const string name_match,
@@ -4197,7 +4279,7 @@ static void _bones_ls(const string &filename, const string name_match,
             m.type = MONS_PLAYER_GHOST;
             monster_info mi(&m);
             bool has_stat_desc = false;
-            get_monster_db_desc(mi, inf, has_stat_desc, true);
+            get_monster_db_desc(mi, inf, has_stat_desc);
             cout << "#######################\n"
                  << inf.title << "\n"
                  << inf.body.str() << "\n"
@@ -4445,6 +4527,8 @@ void game_options::write_webtiles_options(const string& name)
 
     tiles.json_write_string("tile_display_mode", Options.tile_display_mode);
     tiles.json_write_int("tile_cell_pixels", Options.tile_cell_pixels);
+    tiles.json_write_int("tile_viewport_scale", Options.tile_viewport_scale);
+    tiles.json_write_int("tile_map_scale", Options.tile_map_scale);
     tiles.json_write_bool("tile_filter_scaling", Options.tile_filter_scaling);
     tiles.json_write_bool("tile_water_anim", Options.tile_water_anim);
     tiles.json_write_bool("tile_misc_anim", Options.tile_misc_anim);
@@ -4774,6 +4858,7 @@ bool parse_args(int argc, char **argv, bool rc_only)
         case CLO_SCRIPT:
             crawl_state.test   = true;
             crawl_state.script = true;
+            crawl_state.script_args.clear();
             if (current < argc - 1)
             {
                 crawl_state.tests_selected = split_string(",", next_arg);
@@ -4782,8 +4867,10 @@ bool parse_args(int argc, char **argv, bool rc_only)
                 current = argc;
             }
             else
+            {
                 end(1, false,
                     "-script must specify comma-separated script names");
+            }
             break;
 
         case CLO_BUILDDB:
@@ -5060,7 +5147,7 @@ menu_sort_condition::menu_sort_condition(menu_type _mt, int _sort)
 }
 
 menu_sort_condition::menu_sort_condition(const string &s)
-    : mtype(MT_ANY), sort(-1), cmp()
+    : mtype(menu_type::any), sort(-1), cmp()
 {
     string cp = s;
     set_menu_type(cp);
@@ -5070,7 +5157,7 @@ menu_sort_condition::menu_sort_condition(const string &s)
 
 bool menu_sort_condition::matches(menu_type mt) const
 {
-    return mtype == MT_ANY || mtype == mt;
+    return mtype == menu_type::any || mtype == mt;
 }
 
 void menu_sort_condition::set_menu_type(string &s)
@@ -5081,11 +5168,11 @@ void menu_sort_condition::set_menu_type(string &s)
         menu_type mtype;
     } menu_type_map[] =
       {
-          { "any:",    MT_ANY       },
-          { "inv:",    MT_INVLIST   },
-          { "drop:",   MT_DROP      },
-          { "pickup:", MT_PICKUP    },
-          { "know:",   MT_KNOW      }
+          { "any:",    menu_type::any       },
+          { "inv:",    menu_type::invlist   },
+          { "drop:",   menu_type::drop      },
+          { "pickup:", menu_type::pickup    },
+          { "know:",   menu_type::know      }
       };
 
     for (const auto &mi : menu_type_map)

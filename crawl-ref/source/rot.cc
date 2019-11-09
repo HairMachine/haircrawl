@@ -204,11 +204,7 @@ static void _rot_corpse(item_def &it, int mitm_index, int rot_time)
         destroy_item(mitm_index);
     }
     else
-    {
         turn_corpse_into_skeleton(it);
-        const int piety = x_chance_in_y(2, 5) ? 2 : 1; // match fungal_bloom()
-        did_god_conduct(DID_ROT_CARRION, piety);
-    }
 }
 
 /**
@@ -350,7 +346,7 @@ void rot_floor_items(int elapsedTime)
  *
  * @param time_delta    The amount of time to rot for.
  */
-void rot_inventory_food(int time_delta)
+void rot_inventory_food(int /*time_delta*/)
 {
     int num_chunks         = 0;
     int num_chunks_gone    = 0;

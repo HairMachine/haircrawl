@@ -264,7 +264,7 @@ static void _apply_ood(level_id &place)
         if (fuzz)
         {
             place.depth += fuzz;
-            dprf(DIAG_MONPLACE, "Monster level fuzz: %d (old: %s, new: %s)",
+            dprf("Monster level fuzz: %d (old: %s, new: %s)",
                  fuzz, old_place.describe().c_str(), place.describe().c_str());
         }
     }
@@ -413,7 +413,7 @@ monster_type pick_random_monster(level_id place,
         return pick_monster(place);
 }
 
-bool can_place_on_trap(monster_type mon_type, trap_type trap)
+bool can_place_on_trap(monster_type mon_type)
 {
     if (mons_is_tentacle_segment(mon_type))
         return true;
@@ -558,7 +558,7 @@ monster_type resolve_monster_type(monster_type mon_type,
 
 // For generation purposes, don't treat simulacra of lava enemies as
 // being able to place on lava.
-const monster_type fixup_zombie_type(const monster_type cls,
+monster_type fixup_zombie_type(const monster_type cls,
                                          const monster_type base_type)
 {
     return (mons_class_is_zombified(cls)
@@ -578,6 +578,10 @@ static bool _valid_monster_generation_location(const mgen_data &mg,
         || monster_at(mg_pos)
         || you.pos() == mg_pos && !fedhas_passthrough_class(mg.cls))
     {
+        ASSERT(!crawl_state.generating_level
+                || !in_bounds(mg_pos)
+                || you.pos() != mg_pos
+                || you.where_are_you == BRANCH_ABYSS);
         return false;
     }
 
@@ -594,6 +598,7 @@ static bool _valid_monster_generation_location(const mgen_data &mg,
     if (mg.proximity == PROX_AWAY_FROM_PLAYER && close_to_player
         || mg.proximity == PROX_CLOSE_TO_PLAYER && !close_to_player)
     {
+        ASSERT(!crawl_state.generating_level || you.where_are_you == BRANCH_ABYSS);
         return false;
     }
     // Check that the location is not proximal to level stairs.
@@ -607,7 +612,7 @@ static bool _valid_monster_generation_location(const mgen_data &mg,
     // Don't generate monsters on top of teleport traps.
     // (How did they get there?)
     const trap_def* ptrap = trap_at(mg_pos);
-    if (ptrap && !can_place_on_trap(mg.cls, ptrap->type))
+    if (ptrap && !can_place_on_trap(mg.cls))
         return false;
 
     return true;
@@ -646,6 +651,7 @@ monster* place_monster(mgen_data mg, bool force_pos, bool dont_place)
     mg.cls = resolve_monster_type(mg.cls, mg.base_type, mg.proximity,
                                   &mg.pos, mg.map_mask,
                                   &place, &want_band, allow_ood);
+    // TODO: it doesn't seem that this check can ever come out to be true??
     bool chose_ood_monster = place.absdepth() > mg.place.absdepth() + 5;
     if (want_band)
         mg.flags |= MG_PERMIT_BANDS;
@@ -737,6 +743,9 @@ monster* place_monster(mgen_data mg, bool force_pos, bool dont_place)
     if (mg.props.exists(MAP_KEY))
         mon->set_originating_map(mg.props[MAP_KEY].get_string());
 
+    if (chose_ood_monster)
+        mon->props[MON_OOD_KEY].get_bool() = true;
+
     if (mg.needs_patrol_point()
         || (mon->type == MONS_ALLIGATOR
             && !testbits(mon->flags, MF_BAND_MEMBER)))
@@ -824,6 +833,8 @@ monster* place_monster(mgen_data mg, bool force_pos, bool dont_place)
                 member->props["kirke_band"] = true;
         }
     }
+    dprf(DIAG_DNGN, "Placing %s at %d,%d", mon->name(DESC_PLAIN, true).c_str(),
+                mon->pos().x, mon->pos().y);
 
     // Placement of first monster, at least, was a success.
     return mon;
@@ -1214,7 +1225,7 @@ static monster* _place_monster_aux(const mgen_data &mg, const monster *leader,
     if (mon->type == MONS_HELLBINDER || mon->type == MONS_CLOUD_MAGE)
     {
         mon->props[MON_GENDER_KEY] = random_choose(GENDER_FEMALE, GENDER_MALE,
-                                                   GENDER_NEUTER);
+                                                   GENDER_NEUTRAL);
     }
 
     if (mon->has_spell(SPELL_OZOCUBUS_ARMOUR))
@@ -1506,7 +1517,7 @@ static monster* _place_pghost_aux(const mgen_data &mg, const monster *leader,
     // since depending on the ghost, the aux call can trigger variation in
     // things like whether an enchantment (with a random duration) is
     // triggered.
-    rng_generator rng(RNG_SYSTEM_SPECIFIC);
+    rng::generator rng(rng::SYSTEM_SPECIFIC);
     return _place_monster_aux(mg, leader, place, force_pos, dont_place);
 }
 
@@ -2694,7 +2705,7 @@ public:
         return travel_pathfind::pathfind(RMODE_CONNECTIVITY);
     }
 
-    bool path_flood(const coord_def &c, const coord_def &dc) override
+    bool path_flood(const coord_def &/*c*/, const coord_def &dc) override
     {
         if (best_distance && traveled_distance > best_distance)
             return true;
@@ -2822,13 +2833,6 @@ conduct_type player_will_anger_monster(const monster &mon)
     if (is_good_god(you.religion) && mon.evil())
         return DID_EVIL;
 
-    if (you_worship(GOD_FEDHAS)
-        && ((mon.holiness() & MH_UNDEAD && !mon.is_insubstantial())
-            || mon.has_corpse_violating_spell()))
-    {
-        return DID_CORPSE_VIOLATION;
-    }
-
     if (is_evil_god(you.religion) && mon.is_holy())
         return DID_HOLY;
 
@@ -2845,17 +2849,27 @@ conduct_type player_will_anger_monster(const monster &mon)
     return DID_NOTHING;
 }
 
-bool player_angers_monster(monster* mon)
+bool player_angers_monster(monster* mon, bool real)
 {
     ASSERT(mon); // XXX: change to monster &mon
 
     // Get the drawbacks, not the benefits... (to prevent e.g. demon-scumming).
     conduct_type why = player_will_anger_monster(*mon);
-    if (why && mon->wont_attack())
+    if (why && (!real || mon->wont_attack()))
     {
-        mon->attitude = ATT_HOSTILE;
-        mon->del_ench(ENCH_CHARM);
-        behaviour_event(mon, ME_ALERT, &you);
+        if (real)
+        {
+            mon->attitude = ATT_HOSTILE;
+            mon->del_ench(ENCH_CHARM);
+            behaviour_event(mon, ME_ALERT, &you);
+        }
+        const string modal = real
+                             ? ((why == DID_SACRIFICE_LOVE) ? "can " : "")
+                             : "would ";
+        const string verb = (why == DID_SACRIFICE_LOVE)
+                             ? "feel"
+                             : real ? "is" : "be";
+        const string vcomplex = modal + verb;
 
         if (you.can_see(*mon))
         {
@@ -2864,26 +2878,29 @@ bool player_angers_monster(monster* mon)
             switch (why)
             {
             case DID_EVIL:
-                mprf("%s is enraged by your holy aura!", mname.c_str());
-                break;
-            case DID_CORPSE_VIOLATION:
-                mprf("%s is revulsed by your support of nature!", mname.c_str());
+                mprf("%s %s enraged by your holy aura!",
+                    mname.c_str(), vcomplex.c_str());
                 break;
             case DID_HOLY:
-                mprf("%s is enraged by your evilness!", mname.c_str());
+                mprf("%s %s enraged by your evilness!",
+                    mname.c_str(), vcomplex.c_str());
                 break;
             case DID_UNCLEAN:
             case DID_CHAOS:
-                mprf("%s is enraged by your lawfulness!", mname.c_str());
+                mprf("%s %s enraged by your lawfulness!",
+                    mname.c_str(), vcomplex.c_str());
                 break;
             case DID_SPELL_CASTING:
-                mprf("%s is enraged by your magic-hating god!", mname.c_str());
+                mprf("%s %s enraged by your magic-hating god!",
+                    mname.c_str(), vcomplex.c_str());
                 break;
             case DID_SACRIFICE_LOVE:
-                mprf("%s can only feel hate for you!", mname.c_str());
+                mprf("%s %s only hate for you!",
+                    mname.c_str(), vcomplex.c_str());
                 break;
             default:
-                mprf("%s is enraged by a buggy thing about you!", mname.c_str());
+                mprf("%s %s enraged by a buggy thing about you!",
+                    mname.c_str(), vcomplex.c_str());
                 break;
             }
         }
@@ -3101,7 +3118,7 @@ void replace_boris()
     // a new level is entered.
     if (!you.props["killed_boris_once"]
         || you.unique_creatures[MONS_BORIS]
-        || !one_chance_in(3))
+        || !one_chance_in(6))
     {
         return;
     }

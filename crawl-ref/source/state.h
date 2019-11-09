@@ -198,6 +198,7 @@ public:
     bool player_is_dead() const;
 
     bool game_standard_levelgen() const;
+    bool game_is_valid_type() const;
     bool game_is_normal() const;
     bool game_is_tutorial() const;
     bool game_is_arena() const;
@@ -265,5 +266,5 @@ private:
     monster* mon;
 };
 
-bool interrupt_cmd_repeat(activity_interrupt_type ai,
+bool interrupt_cmd_repeat(activity_interrupt ai,
                           const activity_interrupt_data &at);

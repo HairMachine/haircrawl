@@ -97,7 +97,6 @@ function trove.get_trove_item(e, value, base_item)
   -- currently 20% armour, 15% weapon, 50% consumable, 15% miscellaneous
   local prices = {
        {base="scroll", type="acquirement", quant=2},
-       {base="scroll", type="identify", quant=12+d(4)+d(4)+d(4)},
        {base="miscellaneous", type="rune of Zot", quant=3, name="slimy rune of Zot"},
        {base="miscellaneous", type="rune of Zot", quant=11, name="abyssal rune of Zot"},
        {base="miscellaneous", type="horn of Geryon"} }
@@ -194,7 +193,10 @@ function trove.get_toll_nopiety()
 end
 
 function trove.portal(e)
-    local toll = trove.get_trove_toll(e)
+    -- dependent on player stats (skills, race, etc) so needs to be isolated
+    -- from gameplay rng.
+    local toll = crawl.rng_wrap(function () return trove.get_trove_toll(e) end,
+                                "subgenerator")
 
     local function stair ()
         return trove_marker  {
@@ -961,46 +963,6 @@ x.<.xxx+xxx+xxx+xxxxxx
 xxxxx xdx xfx xfx
       xdx xfx xfx
       xxx xxx xxx
-ENDMAP
-
-# 20 items, but you have to dig for them.  Wand is included.
-NAME:    trove_dig
-TAGS:    no_item_gen no_monster_gen allow_dup
-WEIGHT:  5
-ORIENT:  encompass
-ITEM:    acquire armour / any useful armour good_item / any armour w:2
-ITEM:    acquire weapon / any useful weapon good_item / any weapon w:2
-ITEM:    acquire jewellery / any useful jewellery good_item / any jewellery w:2
-ITEM:    any useful armour good_item / any useful weapon good_item / \
-         any useful jewellery good_item
-: trove.good_scroll(_G)
-KITEM:   h = wand of digging ident:all, wand of digging ident:all
-SHUFFLE: defg
-: trove.setup_features(_G)
-MAP
-  vvvvv
-vvv...vvv
-vem.<.mfv
-vvv...vvv
-vem...mfv
-vvv...vvv
-vem...mfv
-vvv...vvv
-vem...mfv
-vvv...vvv
-vem...mfv
-vvv.h.vvv
-vdm...mgv
-vvv...vvv
-vdm...mgv
-vvv...vvv
-vdm...mgv
-vvv...vvv
-vdm...mgv
-vvv...vvv
-vdm.A.mgv
-vvv...vvv
-  vvvvv
 ENDMAP
 
 # 16 pieces of armour

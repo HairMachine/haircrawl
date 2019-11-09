@@ -39,7 +39,7 @@ PotionEffect::PotionEffect(const potion_type pot)
     : potion_name(potion_type_name(pot)), kind(pot)
 { }
 
-bool PotionEffect::can_quaff(string *reason) const
+bool PotionEffect::can_quaff(string */*reason*/) const
 {
     return true;
 }
@@ -89,7 +89,7 @@ public:
         if (you.duration[DUR_DEATHS_DOOR])
         {
             if (reason)
-                *reason = "You can't heal while in Death's door.";
+                *reason = "You can't heal while in death's door.";
             return false;
         }
         if (!you.can_potion_heal()
@@ -175,7 +175,7 @@ public:
         if (you.duration[DUR_DEATHS_DOOR])
         {
             if (reason)
-                *reason = "You cannot heal while in Death's door!";
+                *reason = "You cannot heal while in death's door.";
             return false;
         }
         if (you.hp == you.hp_max && player_rotted() == 0)
@@ -629,7 +629,7 @@ public:
         return true;
     }
 
-    bool effect(bool=true, int pow = 40, bool=true) const override
+    bool effect(bool=true, int = 40, bool=true) const override
     {
         inc_mp(POT_MAGIC_MP);
         mpr("Magic courses through your body.");
@@ -653,9 +653,9 @@ public:
         return you.can_go_berserk(true, true, true, reason);
     }
 
-    bool effect(bool was_known = true, int pow = 40, bool=true) const override
+    bool effect(bool was_known = true, int = 40, bool=true) const override
     {
-        if (you.species == SP_VAMPIRE && you.hunger_state < HS_SATIATED)
+        if (you.species == SP_VAMPIRE && !you.vampire_alive)
         {
             mpr("You feel slightly irritated.");
             return false;

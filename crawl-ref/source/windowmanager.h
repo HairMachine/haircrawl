@@ -22,6 +22,8 @@ enum wm_event_type
     WME_RESIZE,
     WME_EXPOSE,
     WME_MOVE,
+    WME_FOCUSIN,
+    WME_FOCUSOUT,
     WME_NUMEVENTS = 15
 };
 
@@ -154,11 +156,13 @@ public:
     virtual void set_mod_state(tiles_key_mod mod) = 0;
     virtual void set_mouse_cursor(mouse_cursor_type id) = 0;
     virtual unsigned short get_mouse_state(int *x, int *y) const = 0;
+    virtual string get_clipboard() = 0;
+    virtual bool has_clipboard() = 0;
 
     // System time functions
     virtual unsigned int set_timer(unsigned int interval,
                                    wm_timer_callback callback) = 0;
-    virtual void remove_timer(unsigned int timer_id) = 0;
+    virtual void remove_timer(unsigned int& timer_id) = 0;
     virtual unsigned int get_ticks() const = 0;
     virtual void delay(unsigned int ms) = 0;
 

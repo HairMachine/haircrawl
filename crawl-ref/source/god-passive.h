@@ -147,9 +147,6 @@ enum class passive_t
     /// Torment resistance, piety dependent.
     resist_torment,
 
-    /// Protection against miscasts. Piety dependent.
-    miscast_protection,
-
     /// Protection against necromancy miscasts and mummy death curses.
     miscast_protection_necromancy,
 
@@ -281,6 +278,7 @@ int ash_skill_boost(skill_type sk, int scale);
 bool ash_has_skill_boost(skill_type sk);
 map<skill_type, int8_t> ash_get_boosted_skills(eq_type type);
 int gozag_gold_in_los(actor* whom);
+void gozag_detect_level_gold(bool count);
 int qazlal_sh_boost(int piety = you.piety);
 int tso_sh_boost();
 void qazlal_storm_clouds();
@@ -295,7 +293,7 @@ void dithmenos_shadow_spell(bolt* orig_beam, spell_type spell);
 void uskayaw_prepares_audience();
 void uskayaw_bonds_audience();
 
-void wu_jian_wall_jump_effects(const coord_def& old_pos);
+void wu_jian_wall_jump_effects();
 bool wu_jian_has_momentum(wu_jian_attack_type);
 void wu_jian_heaven_tick();
 bool wu_jian_post_move_effects(bool did_wall_jump,

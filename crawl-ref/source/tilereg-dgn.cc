@@ -119,21 +119,9 @@ void DungeonRegion::pack_buffers()
         {
             coord_def gc(x + m_cx_to_gx, y + m_cy_to_gy);
 
-            packed_cell tile_cell = packed_cell(vbuf_cell->tile);
             if (map_bounds(gc))
-            {
-                tile_cell.flv = env.tile_flv(gc);
-                pack_cell_overlays(gc, &tile_cell);
-            }
-            else
-            {
-                tile_cell.flv.floor   = 0;
-                tile_cell.flv.wall    = 0;
-                tile_cell.flv.special = 0;
-                tile_cell.flv.feat    = 0;
-            }
-
-            m_buf_dngn.add(tile_cell, x, y);
+                pack_cell_overlays(coord_def(x, y), m_vbuf);
+            m_buf_dngn.add(vbuf_cell->tile, x, y);
 
             const int fcol = vbuf_cell->flash_colour;
             if (fcol)
@@ -254,10 +242,8 @@ void DungeonRegion::render()
             // center this coord, which is at the top left of gc's cell
             pc.x += dx / 2;
 
-            const coord_def min_pos(sx, sy);
-            const coord_def max_pos(ex, ey);
-            m_tag_font->render_string(pc.x, pc.y, def.text,
-                                      min_pos, max_pos, WHITE, false);
+            const auto text = formatted_string(def.text, WHITE);
+            m_tag_font->render_hover_string(pc.x, pc.y, text);
         }
 }
 
@@ -482,7 +468,7 @@ static item_def* _get_evokable_item(const actor* target)
 
     InvMenu menu(MF_SINGLESELECT | MF_ANYPRINTABLE
                  | MF_ALLOW_FORMATTING | MF_SELECT_BY_PAGE);
-    menu.set_type(MT_ANY);
+    menu.set_type(menu_type::any);
     menu.set_title("Wand to zap?");
     menu.load_items(list);
     menu.show();
@@ -1004,7 +990,7 @@ bool DungeonRegion::update_tip_text(string &tip)
 #ifdef WIZARD
     if (you.wizard)
     {
-        if (ret)
+        if (!tip.empty())
             tip += "\n\n";
 
         if (you.see_cell(gc))
@@ -1018,7 +1004,7 @@ bool DungeonRegion::update_tip_text(string &tip)
                 tip += make_stringf("HEIGHT(%d)\n", dgn_height_at(gc));
 
             tip += "\n";
-            tip += tile_debug_string(env.tile_fg(ep), env.tile_bg(ep), env.tile_cloud(ep), ' ');
+            tip += tile_debug_string(env.tile_fg(ep), env.tile_bg(ep), ' ');
         }
         else
         {
@@ -1028,20 +1014,20 @@ bool DungeonRegion::update_tip_text(string &tip)
             tip += "\n";
         }
 
-        tip += tile_debug_string(env.tile_bk_fg(gc), env.tile_bk_bg(gc), env.tile_bk_bg(gc), 'B');
+        tip += tile_debug_string(env.tile_bk_fg(gc), env.tile_bk_bg(gc), 'B');
 
         if (!m_vbuf.empty())
         {
             const screen_cell_t *vbuf = m_vbuf;
             const coord_def vc(gc.x - m_cx_to_gx, gc.y - m_cy_to_gy);
             const screen_cell_t &cell = vbuf[crawl_view.viewsz.x * vc.y + vc.x];
-            tip += tile_debug_string(cell.tile.fg, cell.tile.bg, cell.tile.cloud, 'V');
+            tip += tile_debug_string(cell.tile.fg, cell.tile.bg, 'V');
         }
 
         tip += make_stringf("\nFLV: floor: %d (%s) (%d)"
                             "\n     wall:  %d (%s) (%d)"
                             "\n     feat:  %d (%s) (%d)"
-                            "\n  special:  %d\n",
+                            "\n  special:  %d",
                             env.tile_flv(gc).floor,
                             tile_dngn_name(env.tile_flv(gc).floor),
                             env.tile_flv(gc).floor_idx,

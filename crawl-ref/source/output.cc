@@ -310,8 +310,7 @@ public:
     colour_bar(colour_t default_colour,
                colour_t change_pos,
                colour_t change_neg,
-               colour_t empty,
-               bool round = false)
+               colour_t empty)
         : m_default(default_colour), m_change_pos(change_pos),
           m_change_neg(change_neg), m_empty(empty),
           horiz_bar_width(-1),
@@ -511,8 +510,7 @@ static bool _boosted_ev()
 static bool _boosted_sh()
 {
     return you.duration[DUR_DIVINE_SHIELD]
-           || qazlal_sh_boost() > 0
-           || you.attribute[ATTR_BONE_ARMOUR] > 0;
+           || qazlal_sh_boost() > 0;
 }
 
 #ifdef DGL_SIMPLE_MESSAGING
@@ -539,8 +537,8 @@ void update_turn_count()
 
     // Don't update turn counter when running/resting/traveling to
     // prevent pointless screen updates.
-    if (you.running > 0
-        || you.running < 0 && Options.travel_delay == -1)
+    if (mouse_control::current_mode() == MOUSE_MODE_NORMAL
+        && (you.running > 0 || you.running < 0 && Options.travel_delay == -1))
     {
         return;
     }
@@ -550,14 +548,14 @@ void update_turn_count()
     // Show the turn count starting from 1. You can still quit on turn 0.
     textcolour(HUD_VALUE_COLOUR);
     if (Options.show_game_time)
-    {
-        CPRINTF("%.1f (%.1f)%s", you.elapsed_time / 10.0,
-                (you.elapsed_time - you.elapsed_time_at_last_input) / 10.0,
-                // extra spaces to erase excess if previous output was longer
-                "    ");
-    }
+        CPRINTF("%.1f", you.elapsed_time / 10.0);
     else
         CPRINTF("%d", you.num_turns);
+
+    CPRINTF(" (%.1f)%s",
+            (you.elapsed_time - you.elapsed_time_at_last_input) / 10.0,
+            // extra spaces to erase excess if previous output was longer
+            "    ");
     textcolour(LIGHTGREY);
 }
 
@@ -694,7 +692,7 @@ static void _print_stats_noise(int x, int y)
     }
 }
 
-static void _print_stats_gold(int x, int y, colour_t colour)
+static void _print_stats_gold(int x, int y)
 {
     CGOTOXY(x, y, GOTO_STAT);
     textcolour(HUD_CAPTION_COLOUR);
@@ -1282,8 +1280,7 @@ static void _redraw_title()
         if (you_worship(GOD_GOZAG))
         {
             // "Mottled Draconian of Gozag  Gold: 99999" just fits
-            _print_stats_gold(textwidth + 2, 2,
-                              _god_status_colour(god_colour(you.religion)));
+            _print_stats_gold(textwidth + 2, 2);
         }
     }
 
@@ -1418,7 +1415,6 @@ void print_stats()
         you.redraw_status_lights = false;
         _print_status_lights(11 + yhack);
     }
-    textcolour(LIGHTGREY);
 
 #ifdef USE_TILE_LOCAL
     if (has_changed)
@@ -1913,7 +1909,7 @@ static const char* _determine_colour_string(int level, int max_level)
     }
 }
 
-static int _stealth_breakpoint(int stealth)
+int stealth_breakpoint(int stealth)
 {
     if (stealth == 0)
         return 0;
@@ -1931,7 +1927,7 @@ static string _stealth_bar(int sw)
     //no colouring
     bar += _determine_colour_string(0, 5);
     bar += "Stlth    ";
-    const int stealth_num = _stealth_breakpoint(player_stealth());
+    const int stealth_num = stealth_breakpoint(player_stealth());
     for (int i = 0; i < stealth_num; i++)
         bar += "+";
     for (int i = 0; i < 10 - stealth_num; i++)
@@ -2504,7 +2500,8 @@ private:
         if (find(equip_chars.begin(), equip_chars.end(), ch) != equip_chars.end())
         {
             item_def& item = you.inv[letter_to_index(ch)];
-            describe_item(item);
+            if (!describe_item(item))
+                return false;
             return true;
         }
         return formatted_scroller::process_key(ch);

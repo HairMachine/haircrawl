@@ -100,11 +100,10 @@ static void _lua_push_inv_items(lua_State *ls = nullptr)
 }
 
 #define IDEF(name)                                                      \
-    static int l_item_##name(lua_State *ls, item_def *item,             \
-                             const char *attr)                         \
+    static int l_item_##name(lua_State *ls, item_def *item)             \
 
 #define IDEFN(name, closure)                    \
-    static int l_item_##name(lua_State *ls, item_def *item, const char *attrs) \
+    static int l_item_##name(lua_State *ls, item_def *item) \
     {                                                                   \
         clua_push_item(ls, item);                                            \
         lua_pushcclosure(ls, l_item_##closure, 1);                      \
@@ -244,7 +243,7 @@ static int l_item_do_drop(lua_State *ls)
     int qty = item->quantity;
     if (lua_isnumber(ls, 1))
     {
-        int q = luaL_checkint(ls, 1);
+        int q = luaL_safe_checkint(ls, 1);
         if (q >= 1 && q <= item->quantity)
             qty = q;
     }
@@ -409,7 +408,7 @@ static string _item_name(lua_State *ls, item_def* item)
     if (lua_isstring(ls, 1))
         ndesc = description_type_by_name(lua_tostring(ls, 1));
     else if (lua_isnumber(ls, 1))
-        ndesc = static_cast<description_level_type>(luaL_checkint(ls, 1));
+        ndesc = static_cast<description_level_type>(luaL_safe_checkint(ls, 1));
     const bool terse = lua_toboolean(ls, 2);
     return item->name(ndesc, terse);
 }
@@ -1045,7 +1044,7 @@ static int l_item_do_dec_quantity(lua_State *ls)
     }
 
     // The quantity to reduce by.
-    int quantity = luaL_checkint(ls, 1);
+    int quantity = luaL_safe_checkint(ls, 1);
 
     bool destroyed = false;
 
@@ -1073,7 +1072,7 @@ static int l_item_do_inc_quantity(lua_State *ls)
     }
 
     // The quantity to increase by.
-    int quantity = luaL_checkint(ls, 1);
+    int quantity = luaL_safe_checkint(ls, 1);
 
     if (in_inventory(*item))
         inc_inv_item_quantity(item->link, quantity);
@@ -1225,7 +1224,7 @@ static int l_item_inventory(lua_State *ls)
  */
 static int l_item_index_to_letter(lua_State *ls)
 {
-    int index = luaL_checkint(ls, 1);
+    int index = luaL_safe_checkint(ls, 1);
     char sletter[2] = "?";
     if (index >= 0 && index <= ENDOFPACK)
         *sletter = index_to_letter(index);
@@ -1255,8 +1254,8 @@ static int l_item_letter_to_index(lua_State *ls)
  */
 static int l_item_swap_slots(lua_State *ls)
 {
-    int slot1 = luaL_checkint(ls, 1),
-        slot2 = luaL_checkint(ls, 2);
+    int slot1 = luaL_safe_checkint(ls, 1),
+        slot2 = luaL_safe_checkint(ls, 2);
     bool verbose = lua_toboolean(ls, 3);
     if (slot1 < 0 || slot1 >= ENDOFPACK
         || slot2 < 0 || slot2 >= ENDOFPACK
@@ -1290,11 +1289,11 @@ static int dmx_get_qty(lua_State *ls, int ndx, int subndx)
     {
         lua_rawgeti(ls, ndx, subndx);
         if (lua_isnumber(ls, -1))
-            qty = luaL_checkint(ls, -1);
+            qty = luaL_safe_checkint(ls, -1);
         lua_pop(ls, 1);
     }
     else if (lua_isnumber(ls, ndx))
-        qty = luaL_checkint(ls, ndx);
+        qty = luaL_safe_checkint(ls, ndx);
     return qty;
 }
 
@@ -1332,7 +1331,7 @@ static int l_item_pickup(lua_State *ls)
         ITEM(item, 1);
         int qty = item->quantity;
         if (lua_isnumber(ls, 2))
-            qty = luaL_checkint(ls, 2);
+            qty = luaL_safe_checkint(ls, 2);
 
         if (l_item_pickup2(item, qty))
             lua_pushnumber(ls, 1);
@@ -1377,7 +1376,7 @@ static int l_item_equipped_at(lua_State *ls)
 {
     int eq = -1;
     if (lua_isnumber(ls, 1))
-        eq = luaL_checkint(ls, 1);
+        eq = luaL_safe_checkint(ls, 1);
     else if (lua_isstring(ls, 1))
     {
         const char *eqname = lua_tostring(ls, 1);
@@ -1425,7 +1424,7 @@ static int l_item_fired_item(lua_State *ls)
  */
 static int l_item_inslot(lua_State *ls)
 {
-    int index = luaL_checkint(ls, 1);
+    int index = luaL_safe_checkint(ls, 1);
     if (index >= 0 && index < 52 && you.inv[index].defined())
         clua_push_item(ls, &you.inv[index]);
     else
@@ -1443,8 +1442,8 @@ static int l_item_inslot(lua_State *ls)
 static int l_item_get_items_at(lua_State *ls)
 {
     coord_def s;
-    s.x = luaL_checkint(ls, 1);
-    s.y = luaL_checkint(ls, 2);
+    s.x = luaL_safe_checkint(ls, 1);
+    s.y = luaL_safe_checkint(ls, 2);
     coord_def p = player2grid(s);
 
     if (!query_map_knowledge(false, p, [](const map_cell& cell) {
@@ -1467,16 +1466,13 @@ static int l_item_get_items_at(lua_State *ls)
     return 1;
 }
 
-/*** See what a shop has for sale.
- * Only works when standing at a shop.
- * @treturn array|nil An array of @{Item} objects or nil if not on a shop
- * @function shop_inventory
- */
-static int l_item_shop_inventory(lua_State *ls)
+int lua_push_shop_items_at(lua_State *ls, const coord_def &s)
 {
-    shop_struct *shop = shop_at(you.pos());
+    // also used in l-dgnit.cc
+    shop_struct *shop = shop_at(s);
     if (!shop)
         return 0;
+    shopping_list.refresh(); // prevent crash if called during tests
 
     lua_newtable(ls);
 
@@ -1495,6 +1491,16 @@ static int l_item_shop_inventory(lua_State *ls)
     }
 
     return 1;
+}
+
+/*** See what a shop has for sale.
+ * Only works when standing at a shop.
+ * @treturn array|nil An array of @{Item} objects or nil if not on a shop
+ * @function shop_inventory
+ */
+static int l_item_shop_inventory(lua_State *ls)
+{
+    return lua_push_shop_items_at(ls, you.pos());
 }
 
 /*** Look at the shopping list.
@@ -1527,7 +1533,7 @@ static int l_item_shopping_list(lua_State *ls)
 struct ItemAccessor
 {
     const char *attribute;
-    int (*accessor)(lua_State *ls, item_def *item, const char *attr);
+    int (*accessor)(lua_State *ls, item_def *item);
 };
 
 static ItemAccessor item_attrs[] =
@@ -1606,7 +1612,7 @@ static int item_get(lua_State *ls)
 
     for (const ItemAccessor &ia : item_attrs)
         if (!strcmp(attr, ia.attribute))
-            return ia.accessor(ls, iw, attr);
+            return ia.accessor(ls, iw);
 
     return 0;
 }
