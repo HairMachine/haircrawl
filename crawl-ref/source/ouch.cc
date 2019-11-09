@@ -801,6 +801,14 @@ void ouch(int dam, kill_method_type death_type, mid_t source, const char *aux,
                 || strstr(aux, "Torment")
                 || strstr(aux, "exploding lurking horror")));
 
+    // Casual Crawl - reduce incoming damage
+    if (dam != INSTANT_DEATH) {
+        dam = dam * 0.75;
+        if (dam == 0) {
+            dam = 1;
+        }
+    }
+
     // Multiply damage if amulet of harm is in play
     if (dam != INSTANT_DEATH)
         dam = _apply_extra_harm(dam, source);
