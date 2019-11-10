@@ -2593,7 +2593,6 @@ static bool _identify(bool alreadyknown, const string &pre_msg, int &link)
             // correct input 'link' to the new location of the ID scroll stack
             // so that we decrement *it* instead of the ID'd item (10663)
             ASSERT(you.inv[target_link].defined());
-            ASSERT(you.inv[target_link].is_type(OBJ_SCROLLS, SCR_IDENTIFY));
             link = target_link;
         }
     }
@@ -2768,8 +2767,7 @@ static void _vulnerability_scroll()
 
 static bool _is_cancellable_scroll(scroll_type scroll)
 {
-    return scroll == SCR_IDENTIFY
-           || scroll == SCR_BLINKING
+    return scroll == SCR_BLINKING
            || scroll == SCR_ENCHANT_ARMOUR
            || scroll == SCR_AMNESIA
            || scroll == SCR_REMOVE_CURSE
@@ -2876,9 +2874,6 @@ string cannot_read_item_reason(const item_def &item)
 
         case SCR_ENCHANT_WEAPON:
             return _no_items_reason(OSEL_ENCHANTABLE_WEAPON, true);
-
-        case SCR_IDENTIFY:
-            return _no_items_reason(OSEL_UNIDENT, true);
 
         case SCR_REMOVE_CURSE:
             return _no_items_reason(OSEL_CURSED_WORN);
@@ -3273,18 +3268,6 @@ void read_scroll(item_def& scroll)
         cancel_scroll = !_handle_brand_weapon(alreadyknown, pre_succ_msg);
         break;
 
-    case SCR_IDENTIFY:
-        if (!alreadyknown)
-        {
-            mpr(pre_succ_msg);
-            mpr("It is a scroll of identify.");
-            // included in default force_more_message (to show it before menu)
-            // Do this here so it doesn't turn up in the ID menu.
-            set_ident_type(scroll, true);
-        }
-        cancel_scroll = !_identify(alreadyknown, pre_succ_msg, link);
-        break;
-
     case SCR_ENCHANT_ARMOUR:
         if (!alreadyknown)
         {
@@ -3414,7 +3397,6 @@ void read_scroll(item_def& scroll)
         && which_scroll != SCR_ACQUIREMENT
         && which_scroll != SCR_BRAND_WEAPON
         && which_scroll != SCR_ENCHANT_WEAPON
-        && which_scroll != SCR_IDENTIFY
         && which_scroll != SCR_ENCHANT_ARMOUR
 #if TAG_MAJOR_VERSION == 34
         && which_scroll != SCR_RECHARGING

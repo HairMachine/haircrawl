@@ -586,7 +586,6 @@ unsigned int item_value(item_def item, bool ident)
                 break;
 
             case SCR_FOG:
-            case SCR_IDENTIFY:
 #if TAG_MAJOR_VERSION == 34
             case SCR_CURSE_ARMOUR:
             case SCR_CURSE_WEAPON:

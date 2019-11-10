@@ -115,7 +115,6 @@ static bool _is_boring_item(int type, int sub_type)
         switch (sub_type)
         {
         case SCR_REMOVE_CURSE:
-        case SCR_IDENTIFY:
         case SCR_MAGIC_MAPPING:
             return true;
         default:
@@ -1403,7 +1402,6 @@ static void _generate_scroll_item(item_def& item, int force_type,
             //                  828  otherwise
             //                 -122  in sprint
             item.sub_type = random_choose_weighted(
-                200, SCR_IDENTIFY,
                  // [Cha] don't generate teleportation scrolls if in sprint
                 100, (crawl_state.game_is_sprint() ? NUM_SCROLLS
                                                    : SCR_TELEPORTATION),

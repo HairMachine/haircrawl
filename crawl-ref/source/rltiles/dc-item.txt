@@ -604,9 +604,7 @@ scroll SCROLL UNSEEN_SCROLL
 #### These must be in the same order as the enum in item-prop-enum.h!
 %sdir item/scroll
 %back scroll-yellow
-i-identify SCR_IDENTIFY SCR_ID_FIRST
-%back scroll-purple
-i-teleportation SCR_TELEPORTATION
+i-teleportation SCR_TELEPORTATION SCR_ID_FIRST
 %back scroll-blue
 i-fear SCR_FEAR
 %back scroll-grey

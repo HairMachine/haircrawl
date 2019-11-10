@@ -375,7 +375,6 @@ enum rune_type
 
 enum scroll_type
 {
-    SCR_IDENTIFY,
     SCR_TELEPORTATION,
     SCR_FEAR,
     SCR_NOISE,
