@@ -496,7 +496,7 @@ MONS:   w:5 zombie place:D:12 / spectre place:D:12 / simulacrum place:D:12
 SUBST:  e = *, f = %$, ghij = -
 NSUBST: 1 = 3=1 / 1-, - = 1- / -
 :     elseif you.depth() < 14 then
-MONS:   w:5 zombie place:D:15 / spectre place:D:15 / simulacrum place:D:15
+MONS:   w:5 zombie place:D:$ / spectre place:D:$ / simulacrum place:D:$
 SUBST:  f = |*, g = *%, h = %$--, ij = -
 NSUBST: - = 4=1- / -
 :     else
@@ -673,7 +673,7 @@ MONS:   vampire mosquito band / shadow / death knight / skeletal warrior / \
 SUBST:  e = *, f = *%,  g = %$--, hi = -
 NSUBST: D = 2=1 / 4=1- / 2=2- / -
 :     elseif you.depth() < 14 then
-MONS:   zombie place:D:15 / spectre place:D:15 / simulacrum place:D:15 / \
+MONS:   zombie place:D:$ / spectre place:D:$ / simulacrum place:D:$ / \
         vampire mosquito band / death knight / skeletal warrior
 MONS:   freezing wraith / necromancer / shadow wraith / vampire knight / \
         phantasmal warrior / flayed ghost
@@ -882,7 +882,7 @@ ORIENT: float
 KMONS:  O = player_ghost
 : if you.in_branch("D") then
 MONS:   skeletal warrior / vampire
-MONS:   wraith / simulacrum place:D:15
+MONS:   wraith / simulacrum place:D:$
 MONS:   necromancer
 MONS:   lich
 : else
@@ -1760,7 +1760,7 @@ MAP
 ENDMAP
 
 NAME:   gammafunk_ghost_tricky_traps
-DEPTH:  D:15, Shoals, Spider, Elf, Depths, Zot
+DEPTH:  D:$, Shoals, Spider, Elf, Depths, Zot
 KFEAT:  ^ = zot trap / dispersal trap w:5 / alarm trap w:1 / floor w:16
 KFEAT:  ' = zot trap / dispersal trap w:5 / alarm trap w:1 / floor w:8
 : kitem("O = " .. dgn.randart_aux_armour)
@@ -1808,8 +1808,8 @@ cccnn===nnccc
 ENDMAP
 
 NAME:    gammafunk_ghost_crypt
-DEPTH:   D:15, Crypt, Depths, Zot
-WEIGHT:  5 (D:15)
+DEPTH:   D:$, Crypt, Depths, Zot
+WEIGHT:  5 (D:$)
 : item(dgn.loot_scrolls .. " / " .. dgn.loot_potions)
 # Always place one randart aux, one randart jewel, and one nice book, each
 # using the possible ghost locations.
