@@ -652,6 +652,8 @@ i-silence SCR_SILENCE
 %back scroll-yellow
 i-amnesia SCR_AMNESIA
 %back scroll-grey
+i-teleportation SCR_ESCAPE
+%back scroll-yellow
 #### Remove curse foo when TAG_MAJOR_VERSION > 34
 # Don't forget to update SCR_ID_LAST
 i-curse-jewellery SCR_CURSE_JEWELLERY SCR_ID_LAST

@@ -764,6 +764,7 @@ static const char* scroll_type_name(int scrolltype)
     case SCR_VULNERABILITY:      return "vulnerability";
     case SCR_SILENCE:            return "silence";
     case SCR_AMNESIA:            return "amnesia";
+    case SCR_ESCAPE:             return "escape";
 #if TAG_MAJOR_VERSION == 34
     case SCR_CURSE_WEAPON:       return "curse weapon";
     case SCR_CURSE_ARMOUR:       return "curse armour";
@@ -3106,6 +3107,7 @@ bool is_emergency_item(const item_def &item)
             return you.species != SP_FORMICID;
         case SCR_FEAR:
         case SCR_FOG:
+        case SCR_ESCAPE:
             return true;
         default:
             return false;

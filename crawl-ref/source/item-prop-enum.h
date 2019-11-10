@@ -406,6 +406,7 @@ enum scroll_type
     SCR_VULNERABILITY,
     SCR_SILENCE,
     SCR_AMNESIA,
+    SCR_ESCAPE,
 #if TAG_MAJOR_VERSION == 34
     SCR_CURSE_JEWELLERY,
 #endif

@@ -14,6 +14,7 @@
 #include "artefact.h"
 #include "art-enum.h"
 #include "butcher.h"
+#include "branch.h"
 #include "chardump.h"
 #include "cloud.h"
 #include "colour.h"
@@ -27,6 +28,7 @@
 #include "evoke.h"
 #include "exercise.h"
 #include "fight.h"
+#include "files.h"
 #include "food.h"
 #include "god-abil.h"
 #include "god-conduct.h"
@@ -66,11 +68,13 @@
 #include "spl-wpnench.h"
 #include "spl-zap.h"
 #include "state.h"
+#include "stairs.h"
 #include "stringutil.h"
 #include "target.h"
 #include "terrain.h"
 #include "throw.h"
 #include "tiles-build-specific.h"
+#include "tileview.h"
 #include "transform.h"
 #include "uncancel.h"
 #include "unwind.h"
@@ -2777,7 +2781,8 @@ static bool _is_cancellable_scroll(scroll_type scroll)
            || scroll == SCR_BRAND_WEAPON
            || scroll == SCR_ENCHANT_WEAPON
            || scroll == SCR_MAGIC_MAPPING
-           || scroll == SCR_ACQUIREMENT;
+           || scroll == SCR_ACQUIREMENT
+           || scroll == SCR_ESCAPE;
 }
 
 /**
@@ -3352,6 +3357,34 @@ void read_scroll(item_def& scroll)
             } while (!done);
             if (aborted)
                 canned_msg(MSG_OK);
+        }
+        break;
+
+    case SCR_ESCAPE:
+        {
+        // Get the new location
+        branch_type curr_branch = you.where_are_you;
+        dungeon_feature_type stair_taken = branches[curr_branch].entry_stairs;
+        const level_id old_level = level_id::current();
+        
+        // Set the new depth
+        you.depth = 1;
+        
+        // Change levels
+        leaving_level_now(stair_taken);
+        const bool newlevel = load_level(stair_taken, LOAD_ENTER_LEVEL, old_level);
+        tile_new_level(newlevel);
+        new_level();
+        seen_monsters_react();
+        viewwindow();
+
+        // Tell stash-tracker and travel that we've changed levels.
+        trackers_init_new_level();
+        save_game_state();
+
+        // Boom! Crash! Spectacular next-gen special effects!
+        big_cloud(CLOUD_TLOC_ENERGY, &you, you.pos(), 50, 4 + random2(4));
+        mpr("You read a scroll of escape! Suddenly, you find yourself somewhere else.");
         }
         break;
 

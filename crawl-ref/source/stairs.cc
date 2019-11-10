@@ -27,6 +27,7 @@
 #include "item-status-flag-type.h"
 #include "items.h"
 #include "level-state-type.h"
+#include "makeitem.h"
 #include "mapmark.h"
 #include "message.h"
 #include "misc.h"
@@ -778,11 +779,15 @@ void floor_transition(dungeon_feature_type how,
     }
 
     // Did we enter a different branch?
+    bool new_branch = true;
     if (!player_in_branch(old_level.branch))
     {
         const branch_type branch = you.where_are_you;
-        if (branch_entered(branch))
+        if (branch_entered(branch)) 
+        {
             mprf("Welcome back to %s!", branches[branch].longname);
+            new_branch = false;
+        }
         else if (how == branches[branch].entry_stairs)
         {
             if (branches[branch].entry_message)
@@ -870,6 +875,17 @@ void floor_transition(dungeon_feature_type how,
 
     autotoggle_autopickup(false);
     request_autopickup();
+
+    /*  
+        If entering a new branch: a scroll of escape is gifted!
+        This is here because we need to do this after the level is generated; the previous branch check
+        logic happens before this. TODO: Hair - Check if this can be moved.
+    */
+    if (new_branch)
+    {
+        mpr("Something drops at your feet.");
+        create_item_named("scroll of escape", you.pos(), nullptr);
+    }
 }
 
 /**
