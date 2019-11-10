@@ -640,9 +640,6 @@ end
 -- List of useful scrolls, with some reasonable weights.
 -- When changing the list or the weights, please keep the total weight at 1000.
 dgn.good_scrolls = [[
-    w:85  scroll of identify no_pickup /
-    w:38  scroll of identify no_pickup q:2 /
-    w:10  scroll of identify no_pickup q:3 /
     w:85  scroll of teleportation no_pickup /
     w:38  scroll of teleportation no_pickup q:2 /
     w:10  scroll of teleportation no_pickup q:3 /
