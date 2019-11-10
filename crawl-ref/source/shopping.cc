@@ -570,6 +570,7 @@ unsigned int item_value(item_def item, bool ident)
             case SCR_HOLY_WORD:
             case SCR_SILENCE:
             case SCR_VULNERABILITY:
+            case SCR_REMOVE_CURSE:
                 valued += 75;
                 break;
 
@@ -580,7 +581,6 @@ unsigned int item_value(item_def item, bool ident)
                 valued += 35;
                 break;
 
-            case SCR_REMOVE_CURSE:
             case SCR_TELEPORTATION:
                 valued += 30;
                 break;

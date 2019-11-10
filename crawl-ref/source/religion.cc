@@ -3158,6 +3158,12 @@ static void _god_welcome_handle_gear()
             set_ident_type(OBJ_SCROLLS, SCR_REMOVE_CURSE, true);
             pack_item_identify_message(OBJ_SCROLLS, SCR_REMOVE_CURSE);
         }
+
+        // Due to changes to remove curse rarity, give Ash worshippers a fat stack on conversion.
+        mpr("Ashenzari gifts you scrolls!");
+        int link = create_item_named("scroll of remove curse", you.pos(), nullptr);
+        item_def* item = &mitm[link];
+        item->quantity = 20;
     }
 
     if (have_passive(passive_t::identify_items))
