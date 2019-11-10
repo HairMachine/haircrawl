@@ -779,21 +779,21 @@ void floor_transition(dungeon_feature_type how,
     }
 
     // Did we enter a different branch?
-    bool new_branch = true;
+    bool new_branch = false;
     if (!player_in_branch(old_level.branch))
     {
         const branch_type branch = you.where_are_you;
         if (branch_entered(branch)) 
-        {
             mprf("Welcome back to %s!", branches[branch].longname);
-            new_branch = false;
-        }
+        
         else if (how == branches[branch].entry_stairs)
         {
             if (branches[branch].entry_message)
                 mpr(branches[branch].entry_message);
             else if (branch != BRANCH_ABYSS) // too many messages...
                 mprf("Welcome to %s!", branches[branch].longname);
+            
+            new_branch = true;
         }
 
         if (branch == BRANCH_GAUNTLET)
