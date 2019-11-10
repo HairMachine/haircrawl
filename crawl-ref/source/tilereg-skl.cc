@@ -72,24 +72,7 @@ int SkillRegion::handle_mouse(MouseEvent &event)
         }
 #endif
         m_last_clicked_item = item_idx;
-        if (!you.can_currently_train[skill])
-            mpr("You cannot train this skill.");
-        else if (you.species == SP_GNOLL)
-            mpr("Gnolls can't change their training allocations!");
-        else if (you.skills[skill] >= 27)
-            mpr("There's no point to toggling this skill anymore.");
-        else
-        {
-            tiles.set_need_redraw();
-            if (Options.skill_focus == SKM_FOCUS_OFF)
-                you.train[skill] = (training_status)!you.train[skill];
-            else
-            {
-                you.train[skill] = (training_status)
-                    ((you.train[skill] + 1) % NUM_TRAINING_STATUSES);
-            }
-            reset_training();
-        }
+        mpr("Everyone's a Gnoll now so this doesn't work any more! Hooray!");
         return CK_MOUSE_CMD;
     }
     else if (skill != NUM_SKILLS && event.button == MouseEvent::RIGHT)
@@ -119,19 +102,6 @@ bool SkillRegion::update_tip_text(string& tip)
     if (item_idx >= m_items.size() || m_items[item_idx].empty())
         return false;
 
-    const int flag = m_items[item_idx].flag;
-    if (flag & TILEI_FLAG_INVALID)
-        tip = "You cannot train this skill now.";
-    else if (you.species != SP_GNOLL)
-    {
-        const skill_type skill = (skill_type) m_items[item_idx].idx;
-
-        tip = "[L-Click] ";
-        if (you.train[skill])
-            tip += "Disable training";
-        else
-            tip += "Enable training";
-    }
 #ifdef WIZARD
     if (you.wizard)
         tip += "\n[Ctrl + L-Click] Change skill level (wizmode)";

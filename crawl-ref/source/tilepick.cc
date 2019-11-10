@@ -3853,8 +3853,6 @@ static tileidx_t _tileidx_player_species_base(const species_type species)
             return TILEG_SP_VINE_STALKER;
         case SP_BARACHI:
             return TILEG_SP_BARACHI;
-        case SP_GNOLL:
-            return TILEG_SP_GNOLL;
         default:
             return TILEP_ERROR;
     }

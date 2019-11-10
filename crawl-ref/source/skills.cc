@@ -147,7 +147,7 @@ static int _spec_skills[NUM_SPECIES][NUM_SKILLS];
 // 130 exp apt is midway between +0 and -1 now. -- elliptic
 unsigned int skill_cost_needed(int level)
 {
-    return exp_needed(level, 1) * 13;
+    return exp_needed(level, 1) * 400;
 }
 
 static const int MAX_SKILL_COST_LEVEL = 27;
@@ -510,7 +510,7 @@ static void _check_start_train()
 
 static bool _player_is_gnoll()
 {
-    return you.species == SP_GNOLL;
+    return true;
 }
 
 static void _check_stop_train()
@@ -908,31 +908,6 @@ void train_skills(bool simu)
         }
         while (exp != you.exp_available);
     }
-    else
-    {
-        do
-        {
-            cost = calc_skill_cost(you.skill_cost_level);
-            exp = you.exp_available;
-            if (you.skill_cost_level == MAX_SKILL_COST_LEVEL)
-                _train_skills(exp, cost, simu);
-            else
-            {
-                // Amount of experience points needed to reach the next skill cost level
-                const int next_level = skill_cost_needed(you.skill_cost_level + 1)
-                                       - you.total_experience;
-                ASSERT(next_level > 0);
-                _train_skills(min(exp, next_level + cost - 1), cost, simu);
-            }
-        }
-        while (you.exp_available >= cost && exp != you.exp_available);
-    }
-
-    for (int i = 0; i < NUM_SKILLS; ++i)
-        check_skill_level_change(static_cast<skill_type>(i), !simu);
-
-    // We might have disabled some skills on level up.
-    reset_training();
 }
 
 //#define DEBUG_TRAINING_COST

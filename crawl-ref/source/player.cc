@@ -5380,8 +5380,6 @@ string player::shout_verb(bool directed) const
 
     const int screaminess = max(get_mutation_level(MUT_SCREAM) - 1, 0);
 
-    if (species == SP_GNOLL)
-        return dog_shout_verbs[screaminess];
     if (species == SP_BARACHI)
         return frog_shout_verbs[screaminess];
     if (species != SP_FELID)

@@ -10,17 +10,17 @@ aptitudes:
   hp: 2
   mp_mod: 0
   mr: 5
-  slings: -1
-  bows: -1
-  crossbows: -1
-  throwing: -1
-  armour: -2
-  dodging: -2
-  stealth: 5
-  shields: -2
-  spellcasting: -1
-  poison_magic: 3
-  invocations: 1
+  slings: 0
+  bows: 0
+  crossbows: 0
+  throwing: 0
+  armour: -1
+  dodging: -1
+  stealth: 10
+  shields: -1
+  spellcasting: 0
+  poison_magic: 6
+  invocations: 2
 size: large
 str: 10
 int: 8

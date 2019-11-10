@@ -10,32 +10,32 @@ aptitudes:
   hp: 0
   mp_mod: 0
   mr: 4
-  fighting: -1
-  short_blades: +1
-  axes: -1
-  maces_and_flails: -2
-  polearms: -1
-  staves: -2
-  slings: -2
-  bows: -2
-  crossbows: -2
-  throwing: -2
-  armour: -2
-  dodging: 1
-  stealth: 5
-  shields: -1
-  unarmed_combat: 1
-  spellcasting: -1
-  conjurations: -3
-  hexes: 4
-  charms: 1
-  necromancy: 1
-  translocations: -2
-  transmutations: 1
-  fire_magic: -2
-  poison_magic: -1
-  invocations: -1
-  evocations: -1
+  fighting: 0
+  short_blades: 2
+  axes: 0
+  maces_and_flails: -1
+  polearms: 0
+  staves: -1
+  slings: -1
+  bows: -1
+  crossbows: -1
+  throwing: -1
+  armour: -1
+  dodging: 2
+  stealth: 10
+  shields: 0
+  unarmed_combat: 2
+  spellcasting: 0
+  conjurations: -1
+  hexes: 8
+  charms: 2
+  necromancy: 2
+  translocations: -1
+  transmutations: 2
+  fire_magic: -1
+  poison_magic: 0
+  invocations: 0
+  evocations: 0
 undead_type: US_SEMI_UNDEAD
 str: 7
 int: 10

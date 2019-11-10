@@ -10,32 +10,32 @@ aptitudes:
   hp: 0
   mp_mod: 0
   mr: 3
-  fighting: 1
-  short_blades: 2
-  long_blades: 1
-  axes: -2
-  maces_and_flails: -2
-  polearms: 4
-  staves: -2
-  slings: -2
-  bows: -2
-  crossbows: -2
-  armour: -3
-  dodging: 3
-  stealth: 2
-  unarmed_combat: 1
-  spellcasting: -1
-  conjurations: -2
-  charms: 1
-  necromancy: -2
-  translocations: -2
-  transmutations: 3
-  fire_magic: -3
-  ice_magic: 1
-  air_magic: -2
-  earth_magic: -2
-  poison_magic: 1
-  invocations: 1
+  fighting: 2
+  short_blades: 4
+  long_blades: 2
+  axes: -1
+  maces_and_flails: -1
+  polearms: 8
+  staves: -1
+  slings: -1
+  bows: -1
+  crossbows: -1
+  armour: -1
+  dodging: 6
+  stealth: 4
+  unarmed_combat: 2
+  spellcasting: 0
+  conjurations: -1
+  charms: 2
+  necromancy: -1
+  translocations: -1
+  transmutations: 6
+  fire_magic: -1
+  ice_magic: 2
+  air_magic: -1
+  earth_magic: -1
+  poison_magic: 2
+  invocations: 2
 can_swim: true
 str: 8
 int: 7

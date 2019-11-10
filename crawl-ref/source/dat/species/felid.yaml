@@ -21,21 +21,21 @@ aptitudes:
   crossbows: False
   throwing: False
   armour: False
-  dodging: 3
-  stealth: 4
+  dodging: 6
+  stealth: 8
   shields: False
-  spellcasting: -1
-  conjurations: -1
-  hexes: 4
-  charms: 2
-  translocations: 4
-  transmutations: 1
-  fire_magic: -1
-  ice_magic: -1
-  air_magic: -1
-  earth_magic: -1
-  poison_magic: -1
-  evocations: 1
+  spellcasting: 0
+  conjurations: 0
+  hexes: 8
+  charms: 4
+  translocations: 8
+  transmutations: 2
+  fire_magic: 0
+  ice_magic: 0
+  air_magic: 0
+  earth_magic: 0
+  poison_magic: 0
+  evocations: 2
 size: little
 str: 4
 int: 9

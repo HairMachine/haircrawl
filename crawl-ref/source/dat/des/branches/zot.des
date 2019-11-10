@@ -2745,11 +2745,9 @@ MONS:    patrolling orb guardian, orange crystal statue / w:20 obsidian statue
 MONS:    electric golem, killer klown, ancient lich, orb of fire
 # Traps to spread throughout the vault. Fewer alarm traps as those have a big
 # effect on the vault as a whole.
-KFEAT:   ~ = zot trap / dispersal trap / permanent teleport trap / net trap \
-             / alarm trap w:5
+KFEAT:   ~ = teleport trap w:5
 # Flat distribution of traps for specific sections.
-KFEAT:   ^ = zot trap / dispersal trap / permanent teleport trap / alarm trap \
-             / net trap
+KFEAT:   ^ = teleport trap
 KMASK:   ^~ = no_item_gen
 # Place a minimum number of traps and some extra liches in each lower wing.
 NSUBST:  d = 2=5. / 4=~ / ., h = 2=5. / 4=~ / .
@@ -2762,8 +2760,6 @@ NSUBST:  e = 4=~ / ., j = 4=~ / .
 # weight a specific monster: killer klown, ancient lich, or orb of fire.
 SUBST:   ? : KLM
 SUBST:   K = 0 4:40 5 6 ., L = 0 4 5:40 6 ., M = 0 4 5 6:40 .
-# Make a final sprinkling of traps throughout the vault.
-SUBST:   . = ~ .:600
 # Put traps in wing entrances with decreased odds on one side to make double
 # trapped entrances rarer.
 SUBST:   D = ^..., H = ^.

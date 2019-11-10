@@ -591,14 +591,10 @@ public:
 
         // these are included in default force_more_message
         const int exp = 7500 * you.experience_level;
-        if (you.species == SP_GNOLL)
-        {
-            you.exp_available += exp;
-            train_skills();
-        }
-        else
-            skill_menu(SKMF_EXPERIENCE, exp);
-
+        
+        you.exp_available += exp;
+        train_skills();
+        
         // the player might meet training targets and need to choose
         // skills
         check_selected_skills();

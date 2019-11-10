@@ -3239,8 +3239,7 @@ void bolt::affect_player_enchantment(bool resistible)
     case BEAM_MALMUTATE:
     case BEAM_UNRAVELLED_MAGIC:
         mpr("Strange energies course through your body.");
-        you.malmutate(aux_source.empty() ? get_source_name() :
-                      (get_source_name() + "/" + aux_source));
+        you.rot(nullptr, 5);
         obvious_effect = true;
         break;
 

@@ -458,7 +458,6 @@ string get_god_dislikes(god_type which_god)
         // Trog forgives Gnolls practising spellcasting since they do it
         // without choice. XXX: Rework the peeve_map to allow checking this.
         if (which_god == GOD_TROG
-            && you.species == SP_GNOLL
             && entry.first == DID_SPELL_PRACTISE)
         {
             continue;
@@ -955,7 +954,6 @@ static void _handle_your_gods_response(conduct_type thing_done, int level,
     // Trog forgives Gnolls practising spellcasting since they do it without
     // choice. XXX: Rework the peeve_map to allow checking this.
     if (you_worship(GOD_TROG)
-        && you.species == SP_GNOLL
         && thing_done == DID_SPELL_PRACTISE)
     {
         return;

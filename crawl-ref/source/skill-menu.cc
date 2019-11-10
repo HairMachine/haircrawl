@@ -120,50 +120,7 @@ static bool _show_skill(skill_type sk, skill_menu_state state)
 
 bool SkillMenuEntry::is_selectable(bool keep_hotkey)
 {
-    if (is_invalid_skill(m_sk))
-        return false;
-
-    if (is_set(SKMF_HELP))
-        return true;
-
-    if (you.species == SP_GNOLL)
-        return false;
-
-    if (!_show_skill(m_sk, skm.get_state(SKM_SHOW)))
-        return false;
-
-    if (is_set(SKMF_RESKILL_TO) && you.transfer_from_skill == m_sk)
-    {
-        if (!keep_hotkey)
-            ++m_letter;
-        return false;
-    }
-
-    if (is_set(SKMF_RESKILL_TO) && is_useless_skill(m_sk))
-        return false;
-
-    if (is_set(SKMF_RESKILL_FROM) && !you.skill_points[m_sk])
-    {
-        if (!keep_hotkey)
-            ++m_letter;
-        return false;
-    }
-
-    if (!you.can_currently_train[m_sk] && !is_set(SKMF_RESKILL_TO)
-        && !is_set(SKMF_RESKILL_FROM))
-    {
-        return false;
-    }
-
-    if (mastered())
-    {
-        if (is_set(SKMF_RESKILL_TO) && !keep_hotkey)
-            ++m_letter;
-        if (!is_set(SKMF_RESKILL_FROM))
-            return false;
-    }
-
-    return true;
+    return false;
 }
 
 bool SkillMenuEntry::is_set(int flag) const
@@ -1037,7 +994,6 @@ bool SkillMenu::do_skill_enabled_check()
     {
         // Shouldn't happen, but crash rather than locking the player in the
         // menu. Training will be fixed up on load.
-        ASSERT(you.species != SP_GNOLL);
         set_help("<lightred>You need to enable at least one skill.</lightred>");
         return false;
     }
@@ -1104,18 +1060,13 @@ skill_menu_state SkillMenu::get_state(skill_menu_switch sw)
     }
     else if (!m_switches[sw])
     {
-        if (you.species == SP_GNOLL)
+        switch (sw)
         {
-            switch (sw)
-            {
-            case SKM_MODE:  return SKM_MODE_MANUAL;
-            case SKM_DO:    return SKM_DO_FOCUS;
-            case SKM_SHOW:  return SKM_SHOW_ALL;
-            default:        return SKM_NONE;
-            }
+        case SKM_MODE:  return SKM_MODE_MANUAL;
+        case SKM_DO:    return SKM_DO_FOCUS;
+        case SKM_SHOW:  return SKM_SHOW_ALL;
+        default:        return SKM_NONE;
         }
-        else
-            return SKM_NONE;
     }
     else
         return m_switches[sw]->get_state();
@@ -1328,51 +1279,6 @@ void SkillMenu::init_button_row()
 void SkillMenu::init_switches()
 {
     SkillMenuSwitch* sw;
-    if (you.species != SP_GNOLL)
-    {
-        sw = new SkillMenuSwitch("mode", '/');
-        m_switches[SKM_MODE] = sw;
-        sw->add(SKM_MODE_AUTO);
-        if (!is_set(SKMF_SPECIAL) && !is_set(SKMF_SIMPLE))
-            sw->add(SKM_MODE_MANUAL);
-        if (!you.auto_training)
-            sw->set_state(SKM_MODE_MANUAL);
-        sw->update();
-        sw->set_id(SKM_MODE);
-        add_item(sw, sw->size(), m_pos);
-
-        sw = new SkillMenuSwitch("skill", '|');
-        m_switches[SKM_DO] = sw;
-        if (!is_set(SKMF_EXPERIENCE)
-            && (is_set(SKMF_SIMPLE) || Options.skill_focus != SKM_FOCUS_ON))
-        {
-            sw->add(SKM_DO_PRACTISE);
-        }
-        if (!is_set(SKMF_RESKILLING) && !is_set(SKMF_SIMPLE)
-            && Options.skill_focus != SKM_FOCUS_OFF)
-        {
-            sw->add(SKM_DO_FOCUS);
-        }
-        sw->set_state(you.skill_menu_do);
-        sw->add_hotkey('\t');
-        sw->update();
-        sw->set_id(SKM_DO);
-        add_item(sw, sw->size(), m_pos);
-
-        sw = new SkillMenuSwitch("skills", '*');
-        m_switches[SKM_SHOW] = sw;
-        sw->add(SKM_SHOW_DEFAULT);
-        if (!is_set(SKMF_SIMPLE) && !is_set(SKMF_EXPERIENCE))
-        {
-            sw->add(SKM_SHOW_ALL);
-            if (Options.default_show_all_skills)
-                sw->set_state(SKM_SHOW_ALL);
-        }
-        sw->update();
-        sw->set_id(SKM_SHOW);
-        add_item(sw, sw->size(), m_pos);
-    }
-
     if (is_set(SKMF_CHANGED))
     {
         sw = new SkillMenuSwitch("level", '_');
@@ -1402,9 +1308,6 @@ void SkillMenu::init_switches()
         if (!you.auto_training)
             sw->set_state(SKM_VIEW_COST);
     }
-
-    if (you.species != SP_GNOLL)
-        sw->add(SKM_VIEW_TARGETS);
 
     if (you.wizard)
     {
@@ -1468,8 +1371,6 @@ void SkillMenu::refresh_button_row()
             clearlegend = "[<yellow>-</yellow>] clear all targets";
         }
     }
-    else if (you.species != SP_GNOLL) // SKM_VIEW_TARGETS unavailable for Gn
-        midlegend = "[<yellow>=</yellow>] set a skill target";
 
     m_help_button->set_text(helpstring + legend);
     m_middle_button->set_text(midlegend);

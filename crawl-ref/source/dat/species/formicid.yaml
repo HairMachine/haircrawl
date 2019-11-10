@@ -9,22 +9,22 @@ aptitudes:
   hp: 0
   mp_mod: 0
   mr: 4
-  fighting: 1
-  slings: 1
-  bows: -2
-  armour: 1
-  dodging: -1
-  stealth: 3
-  shields: 2
-  conjurations: -1
-  hexes: 2
-  translocations: -1
-  transmutations: 1
-  air_magic: -2
-  earth_magic: 2
-  poison_magic: 3
-  invocations: 2
-  evocations: 1
+  fighting: 2
+  slings: 2
+  bows: -1
+  armour: 2
+  dodging: 0
+  stealth: 6
+  shields: 4
+  conjurations: 0
+  hexes: 4
+  translocations: 0
+  transmutations: 2
+  air_magic: -1
+  earth_magic: 4
+  poison_magic: 6
+  invocations: 4
+  evocations: 2
 str: 12
 int: 7
 dex: 6

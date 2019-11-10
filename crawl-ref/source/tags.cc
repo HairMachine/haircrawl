@@ -2428,8 +2428,7 @@ static void tag_read_you(reader &th)
     // based on the points they'd have gotten from XL/3 selection and XL/4
     // random SID.
     if (th.getMinorVersion() >= TAG_MINOR_STATLOCKED_GNOLLS
-        && th.getMinorVersion() < TAG_MINOR_GNOLLS_REDUX
-        && you.species == SP_GNOLL)
+        && th.getMinorVersion() < TAG_MINOR_GNOLLS_REDUX)
     {
         const species_def& sd = get_species_def(you.species);
 
@@ -2672,8 +2671,7 @@ static void tag_read_you(reader &th)
         you.train_alt[j]    = (training_status)unmarshallByte(th);
 #if TAG_MAJOR_VERSION == 34
         // Gnolls always train all skills.
-        if (th.getMinorVersion() < TAG_MINOR_GNOLLS_REDUX
-            && you.species == SP_GNOLL)
+        if (th.getMinorVersion() < TAG_MINOR_GNOLLS_REDUX)
         {
             you.train[j] = you.train_alt[j] = TRAINING_ENABLED;
         }

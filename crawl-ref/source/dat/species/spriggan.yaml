@@ -8,33 +8,33 @@ aptitudes:
   hp: -3
   mp_mod: 1
   mr: 7
-  fighting: -2
-  short_blades: 1
-  long_blades: -2
-  axes: -2
-  maces_and_flails: -3
-  polearms: -3
-  staves: -3
-  slings: 2
-  bows: 2
-  armour: -3
-  dodging: 4
-  stealth: 5
-  shields: -3
-  unarmed_combat: -2
-  spellcasting: 2
-  conjurations: -3
-  hexes: 2
-  charms: 4
-  summoning: -2
-  necromancy: -1
-  translocations: 4
-  transmutations: 3
-  fire_magic: -2
-  ice_magic: -2
-  air_magic: -1
-  earth_magic: -1
-  evocations: 3
+  fighting: -1
+  short_blades: 2
+  long_blades: -1
+  axes: -1
+  maces_and_flails: -1
+  polearms: -1
+  staves: -1
+  slings: 4
+  bows: 4
+  armour: -1
+  dodging: 8
+  stealth: 10
+  shields: -1
+  unarmed_combat: -1
+  spellcasting: 4
+  conjurations: -1
+  hexes: 4
+  charms: 8
+  summoning: -1
+  necromancy: 0
+  translocations: 8
+  transmutations: 6
+  fire_magic: -1
+  ice_magic: -1
+  air_magic: 0
+  earth_magic: 0
+  evocations: 6
 size: little
 str: 4
 int: 9

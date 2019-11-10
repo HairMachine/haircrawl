@@ -974,18 +974,7 @@ static skill_type _item_training_skill(const item_def &item)
  */
 static bool _could_set_training_target(const item_def &item, bool ignore_current)
 {
-    if (!crawl_state.need_save || is_useless_item(item) || you.species == SP_GNOLL)
-        return false;
-
-    const skill_type skill = _item_training_skill(item);
-    if (skill == SK_NONE)
-        return false;
-
-    const int target = min(_item_training_target(item), 270);
-
-    return target && !is_useless_skill(skill)
-       && you.skill(skill, 10, false, false, false) < target
-       && (ignore_current || you.get_training_target(skill) < target);
+    return false;
 }
 
 /**
@@ -1074,8 +1063,6 @@ static string _skill_target_desc(skill_type skill, int scaled_target,
 static void _append_skill_target_desc(string &description, skill_type skill,
                                         int scaled_target)
 {
-    if (you.species != SP_GNOLL)
-        description += "\n    " + _skill_target_desc(skill, scaled_target, 100);
     if (you.training[skill] > 0 && you.training[skill] < 100)
     {
         description += "\n    " + _skill_target_desc(skill, scaled_target,

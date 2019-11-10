@@ -1025,10 +1025,7 @@ ability_type fixup_ability(ability_type ability)
             return ability;
 
     case ABIL_ASHENZARI_TRANSFER_KNOWLEDGE:
-        if (you.species == SP_GNOLL)
-            return ABIL_NON_ABILITY;
-        else
-            return ability;
+        return ABIL_NON_ABILITY;
 
     default:
         return ability;
