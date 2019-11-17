@@ -37,15 +37,16 @@ function sewer_portal(e)
       }
     }
 
-  e.lua_marker(
-    'O',
-    one_way_stair {
-      desc = "a portal to a sewer",
-      dst = "enter_sewer",
-      floor = "exit_sewer"
-    }
-  )
-  e.tags("sewer_entry uniq_sewer no_monster_gen chance_sewer")
+  e.lua_marker('O',
+      timed_marker {
+        disappear = "The drain falls to bits.",
+        entity = 'drain',
+        turns = timeout_turns,
+        single_timed = true,
+        floor = "expired_portal",
+        feat_tile = "dngn_portal_sewer_rusted",
+        msg = messager })
+  e.tags("uniq_sewer no_monster_gen chance_sewer")
   e.chance(800)
   e.kfeat("O = enter_sewer")
   e.kfeat("1 = W")

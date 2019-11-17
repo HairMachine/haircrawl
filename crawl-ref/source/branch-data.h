@@ -257,7 +257,7 @@ const Branch branches[NUM_BRANCHES] =
       DARKGREY, BLUE,
       '2', {}, branch_noise::normal },
 
-    { BRANCH_SEWER, BRANCH_DUNGEON, 1, 1, 1, 4,
+    { BRANCH_SEWER, NUM_BRANCHES, -1, -1, 1, 4,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_SEWER, DNGN_EXIT_SEWER, NUM_FEATURES,
       "Sewer", "a sewer", "Sewer",
