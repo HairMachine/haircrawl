@@ -2413,6 +2413,12 @@ static void _build_dungeon_level()
     if (player_in_branch(BRANCH_SLIME))
         _slime_connectivity_fixup();
 
+    // Whole-level vaults should not be going any further, but this is a hack.
+    if (you.where_are_you >= BRANCH_SEWER) {
+        link_items();
+        return;
+    }
+
     // Now place items, mons, gates, etc.
     // Stairs must exist by this point (except in Shoals where they are
     // yet to be placed). Some items and monsters already exist.
@@ -3511,21 +3517,17 @@ static void _place_branch_entrances(bool use_vaults)
     // Place actual branch entrances.
     for (branch_iterator it; it; ++it)
     {
-        mprf("Checking branch %s", it->shortname);
         // Vestibule and hells are placed by other means.
         // Likewise, if we already have an entrance, keep going.
         if (is_hell_branch(it->id) || branch_entrance_placed[it->id])
             continue;
-
-        mprf("level_id::current() %d, brentry[it->id] %d, it->entry_stairs %d, NUM_FEATURES %d", level_id::current(), brentry[it->id], it->entry_stairs, NUM_FEATURES);
 
         if (it->entry_stairs != NUM_FEATURES
             && player_in_branch(parent_branch(it->id))
             && level_id::current() == brentry[it->id])
         {
             // Placing a stair.
-            //dprf(DIAG_DNGN, "Placing stair to %s", it->shortname);
-            mprf("Placing stair to %s", it->shortname);
+            dprf(DIAG_DNGN, "Placing stair to %s", it->shortname);
 
             // Attempt to place an entry vault if allowed
             if (use_vaults)

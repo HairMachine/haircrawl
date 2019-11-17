@@ -347,7 +347,7 @@ default-depth: Sewer
 # Easier than sewer_minmay_treatment, so more common.
 #
 NAME:     sewer_kobolds
-TAGS:     no_item_gen no_monster_gen no_pool_fixup
+TAGS:     layout no_item_gen no_monster_gen no_pool_fixup
 WEIGHT:   25
 ORIENT:   encompass
 SUBST:    ' = .W

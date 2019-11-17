@@ -314,7 +314,7 @@ default-depth: Ossuary
 NAME:    ossuary_tomb_1
 WEIGHT:  40
 ORIENT:  encompass
-TAGS:    no_item_gen no_monster_gen no_rotate
+TAGS:    layout no_item_gen no_monster_gen no_rotate
 SHUFFLE: dwyz
 SUBST:   w=2, y=2
 NSUBST:  z= 1:1 / *:3

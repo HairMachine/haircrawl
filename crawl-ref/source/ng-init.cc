@@ -75,11 +75,7 @@ void initialise_branch_depths()
     for (branch_iterator it; it; ++it)
     {
         if (!branch_is_unfinished(it->id) && it->parent_branch != NUM_BRANCHES)
-        {
-            brentry[it->id] = level_id(it->parent_branch,
-                                       random_range(it->mindepth,
-                                                    it->maxdepth));
-        }
+            brentry[it->id] = level_id(it->parent_branch, random_range(it->mindepth, it->maxdepth));
     }
 
     // You will get one of Shoals/Swamp and one of Spider/Snake.
