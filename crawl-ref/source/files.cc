@@ -1337,40 +1337,7 @@ static const vector<branch_type> portal_generation_order =
 
 void update_portal_entrances()
 {
-    unordered_set<branch_type, std::hash<int>> seen_portals;
-    auto const cur_level = level_id::current();
-    // add any portals not currently registered
-    for (rectangle_iterator ri(0); ri; ++ri)
-    {
-        dungeon_feature_type feat = env.grid(*ri);
-        // excludes pan, hell, abyss.
-        if (feat_is_portal_entrance(feat) && !feature_mimic_at(*ri))
-        {
-            level_id whither = stair_destination(feat, "", false);
-            if (whither.branch == BRANCH_ZIGGURAT // not (quite) pregenerated
-                || whither.branch == BRANCH_TROVE // not pregenerated
-                || whither.branch == BRANCH_BAZAAR) // multiple bazaars possible
-            {
-                continue; // handle these differently
-            }
-            dprf("Setting up entry for %s.", whither.describe().c_str());
-            ASSERT(count(portal_generation_order.begin(),
-                         portal_generation_order.end(),
-                         whither.branch) == 1);
-            if (brentry[whither.branch] != level_id())
-            {
-                mprf(MSGCH_ERROR, "Second portal entrance for %s!",
-                    whither.describe().c_str());
-            }
-            brentry[whither.branch] = cur_level;
-            seen_portals.insert(whither.branch);
-        }
-    }
-    // clean up any portals that aren't actually here -- comes up for wizmode
-    // and test mode cases.
-    for (auto b : portal_generation_order)
-        if (!seen_portals.count(b) && brentry[b] == cur_level)
-            brentry[b] = level_id();
+    return;
 }
 
 void reset_portal_entrances()
