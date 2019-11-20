@@ -16,7 +16,7 @@
 
 {{
 function ice_cave_portal(e)
-  local timeout_turns = crawl.random_range(600, 800)
+  local timeout_turns = crawl.random_range(2500, 3000)
 
   local messager =
     timed_msg {
@@ -44,8 +44,7 @@ function ice_cave_portal(e)
         floor = "expired_portal",
         feat_tile = "dngn_portal_ice_cave_gone",
         msg = messager })
-  e.tags("uniq_icecv chance_icecave")
-  e.chance(500)
+  e.tags("ice_cave_entry")
   e.kfeat("O = enter_ice_cave")
   e.colour("X = white")
   e.kfeat("X = x")
@@ -213,7 +212,6 @@ end
 
 # Entries ##########################################
 # Not actually used, but useful for reference.
-default-depth: D:11-, Lair, Orc, Elf, Swamp, Shoals, Snake, Spider
 
 # "Easy" ice cave entrances (D, Lair, Orc).
 NAME:   portal_ice_cave_entry_pillars_1
@@ -245,7 +243,6 @@ ENDMAP
 
 NAME:   portal_ice_cave_entry_imps
 TAGS:   patrolling no_monster_gen transparent
-DEPTH:  D:11-, Lair, Orc
 : ice_cave_portal(_G)
 MONS:   white imp
 MAP
@@ -258,7 +255,6 @@ ENDMAP
 
 NAME:   portal_ice_cave_entry_ice_beasts
 TAGS:   patrolling no_monster_gen transparent
-DEPTH:  D:11-, Lair, Orc
 : ice_cave_portal(_G)
 MONS:   ice beast
 MAP
@@ -271,7 +267,6 @@ ENDMAP
 
 NAME:   portal_ice_cave_entry_animals_and_master
 TAGS:   patrolling no_monster_gen no_trap_gen
-DEPTH:  D:11-, Lair:4-, Orc
 WEIGHT: 6
 : ice_cave_portal(_G)
 MONS:   wolf, yak, polar bear, rime drake, ice dragon
@@ -290,7 +285,6 @@ ENDMAP
 
 NAME:   portal_ice_cave_demonic_guard
 TAGS:   patrolling no_monster_gen no_trap_gen
-DEPTH:  D:11-, Lair, Orc
 : ice_cave_portal(_G)
 MONS:   ice devil
 MAP
@@ -308,7 +302,6 @@ ENDMAP
 
 NAME:   portal_ice_cave_rime
 TAGS:   patrolling no_monster_gen no_pool_fixup
-DEPTH:  D:11-, Lair, Orc
 : ice_cave_portal(_G)
 MONS:   rime drake
 MAP
@@ -326,7 +319,6 @@ ENDMAP
 # Hard ice cave entrances (Elf, Swamp, Shoals, Snake, Spider).
 NAME:   portal_ice_cave_entry_pillars_three
 TAGS:   transparent
-DEPTH:  Elf, Swamp, Shoals, Snake, Spider
 : ice_cave_portal(_G)
 MAP
    ...
@@ -340,7 +332,6 @@ ENDMAP
 
 NAME:   portal_ice_cave_entry_pillars_four
 TAGS:   transparent
-DEPTH:  Elf, Swamp, Shoals, Snake, Spider
 WEIGHT: 6
 : ice_cave_portal(_G)
 MAP
@@ -357,7 +348,6 @@ ENDMAP
 
 NAME:   portal_ice_cave_entry_horrid_things
 TAGS:   patrolling no_monster_gen
-DEPTH:  Elf, Snake
 WEIGHT: 6
 : ice_cave_portal(_G)
 MONS:   ice beast, freezing wraith, azure jelly
@@ -376,7 +366,6 @@ ENDMAP
 
 NAME:   portal_ice_cave_entry_ice_statue_one
 TAGS:   no_pool_fixup
-DEPTH:  Elf, Swamp, Shoals, Snake, Spider
 : ice_cave_portal(_G)
 MONS:   ice statue
 KFEAT:  ^ = known web trap
@@ -400,7 +389,6 @@ xxXX+XXxx
 ENDMAP
 
 NAME:   portal_ice_cave_entry_ice_statue_two
-DEPTH:  Elf, Swamp, Snake, Shoals, Spider
 WEIGHT: 6
 : ice_cave_portal(_G)
 MONS:   ice statue, patrolling ice dragon
@@ -419,7 +407,6 @@ ENDMAP
 
 NAME:   portal_ice_cave_entry_dragon
 TAGS:   no_monster_gen no_pool_fixup
-DEPTH:  Swamp, Shoals, Snake, Spider
 MONS:   ice dragon
 : ice_cave_portal(_G)
 : if you.in_branch("Swamp") then
@@ -441,7 +428,6 @@ ENDMAP
 NAME:   portal_ice_cave_entry_frozen_things
 TAGS:   no_monster_gen
 WEIGHT: 6
-DEPTH:  Elf, Swamp, Shoals, Snake, Spider
 MONS:   freezing wraith, azure jelly
 SUBST:  2 = 12.
 : ice_cave_portal(_G)
@@ -460,7 +446,6 @@ ENDMAP
 
 NAME:     portal_ice_cave_entry_ugly_swarm
 TAGS:     no_monster_gen no_item_gen transparent
-DEPTH:    Elf, Swamp, Shoals, Snake, Spider
 WEIGHT:   2
 MONS:     white ugly thing, white very ugly thing
 SHUFFLE:  ABC

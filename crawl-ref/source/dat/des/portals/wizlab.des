@@ -75,7 +75,7 @@
 : crawl_require("dlua/dungeon.lua")
 {{
 function wizlab_portal (e)
-    local timeout_turns = crawl.random_range(600, 800)
+    local timeout_turns = crawl.random_range(2500, 3000)
 
     local messager =
       timed_msg {
@@ -99,8 +99,7 @@ function wizlab_portal (e)
         feat_tile = "dngn_portal_bazaar_gone",
         msg = messager })
     e.kfeat("O = enter_wizlab")
-    e.tags("uniq_wizlab no_item_gen no_monster_gen chance_wizlab")
-    e.chance("500")
+    e.tags("wizlab_entry no_item_gen no_monster_gen")
 end
 
 -- Destinations:
@@ -344,8 +343,6 @@ function callback.wizlab_wucad_wucad_died(data, triggerable,
   crawl.mpr("The shadows inhabiting this place fade forever.", "talk_visual")
 end
 }}
-
-default-depth: Depths, Elf, Crypt, Vaults:1-4
 
 ###############################################################################
 # Portal entrances.
@@ -980,7 +977,7 @@ ENDMAP
 #       should help, though more unique contents could certainly be tried.
 #
 NAME:       wizlab_iskenderun
-TAGS:       no_rotate patrolling
+TAGS:       layout no_rotate patrolling
 MONS:       deep elf mage spells:magic_dart.11.wizard;\
                                  force_lance.11.wizard;\
                                  iskenderun's_battlesphere.22.wizard;\
@@ -1052,7 +1049,7 @@ ENDMAP
 ###############################################################################
 # Zonguldrok's Shrine
 NAME:       wizlab_zonguldrok
-TAGS:       no_rotate
+TAGS:       layout no_rotate
 :           wizlab_setup(_G)
 SUBST:      ? = txxx
 SUBST:      ! = t..
@@ -1174,7 +1171,7 @@ ENDMAP
 #       A prefix as well as suffix but no regular modifier
 #       (so, "faint draconian monk") would be the best, if it's done.
 NAME:       wizlab_wucad
-TAGS:       no_rotate
+TAGS:       layout no_rotate
 SUBST:      T = t.
 KMONS:      8 = orange crystal statue name:Statue_of_Wucad_Mu n_rpl n_the \
                 hd:15 tile:mons_wucad_mu_statue
@@ -1308,7 +1305,7 @@ ENDMAP
 # rotating the same amount of rooms per direction in the same direction,
 # though distorted by the use of the ninth room and each set rotated.
 NAME:    wizlab_golubria
-TAGS:    no_pool_fixup
+TAGS:    layout no_pool_fixup
 KMONS:   1 = spatial vortex w:7 / blink frog / insubstantial wisp w:3 / nothing w:5
 KMONS:   2 = deep elf mage w:5 ; boomerang ego:dispersal w:20 | boomerang w:5 | nothing / \
              rakshasa w:5 ; boomerang ego:dispersal w:20 | boomerang w:5 | nothing / \
@@ -1487,7 +1484,7 @@ ENDMAP
 #
 # TODO: Needs an "ocean of clouds" tiles, and fluffy "cotton wool" cloud tiles.
 NAME:       wizlab_cloud
-TAGS:       no_rotate
+TAGS:       layout no_rotate
 MONS:       air elemental w:20 / shock serpent w:5 / spark wasp w:5 \
             / wind drake w:5
 MONS:       ghost crab / death drake / apocalypse crab
@@ -1609,7 +1606,7 @@ ENDMAP
 ###############################################################################
 # Halls of the Hellbinder (by Mu.)
 NAME:       wizlab_demon
-TAGS:       no_rotate no_hmirror no_vmirror
+TAGS:       layout no_rotate no_hmirror no_vmirror
 KFEAT:      _ = altar_makhleb
 KFEAT:      p = granite_statue
 LFLOORTILE: floor_pebble_lightred

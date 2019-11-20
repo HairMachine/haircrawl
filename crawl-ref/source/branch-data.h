@@ -120,7 +120,7 @@ const Branch branches[NUM_BRANCHES] =
       'B', {}, branch_noise::quiet },
 #endif
 
-    { BRANCH_CRYPT, BRANCH_VAULTS, 2, 3, 3, 19,
+    { BRANCH_CRYPT, BRANCH_VAULTS, 2, 2, 3, 19,
       brflag::dangerous_end,
       DNGN_ENTER_CRYPT, DNGN_EXIT_CRYPT, NUM_FEATURES,
       "Crypt", "the Crypt", "Crypt",
@@ -137,7 +137,7 @@ const Branch branches[NUM_BRANCHES] =
       'W', { RUNE_TOMB }, branch_noise::quiet },
 #if TAG_MAJOR_VERSION > 34
 
-    { BRANCH_DEPTHS, BRANCH_DUNGEON, 15, 15, 5, 22,
+    { BRANCH_DEPTHS, BRANCH_DUNGEON, 12, 12, 2, 22,
       brflag::none,
       DNGN_ENTER_DEPTHS, DNGN_EXIT_DEPTHS, NUM_FEATURES,
       "Depths", "the Depths", "Depths",
@@ -186,7 +186,7 @@ const Branch branches[NUM_BRANCHES] =
       MAGENTA, MAGENTA,
       'Y', { RUNE_TARTARUS }, branch_noise::normal },
 
-    { BRANCH_ZOT, BRANCH_DEPTHS, 1, 1, 1, 27,
+    { BRANCH_ZOT, BRANCH_DEPTHS, 2, 2, 1, 27,
       brflag::dangerous_end,
       DNGN_ENTER_ZOT, DNGN_EXIT_ZOT, NUM_FEATURES,
       "Zot", "the Realm of Zot", "Zot",
@@ -223,7 +223,7 @@ const Branch branches[NUM_BRANCHES] =
       'R', { RUNE_DEMONIC, RUNE_MNOLEG, RUNE_LOM_LOBON, RUNE_CEREBOV,
              RUNE_GLOORX_VLOQ }, branch_noise::normal },
 
-    { BRANCH_ZIGGURAT, BRANCH_DEPTHS, 1, 1, 27, 27,
+    { BRANCH_ZIGGURAT, BRANCH_DEPTHS, 2, 2, 27, 27,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_ZIGGURAT, DNGN_EXIT_ZIGGURAT, DNGN_FLOOR,
       "Ziggurat", "a ziggurat", "Zig",
@@ -258,7 +258,7 @@ const Branch branches[NUM_BRANCHES] =
       '2', {}, branch_noise::normal },
 
     { BRANCH_SEWER, BRANCH_DUNGEON, 1, 2, 1, 4,
-      brflag::no_items,
+      brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_SEWER, DNGN_EXIT_SEWER, NUM_FEATURES,
       "Sewer", "a sewer", "Sewer",
       "You enter a sewer!",
@@ -266,14 +266,14 @@ const Branch branches[NUM_BRANCHES] =
       '3', {}, branch_noise::normal },
 
     { BRANCH_OSSUARY, BRANCH_DUNGEON, 3, 4, 1, 6,
-      brflag::no_items,
+      brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_OSSUARY, DNGN_EXIT_OSSUARY, NUM_FEATURES,
       "Ossuary", "an ossuary", "Ossuary",
       "You enter an ossuary!",
       WHITE, YELLOW,
       '4', {}, branch_noise::normal },
 
-    { BRANCH_BAILEY, NUM_BRANCHES, -1, -1, 1, 11,
+    { BRANCH_BAILEY, BRANCH_DUNGEON, 4, 6, 1, 11,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_BAILEY, DNGN_EXIT_BAILEY, NUM_FEATURES,
       "Bailey", "a bailey", "Bailey",
@@ -282,7 +282,7 @@ const Branch branches[NUM_BRANCHES] =
       '5', {}, branch_noise::normal },
 #if TAG_MAJOR_VERSION > 34
 
-    { BRANCH_GAUNTLET, NUM_BRANCHES, -1, -1, 1, 15,
+    { BRANCH_GAUNTLET, BRANCH_DUNGEON, 9, 12, 1, 15,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_GAUNTLET, DNGN_EXIT_GAUNTLET, DNGN_EXIT_THROUGH_ABYSS,
       "Gauntlet", "a Gauntlet", "Gauntlet",
@@ -291,7 +291,7 @@ const Branch branches[NUM_BRANCHES] =
       '6', {}, branch_noise::normal },
 #endif
 
-    { BRANCH_ICE_CAVE, NUM_BRANCHES, -1, -1, 1, 15,
+    { BRANCH_ICE_CAVE, BRANCH_LAIR, 1, 3, 1, 15,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_ICE_CAVE, DNGN_EXIT_ICE_CAVE, NUM_FEATURES,
       "Ice Cave", "an ice cave", "IceCv",
@@ -304,7 +304,7 @@ const Branch branches[NUM_BRANCHES] =
       '7', {}, branch_noise::normal },
 #endif
 
-    { BRANCH_VOLCANO, NUM_BRANCHES, -1, -1, 1, 14,
+    { BRANCH_VOLCANO, BRANCH_LAIR, 1, 3, 1, 14,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_VOLCANO, DNGN_EXIT_VOLCANO, NUM_FEATURES,
       "Volcano", "a volcano", "Volcano",
@@ -317,7 +317,7 @@ const Branch branches[NUM_BRANCHES] =
       '8', {}, branch_noise::normal },
 #endif
 
-    { BRANCH_WIZLAB, NUM_BRANCHES, -1, -1, 1, 24,
+    { BRANCH_WIZLAB, BRANCH_DEPTHS, 1, 1, 1, 24,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_WIZLAB, DNGN_EXIT_WIZLAB, NUM_FEATURES,
       "Wizlab", "a wizard's laboratory", "WizLab",
@@ -331,7 +331,7 @@ const Branch branches[NUM_BRANCHES] =
 #endif
 #if TAG_MAJOR_VERSION == 34
 
-    { BRANCH_DEPTHS, BRANCH_DUNGEON, 15, 15, 1, 22,
+    { BRANCH_DEPTHS, BRANCH_DUNGEON, 12, 12, 2, 22,
       brflag::none,
       DNGN_ENTER_DEPTHS, DNGN_EXIT_DEPTHS, NUM_FEATURES,
       "Depths", "the Depths", "Depths",
@@ -340,7 +340,7 @@ const Branch branches[NUM_BRANCHES] =
       'U', {}, branch_noise::normal },
 #endif
 
-    { BRANCH_DESOLATION, NUM_BRANCHES, -1, -1, 1, 20,
+    { BRANCH_DESOLATION, BRANCH_VAULTS, 1, 1, 1, 20,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_DESOLATION, DNGN_EXIT_DESOLATION, NUM_FEATURES, // TODO
       "Desolation", "the Desolation of Salt", "Desolation",
@@ -354,7 +354,7 @@ const Branch branches[NUM_BRANCHES] =
 #endif
 #if TAG_MAJOR_VERSION == 34
 
-    { BRANCH_GAUNTLET, NUM_BRANCHES, -1, -1, 1, 15,
+    { BRANCH_GAUNTLET, BRANCH_DUNGEON, 9, 12, 1, 15,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_GAUNTLET, DNGN_EXIT_GAUNTLET, DNGN_EXIT_THROUGH_ABYSS,
       "Gauntlet", "a Gauntlet", "Gauntlet",

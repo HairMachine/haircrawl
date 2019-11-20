@@ -13,7 +13,7 @@
 
 {{
 function ossuary_portal(e)
-  local timeout_turns = crawl.random_range(600, 800)
+  local timeout_turns = crawl.random_range(2500, 3000)
 
   local messager =
     timed_msg {
@@ -41,8 +41,7 @@ function ossuary_portal(e)
         floor = "expired_portal",
         feat_tile = "dngn_portal_ossuary_gone",
         msg = messager })
-  e.tags("uniq_ossuary no_monster_gen chance_ossuary")
-  e.chance(500)
+  e.tags("ossuary_entry no_monster_gen")
   e.kfeat("O = enter_ossuary")
   e.colour("' = yellow")
   e.ftile("' = floor_sandstone")
@@ -69,7 +68,6 @@ end
 }}
 
 #### Portal entry vaults.
-default-depth: D:4-8
 
 NAME:   enter_ossuary_1
 TAGS:   transparent

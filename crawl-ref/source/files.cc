@@ -1327,17 +1327,12 @@ static void _generic_level_reset()
 // portals.
 static const vector<branch_type> portal_generation_order =
 {
-    BRANCH_ICE_CAVE,
-    BRANCH_VOLCANO,
-    BRANCH_BAILEY,
-    BRANCH_GAUNTLET,
+    //BRANCH_WIZLAB,
 #if TAG_MAJOR_VERSION == 34
-    BRANCH_LABYRINTH,
+    BRANCH_LABYRINTH
 #endif
     // do not pregenerate bazaar (TODO: this is non-ideal)
     // do not pregenerate trove
-    BRANCH_WIZLAB,
-    BRANCH_DESOLATION,
 };
 
 void update_portal_entrances()
@@ -1549,7 +1544,7 @@ static bool _branch_pregenerates(branch_type b)
 bool pregen_dungeon(const level_id &stopping_point)
 {
     // TODO: the is_valid() check here doesn't look quite right to me, but so
-    // far I can't get it to break anything...
+    // far I can't get it to break anything...    
     if (stopping_point.is_valid()
         || stopping_point.branch != NUM_BRANCHES &&
            is_random_subbranch(stopping_point.branch) && you.wizard)

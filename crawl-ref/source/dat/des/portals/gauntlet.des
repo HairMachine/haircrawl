@@ -9,7 +9,7 @@
 : crawl_require("dlua/gauntlet.lua")
 {{
 function gauntlet_portal(e)
-  local timeout_turns = crawl.random_range(400, 600)
+  local timeout_turns = crawl.random_range(2500, 3000)
 
   local messager =
     timed_msg {
@@ -46,9 +46,7 @@ end
 # Gauntlet entry vaults
 
 NAME:   gauntlet_entry_generic
-TAGS:   transparent extra uniq_gauntlet
-CHANCE: 5%
-DEPTH:  D:11-, Orc:$, Lair
+TAGS:   gauntlet_entry transparent extra
 : gauntlet_portal(_G)
 MAP
 O

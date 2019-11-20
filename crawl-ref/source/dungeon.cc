@@ -2414,7 +2414,7 @@ static void _build_dungeon_level()
         _slime_connectivity_fixup();
 
     // Whole-level vaults should not be going any further, but this is a hack.
-    if (you.where_are_you >= BRANCH_SEWER) {
+    if (you.where_are_you >= BRANCH_SEWER && you.where_are_you != BRANCH_DEPTHS) {
         link_items();
         return;
     }

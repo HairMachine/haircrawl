@@ -43,7 +43,7 @@
 -- # General setup and design functions: (head to line 382 for the maps)
 
 function volcano_portal (e)
-    local timeout_turns = crawl.random_range(600, 800)
+    local timeout_turns = crawl.random_range(2500, 3000)
 
     local messager =
       timed_msg {
@@ -71,8 +71,7 @@ function volcano_portal (e)
         floor = "expired_portal",
         feat_tile = "dngn_portal_volcano_gone",
         msg = messager })
-    e.tags("uniq_volcano chance_volcano")
-    e.chance(500)
+    e.tags("volcano_entry")
     e.kfeat("O = enter_volcano")
     e.kfeat("S = .")
     e.colour("XS = red")
@@ -366,8 +365,6 @@ function volcano_overflow_convert_lava(data, triggerable,
 end
 
 }}
-
-default-depth: Lair, Orc
 
 ###############################################################################
 # Entries:

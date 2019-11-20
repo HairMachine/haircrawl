@@ -833,7 +833,7 @@ monster* place_monster(mgen_data mg, bool force_pos, bool dont_place)
                 member->props["kirke_band"] = true;
         }
     }
-    dprf(DIAG_DNGN, "Placing %s at %d,%d", mon->name(DESC_PLAIN, true).c_str(),
+    dprf(DIAG_DNGN, "FUCK Placing %s at %d,%d", mon->name(DESC_PLAIN, true).c_str(),
                 mon->pos().x, mon->pos().y);
 
     // Placement of first monster, at least, was a success.
