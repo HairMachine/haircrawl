@@ -3221,10 +3221,6 @@ bool is_bad_item(const item_def &item, bool temp)
 #if TAG_MAJOR_VERSION == 34
         case POT_SLOWING:
             return !you.stasis();
-#endif
-        case POT_DEGENERATION:
-            return true;
-#if TAG_MAJOR_VERSION == 34
         case POT_DECAY:
             return you.res_rotting(temp) <= 0;
         case POT_STRONG_POISON:

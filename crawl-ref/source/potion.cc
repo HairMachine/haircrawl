@@ -29,6 +29,7 @@
 #include "religion.h"
 #include "skill-menu.h"
 #include "spl-goditem.h"
+#include "spl-clouds.h"
 #include "stringutil.h"
 #include "transform.h"
 #include "xom.h"
@@ -864,6 +865,8 @@ public:
         for (int i = 0; i < NUM_STATS; ++i)
             if (lose_stat(static_cast<stat_type>(i), 1 + random2(3)))
                 success = true;
+        // Throw a big cloud of miasma! Yikes!
+        big_cloud(CLOUD_MIASMA, &you, you.pos(), 50, 4 + random2(4));
         return success;
     }
 
