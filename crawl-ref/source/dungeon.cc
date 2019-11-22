@@ -2678,9 +2678,7 @@ static bool _pan_level()
     }
 
     // Unique pan lords become more common as you travel through pandemonium.
-    // On average it takes about 14 levels to see all four, and on average
-    // about 5 levels to see your first.
-    if (x_chance_in_y(1 + place_info.levels_seen, 20 + place_info.levels_seen)
+    if (x_chance_in_y(1 + place_info.levels_seen, 5 + place_info.levels_seen)
         && !all_demons_generated)
     {
         do
@@ -2694,13 +2692,14 @@ static bool _pan_level()
     const map_def *vault = nullptr;
 
     if (which_demon >= 0)
-    {
-        vault = random_map_for_tag(pandemon_level_names[which_demon], false,
-                                   false, MB_FALSE);
-    }
+        vault = random_map_for_tag(pandemon_level_names[which_demon], false, false, MB_FALSE);
     else
-        vault = random_map_in_depth(level_id::current(), false, MB_FALSE);
+        vault = random_map_for_tag("pan_fixed_rune", false, false, MB_FALSE);
 
+    // If we've run out of rune vaults, generate a boring normal vault instead.
+    if (!vault)
+        vault = random_map_in_depth(level_id::current(), false, MB_FALSE);
+    
     // Every Pan level should have a primary vault.
     ASSERT(vault);
     _dgn_ensure_vault_placed(_build_primary_vault(vault), false);

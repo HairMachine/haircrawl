@@ -173,7 +173,7 @@ function pan_demonic_rune(e, glyph, place_lord)
 end
 
 function pan_lord_vault_contents(e, anyglyph, commonglyph, greaterglyph)
-    e.tags('allow_dup')
+    e.tags('pan_fixed_rune allow_dup')
     e.orient('float')
     e.kmons(anyglyph .. " = any demon w:17 / base demonspawn w:2 / \
                             nonbase demonspawn w:1")
@@ -2524,7 +2524,7 @@ WEIGHT: 0
 
 # Concept inherited from lemuel_draining_boxes.
 NAME:   regret_index_pan_draining_boxed
-TAGS:   pan_fixed_rune_boxes pan_fixed_lure_boxes transparent
+TAGS:   pan_fixed_rune pan_fixed_rune_boxes pan_fixed_lure_boxes transparent
 ORIENT: float
 MONS:   pandemonium lord, eye of draining
 MONS:   black sun, lorocyproca, any demon
@@ -2614,7 +2614,7 @@ ENDMAP
 ###################################
 
 NAME:    lemuel_hellion_island
-TAGS:    pan_fixed_rune_hellions pan_fixed_lure_hellions
+TAGS:    pan_fixed_rune_hellions pan_fixed_rune pan_fixed_lure_hellions
 ORIENT:  float
 MONS:    fire bat, hellion, hellephant
 KMONS:   O = pandemonium lord
@@ -2687,7 +2687,7 @@ ENDMAP
 ########################################
 
 NAME:    lemuel_hall_of_pain
-TAGS:    pan_fixed_rune_pain pan_fixed_lure_pain
+TAGS:    pan_fixed_rune pan_fixed_rune_pain pan_fixed_lure_pain
 ORIENT:  float
 MONS:    pandemonium lord, brimstone fiend
 MONS:    tormentor, smoke demon, any demon
@@ -2750,7 +2750,7 @@ ENDMAP
 ########################################
 
 NAME:   grunt_pan_frozen_over
-TAGS:   pan_fixed_rune_frozen pan_fixed_lure_frozen
+TAGS:   pan_fixed_rune pan_fixed_rune_frozen pan_fixed_lure_frozen
 TAGS:   no_pool_fixup no_monster_gen transparent
 ORIENT: float
 MONS:   blizzard demon, nonbase gelid demonspawn
@@ -2836,7 +2836,7 @@ ENDMAP
 ########################################
 
 NAME:    pan_disco_hall
-TAGS:    pan_fixed_rune_disco pan_fixed_lure_disco no_rotate
+TAGS:    pan_fixed_rune pan_fixed_rune_disco pan_fixed_lure_disco no_rotate
 ORIENT:  southeast
 MONS:    rakshasa, corrupter, blood saint
 MONS:    dancing weapon ; demon trident good_item ego:distortion
