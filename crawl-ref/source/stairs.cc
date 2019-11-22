@@ -883,6 +883,17 @@ void floor_transition(dungeon_feature_type how,
     */
     if (new_branch)
     {
+        item_def it;
+        int inv_slot;
+        get_item_by_name(&it, "scroll of escape", OBJ_SCROLLS, false);
+        for (inv_slot = 0; inv_slot < ENDOFPACK; inv_slot++)
+        {
+            // You can only carry 3 scrolls of escape at most.
+            if (items_similar(you.inv[inv_slot], it) && you.inv[inv_slot].quantity >= 3) {
+                return;
+            }
+                
+        }
         mpr("Something drops at your feet.");
         create_item_named("scroll of escape", you.pos(), nullptr);
     }
