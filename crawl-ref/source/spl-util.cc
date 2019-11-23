@@ -469,26 +469,27 @@ int spell_mana(spell_type which_spell)
 // and triggers for Sif acting (same reasoning as above, just good) {dlb}
 int spell_difficulty(spell_type which_spell)
 {
+    int base_lvl = _seekspell(which_spell)->level;
+    // Rather than changing the base spell levels in the data, we keep 1-9 and just convert to the spellcasting value here.
+    // We then use this function to calculate whether the spell can be memorised at all; this is all quite different to vanilla. ~Hair
+    switch (base_lvl) {
+        case 1:
+        case 2:
+            return base_lvl;
+        default:
+            return base_lvl * 3 - 4;
+    }
+}
+
+// This is the original spell_difficulty function because Crawl needs it to calculate failure rates. ~Hair
+int spell_difficulty_normalized(spell_type which_spell)
+{
     return _seekspell(which_spell)->level;
 }
 
 int spell_levels_required(spell_type which_spell)
 {
-    int levels = spell_difficulty(which_spell);
-#if TAG_MAJOR_VERSION == 34
-    if (which_spell == SPELL_DELAYED_FIREBALL
-        && you.has_spell(SPELL_FIREBALL))
-    {
-        levels -= spell_difficulty(SPELL_FIREBALL);
-    }
-    else if (which_spell == SPELL_FIREBALL
-            && you.has_spell(SPELL_DELAYED_FIREBALL))
-    {
-        levels = 0;
-    }
-#endif
-
-    return levels;
+    return 1;
 }
 
 spell_flags get_spell_flags(spell_type which_spell)
@@ -1334,7 +1335,7 @@ int spell_highlight_by_utility(spell_type spell, int default_colour,
         return COL_FORBIDDEN;
     }
     // Grey out spells for which you lack experience or spell levels.
-    if (memcheck && (spell_difficulty(spell) > you.experience_level
+    if (memcheck && (spell_difficulty(spell) > you.skill(SK_SPELLCASTING, 1, false, true, false)
         || player_spell_levels() < spell_levels_required(spell)))
     {
         return COL_INAPPLICABLE;

@@ -346,9 +346,8 @@ int raw_spell_fail(spell_type spell)
         200,
         260,
         340,
-    };
-    const int spell_level = spell_difficulty(spell);
-    ASSERT_RANGE(spell_level, 0, (int) ARRAYSZ(difficulty_by_level));
+    };    const int spell_level = spell_difficulty_normalized(spell);
+    ASSERT_RANGE(spell_level, 0, 10);
     chance += difficulty_by_level[spell_level]; // between 0 and 330
 
     // This polynomial is a smoother approximation of a breakpoint-based
@@ -1991,7 +1990,7 @@ static double _get_true_fail_rate(int raw_fail)
 double get_miscast_chance(spell_type spell, int severity)
 {
     int raw_fail = raw_spell_fail(spell);
-    int level = spell_difficulty(spell);
+    int level = spell_difficulty_normalized(spell);
     if (severity <= 0)
         return _get_true_fail_rate(raw_fail);
     double C = 70000.0 / (150 * level * (10 + level));

@@ -856,7 +856,7 @@ static void _sdump_spells(dump_params &par)
     string verb = par.se? "had" : "have";
 
     if (spell_levels == 1)
-        text += "You " + verb + " one spell level left.";
+        text += "You " + verb + " one spell slot left.";
     else if (spell_levels == 0)
     {
         verb = par.se? "couldn't" : "cannot";
@@ -869,7 +869,7 @@ static void _sdump_spells(dump_params &par)
             text += "You had ";
         else
             text += "You have ";
-        text += make_stringf("%d spell levels left.", spell_levels);
+        text += make_stringf("%d spell slots left.", spell_levels);
     }
 
     text += "\n";

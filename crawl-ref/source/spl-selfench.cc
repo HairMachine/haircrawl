@@ -153,7 +153,7 @@ int cast_selective_amnesia(const string &pre_msg)
         if (spell != SPELL_NO_SPELL)
         {
             const string prompt = make_stringf(
-                    "Forget %s, freeing %d spell level%s for a total of %d?%s",
+                    "Forget %s, freeing %d spell slot%s for a total of %d?%s",
                     spell_title(spell), spell_levels_required(spell),
                     spell_levels_required(spell) != 1 ? "s" : "",
                     player_spell_levels() + spell_levels_required(spell),

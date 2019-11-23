@@ -792,7 +792,7 @@ public:
 
         if (!you.divine_exegesis)
         {
-            spell_levels_str = make_stringf("<lightgreen>%d spell level%s"
+            spell_levels_str = make_stringf("<lightgreen>%d spell slot%s"
                         "</lightgreen>", player_spell_levels(),
                         (player_spell_levels() > 1 || player_spell_levels() == 0)
                                                     ? "s left" : " left ");
@@ -951,9 +951,10 @@ static bool _learn_spell_checks(spell_type specspell, bool wizard = false)
         return false;
     }
 
-    if (you.experience_level < spell_difficulty(specspell) && !wizard)
+    if (you.skill(SK_SPELLCASTING, 1, false, true, false) < spell_difficulty(specspell) && !wizard)
     {
-        mpr("You're too inexperienced to learn that spell!");
+        dprf("Spellcasting: %d, Spell level: %d", you.skill(SK_SPELLCASTING, 1, false, true, false), spell_difficulty(specspell));
+        mpr("You're not good enough at Spellcasting to learn that spell!");
         return false;
     }
 
@@ -1007,7 +1008,7 @@ bool learn_spell(spell_type specspell, bool wizard)
     }
 
     const string prompt = make_stringf(
-             "Memorise %s, consuming %d spell level%s and leaving %d?",
+             "Memorise %s, consuming %d spell slot%s and leaving %d?",
              spell_title(specspell), spell_levels_required(specspell),
              spell_levels_required(specspell) != 1 ? "s" : "",
              player_spell_levels() - spell_levels_required(specspell));
