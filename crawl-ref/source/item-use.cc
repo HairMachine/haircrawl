@@ -3160,7 +3160,8 @@ void read_scroll(item_def& scroll)
         break;
 
     case SCR_NOISE:
-        noisy(25, you.pos(), "You hear a loud clanging noise!");
+        noisy(25, you.pos(), "You hear a deafening clanging noise!");
+        mass_enchantment(ENCH_CONFUSION, 10000);
         break;
 
     case SCR_SUMMONING:

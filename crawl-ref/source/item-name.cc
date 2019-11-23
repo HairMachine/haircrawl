@@ -3206,8 +3206,6 @@ bool is_bad_item(const item_def &item, bool temp)
         case SCR_CURSE_JEWELLERY:
             return !have_passive(passive_t::want_curses);
 #endif
-        case SCR_NOISE:
-            return true;
         default:
             return false;
         }
