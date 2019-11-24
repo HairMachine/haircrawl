@@ -2878,6 +2878,12 @@ string cannot_read_item_reason(const item_def &item)
         case SCR_REMOVE_CURSE:
             return _no_items_reason(OSEL_CURSED_WORN);
 
+        case SCR_ESCAPE:
+            if (player_has_orb()) {
+                return "The power of the Orb prevents your translocation - even one this powerful.";
+            }
+            return "";
+
 #if TAG_MAJOR_VERSION == 34
         case SCR_CURSE_WEAPON:
             if (!you.weapon())
