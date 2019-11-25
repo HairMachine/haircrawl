@@ -75,8 +75,6 @@ static const vector<spell_type> spellbook_templates[] =
 {   // Book of Enchantments
     SPELL_CAUSE_FEAR,
     SPELL_VIOLENT_UNRAVELLING,
-    SPELL_SILENCE,
-    SPELL_DEFLECT_MISSILES,
     SPELL_DISCORD,
 },
 
@@ -190,8 +188,6 @@ static const vector<spell_type> spellbook_templates[] =
 
 {   // Book of the Sky
     SPELL_SUMMON_LIGHTNING_SPIRE,
-    SPELL_SILENCE,
-    SPELL_DEFLECT_MISSILES,
     SPELL_CONJURE_BALL_LIGHTNING,
     SPELL_TORNADO,
 },
@@ -201,7 +197,6 @@ static const vector<spell_type> spellbook_templates[] =
     SPELL_PORTAL_PROJECTILE,
     SPELL_FORCE_LANCE,
     SPELL_DISPERSAL,
-    SPELL_CONTROLLED_BLINK,
     SPELL_DISJUNCTION,
 },
 
@@ -323,7 +318,6 @@ static const vector<spell_type> spellbook_templates[] =
 {   // Book of Dreams
     SPELL_HIBERNATION,
     SPELL_BORGNJORS_VILE_CLUTCH,
-    SPELL_SILENCE,
     SPELL_DARKNESS,
     SPELL_SHADOW_CREATURES,
 },

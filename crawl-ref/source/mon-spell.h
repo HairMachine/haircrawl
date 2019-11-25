@@ -121,7 +121,6 @@ static const mon_spellbook mspell_list[] =
     // ('e') Elves.
     {  MST_DEEP_ELF_MAGE_I,
       {
-       { SPELL_STICKY_FLAME_RANGE, 15, MON_SPELL_WIZARD },
        { SPELL_BOLT_OF_FIRE, 15, MON_SPELL_WIZARD },
        { SPELL_FIRE_ELEMENTALS, 15, MON_SPELL_WIZARD },
        { SPELL_BLINK, 15, MON_SPELL_WIZARD },
@@ -1451,7 +1450,6 @@ static const mon_spellbook mspell_list[] =
 
     {  MST_SMOKE_DEMON,
       {
-       { SPELL_STICKY_FLAME_RANGE, 19, MON_SPELL_MAGICAL },
        { SPELL_STEAM_BALL, 19, MON_SPELL_MAGICAL },
        { SPELL_SMITING, 19, MON_SPELL_MAGICAL },
       }
@@ -1489,7 +1487,6 @@ static const mon_spellbook mspell_list[] =
 
     {  MST_BALRUG,
       {
-       { SPELL_STICKY_FLAME_RANGE, 16, MON_SPELL_MAGICAL },
        { SPELL_BOLT_OF_FIRE, 16, MON_SPELL_MAGICAL },
        { SPELL_FIREBALL, 16, MON_SPELL_MAGICAL },
        { SPELL_SMITING, 16, MON_SPELL_MAGICAL },
@@ -1971,7 +1968,6 @@ static const mon_spellbook mspell_list[] =
     {  MST_AZRAEL,
       {
        { SPELL_BOLT_OF_FIRE, 13, MON_SPELL_MAGICAL },
-       { SPELL_STICKY_FLAME_RANGE, 13, MON_SPELL_MAGICAL },
        { SPELL_FIREBALL, 13, MON_SPELL_MAGICAL },
        { SPELL_HURL_DAMNATION, 13, MON_SPELL_MAGICAL },
        { SPELL_CALL_DOWN_DAMNATION, 13, MON_SPELL_MAGICAL },
