@@ -51,6 +51,7 @@
 #include "skills.h"
 #include "spl-book.h"
 #include "spl-summoning.h"
+#include "spl-util.h"
 #include "state.h"
 #include "stringutil.h"
 #include "throw.h"
@@ -646,25 +647,10 @@ const char* armour_ego_name(const item_def& item, bool terse)
     }
 }
 
-static const char* _wand_type_name(int wandtype)
+static const char* _wand_type_name(const item_def *wand)
 {
-    switch (wandtype)
-    {
-    case WAND_FLAME:           return "flame";
-    case WAND_PARALYSIS:       return "paralysis";
-    case WAND_DIGGING:         return "digging";
-    case WAND_ICEBLAST:        return "iceblast";
-    case WAND_POLYMORPH:       return "polymorph";
-    case WAND_ENSLAVEMENT:     return "enslavement";
-    case WAND_ACID:            return "acid";
-    case WAND_RANDOM_EFFECTS:  return "random effects";
-    case WAND_DISINTEGRATION:  return "disintegration";
-    case WAND_CLOUDS:          return "clouds";
-    case WAND_SCATTERSHOT:     return "scattershot";
-    default:                   return item_type_removed(OBJ_WANDS, wandtype)
-                                    ? "removedness"
-                                    : "bugginess";
-    }
+    // Wand type might become useful in future if wands are expanded into a general evocable class. ~Hair
+    return spell_title(static_cast<spell_type>(wand->spell));
 }
 
 static const char* wand_secondary_string(uint32_t s)
@@ -1204,7 +1190,7 @@ string sub_type_string(const item_def &item, bool known)
     case OBJ_MISSILES: // variable to item-prop.cc.
     case OBJ_ARMOUR:
         return item_base_name(type, sub_type);
-    case OBJ_WANDS: return _wand_type_name(sub_type);
+    case OBJ_WANDS: return _wand_type_name(&item);
     case OBJ_FOOD: return food_type_name(sub_type);
     case OBJ_SCROLLS: return scroll_type_name(sub_type);
     case OBJ_JEWELLERY: return jewellery_type_name(sub_type);
@@ -1741,7 +1727,7 @@ string item_def::name_aux(description_level_type desc, bool terse, bool ident,
         }
 
         if (know_type)
-            buff << "wand of " << _wand_type_name(item_typ);
+            buff << "wand of " << _wand_type_name(this);
         else
         {
             buff << wand_secondary_string(subtype_rnd / NDSC_WAND_PRI)

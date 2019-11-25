@@ -1312,19 +1312,14 @@ bool is_high_tier_wand(int type)
 
 static void _generate_wand_item(item_def& item, int force_type, int item_level)
 {
-    dprf("Starting wand generation");
-    /*if (force_type != OBJ_RANDOM)
-        item.sub_type = force_type;
-    else 
-    {*/
-        // We generate a beautiful random spell wand based on spell books, as these are guaranteed to have castable spells in them. ~Hair
-        book_type book = _choose_book_type(item_level);
-        vector<spell_type> available_spells = spellbook_template(book);
-        item.spell = available_spells[random2(available_spells.size())];
-        // TODO: Properly randomise
-        item.sub_type = WAND_ACID;
-    //}
-
+    // We generate a beautiful random spell wand based on spell books, as these are guaranteed to have castable spells in them. ~Hair
+    book_type book = _choose_book_type(item_level);
+    vector<spell_type> available_spells = spellbook_template(book);
+    item.spell = available_spells[random2(available_spells.size())];
+    
+    // This looks strange. That's because it is. We're doing this to randomise the tile graphic; it will likely change. ~Hair
+    item.sub_type = random2(NUM_WANDS);
+    
     // Add wand charges and ensure we have at least one charge.
     item.charges = 1 + random2avg(wand_charge_value(item.sub_type), 3);
 
