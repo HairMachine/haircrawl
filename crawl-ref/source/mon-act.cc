@@ -1050,8 +1050,7 @@ static void _mons_fire_wand(monster& mons, item_def &wand, bolt &beem,
 
     // charge expenditure {dlb}
     wand.charges--;
-    const spell_type mzap =
-        spell_in_wand(static_cast<wand_type>(wand.sub_type));
+    const spell_type mzap = static_cast<spell_type>(wand.spell);
 
     mons_cast(&mons, beem, mzap, MON_SPELL_EVOKE, false);
 

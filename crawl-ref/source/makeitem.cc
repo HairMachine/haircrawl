@@ -1244,6 +1244,23 @@ static monster_type _choose_random_monster_corpse()
     return MONS_RAT;          // if you can't find anything else...
 }
 
+/// Choose a random spellbook type for the given level.
+static book_type _choose_book_type(int item_level)
+{
+    const book_type book = static_cast<book_type>(random2(NUM_FIXED_BOOKS));
+    if (item_type_removed(OBJ_BOOKS, book))
+        return _choose_book_type(item_level); // choose something else
+
+    // If this book is really rare for this depth, continue trying.
+    const int rarity = book_rarity(book);
+    ASSERT(rarity != 100); // 'removed item' - ugh...
+
+    if (!one_chance_in(100) && x_chance_in_y(rarity-1, item_level+1))
+        return _choose_book_type(item_level); // choose something else
+
+    return book;
+}
+
 /**
  * Choose a random wand subtype for ordinary wand generation.
  *
@@ -1295,10 +1312,18 @@ bool is_high_tier_wand(int type)
 
 static void _generate_wand_item(item_def& item, int force_type, int item_level)
 {
-    if (force_type != OBJ_RANDOM)
+    dprf("Starting wand generation");
+    /*if (force_type != OBJ_RANDOM)
         item.sub_type = force_type;
-    else
-        item.sub_type = _random_wand_subtype();
+    else 
+    {*/
+        // We generate a beautiful random spell wand based on spell books, as these are guaranteed to have castable spells in them. ~Hair
+        book_type book = _choose_book_type(item_level);
+        vector<spell_type> available_spells = spellbook_template(book);
+        item.spell = available_spells[random2(available_spells.size())];
+        // TODO: Properly randomise
+        item.sub_type = WAND_ACID;
+    //}
 
     // Add wand charges and ensure we have at least one charge.
     item.charges = 1 + random2avg(wand_charge_value(item.sub_type), 3);
@@ -1437,23 +1462,6 @@ static void _generate_scroll_item(item_def& item, int force_type,
                                             1, 3);
 
     item.plus = 0;
-}
-
-/// Choose a random spellbook type for the given level.
-static book_type _choose_book_type(int item_level)
-{
-    const book_type book = static_cast<book_type>(random2(NUM_FIXED_BOOKS));
-    if (item_type_removed(OBJ_BOOKS, book))
-        return _choose_book_type(item_level); // choose something else
-
-    // If this book is really rare for this depth, continue trying.
-    const int rarity = book_rarity(book);
-    ASSERT(rarity != 100); // 'removed item' - ugh...
-
-    if (!one_chance_in(100) && x_chance_in_y(rarity-1, item_level+1))
-        return _choose_book_type(item_level); // choose something else
-
-    return book;
 }
 
 /// Choose a random skill for a manual to be generated for.

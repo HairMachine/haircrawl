@@ -190,6 +190,12 @@ void wizard_create_spec_object()
             return;
         }
     }
+    else if (class_wanted == OBJ_WANDS)
+    {
+        mpr("You'll make do with a random wand for now! ~Hair");
+        destroy_item(thing_created);
+        thing_created = items(false, OBJ_WANDS, OBJ_RANDOM, random2(100), 0, -1);
+    }
     else
     {
         string prompt = "What type of item? ";

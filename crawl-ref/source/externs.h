@@ -549,6 +549,7 @@ struct item_def
         short net_placed;   ///< is this throwing net trapping something?
         short skill_points; ///< # of skill points a manual gives
         short stash_freshness; ///< where stash.cc stores corpse freshness
+        short spell; ///< which spell this wand contains
     };
 #pragma pack(pop)
     union

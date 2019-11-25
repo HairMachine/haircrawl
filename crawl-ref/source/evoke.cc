@@ -467,8 +467,7 @@ void zap_wand(int slot)
 
     int power = (15 + you.skill(SK_EVOCATIONS, 7) / 2) * (mp_cost + 9) / 9;
 
-    const spell_type spell =
-        spell_in_wand(static_cast<wand_type>(wand.sub_type));
+    const spell_type spell = static_cast<spell_type>(wand.spell);
 
     spret ret = your_spells(spell, power, false, &wand);
 
