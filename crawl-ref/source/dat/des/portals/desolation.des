@@ -42,7 +42,7 @@ function desolation_portal(e)
         floor = "expired_portal",
         feat_tile = "dngn_portal_desolation_gone",
         msg = messager })
-  e.tags("desolation_entry no_monster_gen chance_desolation")
+  e.tags("desolation_entry no_monster_gen")
   e.kfeat("O = enter_desolation")
 end
 

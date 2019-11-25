@@ -35,6 +35,7 @@ function gauntlet_portal(e)
         dstname = 'gauntlet' })
     e.kfeat("O = enter_gauntlet")
     e.tile("O = dngn_portal_gauntlet")
+    e.tags("gauntlet_entry")
 end
 
 function gauntlet_appearance(e)
@@ -46,7 +47,7 @@ end
 # Gauntlet entry vaults
 
 NAME:   gauntlet_entry_generic
-TAGS:   gauntlet_entry transparent extra
+TAGS:   transparent extra
 : gauntlet_portal(_G)
 MAP
 O

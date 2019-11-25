@@ -44,7 +44,7 @@ function ice_cave_portal(e)
         floor = "expired_portal",
         feat_tile = "dngn_portal_ice_cave_gone",
         msg = messager })
-  e.tags("ice_cave_entry")
+  e.tags("icecv_entry")
   e.kfeat("O = enter_ice_cave")
   e.colour("X = white")
   e.kfeat("X = x")

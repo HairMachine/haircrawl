@@ -5647,9 +5647,17 @@ void item_list::parse_raw_name(string name, item_spec &spec)
 {
     trim_string(name);
     if (name.empty())
-    {
+    {    
         error = make_stringf("Bad item name: '%s'", name.c_str());
-        return ;
+        return;
+    }
+
+    // Special casing for wands. Any wand mentioned in a vault is returned as a silly old wand of magic darts. ~Hair
+    if (starts_with(name, "wand")) {
+        spec.base_type = OBJ_WANDS;
+        spec.sub_type = 0;
+        spec.plus2 = 3;
+        return;
     }
 
     item_kind parsed = item_kind_by_name(name);
