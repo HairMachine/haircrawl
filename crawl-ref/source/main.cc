@@ -2200,6 +2200,8 @@ void world_reacts()
 
     run_environment_effects();
 
+    wand_contaminate();
+
     if (!crawl_state.game_is_arena())
         player_reacts();
 

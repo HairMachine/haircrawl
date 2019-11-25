@@ -2236,3 +2236,12 @@ void identify_inventory()
         }
     }
 }
+
+// Wands in your inventory produce contamination over time, limiting the number you can hold. ~Hair
+void wand_contaminate() {
+    for (int i = 0; i < ENDOFPACK; ++i) {
+        if (you.inv[i].base_type == OBJ_WANDS) {
+            contaminate_player(5, false, false);
+        }
+    }
+}
