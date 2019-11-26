@@ -1068,7 +1068,7 @@ static int _randbook_spell_weight(spell_type spell, int agent)
     // prefer spells roughly approximating the player's overall spellcasting
     // ability (?????)
     const int Spc = div_rand_round(you.skill(SK_SPELLCASTING, 256, true), 256);
-    const int difficult_weight = 5 - abs(3 * spell_difficulty(spell) - Spc) / 7;
+    const int difficult_weight = 5 - abs(3 * spell_difficulty_normalized(spell) - Spc) / 7;
 
     // prefer spells in disciplines the player is skilled with
     const spschools_type disciplines = get_spell_disciplines(spell);
