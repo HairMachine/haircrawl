@@ -17,6 +17,9 @@ ae += forbidden
 # Ignore books that you have already seen
 ae += [^n]identified.*spellbook
 
+# Ignore all wands
+ae += wand*
+
 # Don't pick up misc items when duplication doesn't help.
 :add_autopickup_func(function (it, name)
 :  local itname = it.name(true) -- Not the name parameter, which includes prefixes.
