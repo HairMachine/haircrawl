@@ -4021,9 +4021,7 @@ void contaminate_player(int change, bool controlled, bool msg)
     }
     else if (msg && new_level < old_level)
     {
-        if (old_level == 1 && new_level == 0)
-            mpr("Your magical contamination has completely faded away.");
-        else if (player_severe_contamination() || was_glowing)
+        if (player_severe_contamination() || was_glowing)
         {
             mprf(MSGCH_RECOVERY,
                  "You feel less contaminated with magical energies.");
