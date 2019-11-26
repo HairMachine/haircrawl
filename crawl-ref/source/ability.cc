@@ -2885,12 +2885,12 @@ static spret _do_ability(const ability_def& abil, bool fail)
 
     case ABIL_EXSANGUINATE:
         fail_check();
-        start_delay<ExsanguinateDelay>(5);
+        start_delay<ExsanguinateDelay>(1);
         break;
 
     case ABIL_REVIVIFY:
         fail_check();
-        start_delay<RevivifyDelay>(5);
+        start_delay<RevivifyDelay>(1);
         break;
 
     case ABIL_JIYVA_CALL_JELLY:
