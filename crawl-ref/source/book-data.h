@@ -74,6 +74,7 @@ static const vector<spell_type> spellbook_templates[] =
 
 {   // Book of Enchantments
     SPELL_CAUSE_FEAR,
+    SPELL_ENSLAVEMENT,
     SPELL_VIOLENT_UNRAVELLING,
     SPELL_DISCORD,
 },
@@ -121,6 +122,7 @@ static const vector<spell_type> spellbook_templates[] =
 },
 
 {   // Book of Transfigurations
+    SPELL_POLYMORPH,
     SPELL_IRRADIATE,
     SPELL_STATUE_FORM,
     SPELL_HYDRA_FORM,
@@ -259,6 +261,7 @@ static const vector<spell_type> spellbook_templates[] =
     SPELL_BATTLESPHERE,
     SPELL_VENOM_BOLT,
     SPELL_BOLT_OF_MAGMA,
+    SPELL_DISINTEGRATE,
     SPELL_IRON_SHOT,
     SPELL_IOOD,
     SPELL_SPELLFORGED_SERVITOR,
@@ -310,7 +313,7 @@ static const vector<spell_type> spellbook_templates[] =
     SPELL_SWIFTNESS,
     SPELL_PASSWALL,
     SPELL_GOLUBRIAS_PASSAGE,
-    SPELL_LRD,
+    SPELL_DIG,
     SPELL_DARKNESS,
     SPELL_INVISIBILITY,
 },
@@ -340,6 +343,7 @@ static const vector<spell_type> spellbook_templates[] =
 
 {   // Book of Annihilations
     SPELL_POISON_ARROW,
+    SPELL_SCATTERSHOT,
     SPELL_CHAIN_LIGHTNING,
     SPELL_LEHUDIBS_CRYSTAL_SPEAR,
     SPELL_GLACIATE,

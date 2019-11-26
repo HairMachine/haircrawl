@@ -170,8 +170,7 @@ static const struct spell_desc spelldata[] =
 {
     SPELL_POLYMORPH, "Polymorph",
     spschool::transmutation | spschool::hexes,
-    spflag::dir_or_target | spflag::chaotic | spflag::monster
-        | spflag::needs_tracer | spflag::MR_check,
+    spflag::dir_or_target | spflag::chaotic | spflag::needs_tracer | spflag::MR_check,
     4,
     200,
     LOS_RADIUS, LOS_RADIUS,
@@ -614,8 +613,7 @@ static const struct spell_desc spelldata[] =
 {
     SPELL_ENSLAVEMENT, "Enslavement",
     spschool::hexes,
-    spflag::dir_or_target | spflag::not_self | spflag::needs_tracer
-        | spflag::monster | spflag::MR_check,
+    spflag::dir_or_target | spflag::not_self | spflag::needs_tracer | spflag::MR_check,
     4,
     200,
     LOS_RADIUS, LOS_RADIUS,
