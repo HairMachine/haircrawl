@@ -150,6 +150,12 @@ public:
         you.duration[DUR_POISONING] = 0;
         you.disease = 0;
         you.duration[DUR_CONF] = 0;
+        // Also cancellation effect ~Hair
+        debuff_player();
+        const int old_contam_level = get_contamination_level();
+        contaminate_player(-1 * (1000 + random2(4000)));
+        if (old_contam_level && old_contam_level == get_contamination_level())
+            mpr("You feel slightly less contaminated with magical energies.");
         return true;
     }
 };
@@ -409,6 +415,7 @@ public:
     {
         you.attribute[ATTR_FLIGHT_UNCANCELLABLE] = 1;
         fly_player(pow);
+        haste_player(40 + random2(pow));
         return you.airborne();
     }
 };

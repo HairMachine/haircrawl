@@ -1374,21 +1374,16 @@ static void _generate_potion_item(item_def& item, int force_type,
         {
             // total weight: 1045
             stype = random_choose_weighted(192, POT_CURING,
-                                           105, POT_HEAL_WOUNDS,
+                                           115, POT_AMBROSIA,
+                                           115, POT_BERSERK_RAGE,
+                                           105, POT_FLIGHT,
                                             73, POT_LIGNIFY,
-                                            73, POT_FLIGHT,
-                                            73, POT_HASTE,
                                             66, POT_DEGENERATION,
-                                            66, POT_MIGHT,
-                                            66, POT_AGILITY,
                                             66, POT_BRILLIANCE,
                                             53, POT_MUTATION,
                                             35, POT_INVISIBILITY,
                                             35, POT_RESISTANCE,
                                             35, POT_MAGIC,
-                                            35, POT_BERSERK_RAGE,
-                                            35, POT_CANCELLATION,
-                                            35, POT_AMBROSIA,
                                              2, POT_EXPERIENCE);
         }
         while (agent == GOD_XOM
