@@ -1094,20 +1094,13 @@ static bool _handle_wand(monster& mons)
     if (item_type_removed(wand->base_type, wand->sub_type))
         return false;
 
-    // XXX: Teach monsters to use random effects
-    // Digging is handled elsewhere so that sensible (wall) targets are
-    // chosen.
-    if (wand->sub_type == WAND_RANDOM_EFFECTS
-        || wand->sub_type == WAND_DIGGING)
-    {
-        return false;
-    }
-
     bolt beem;
 
-    const spell_type mzap =
-        spell_in_wand(static_cast<wand_type>(wand->sub_type));
+    const spell_type mzap = static_cast<spell_type>(wand->spell);
     const int power = 30 + mons.get_hit_dice();
+
+    if (!is_valid_mon_spell(mzap))
+        return false;
 
     if (!setup_mons_cast(&mons, beem, mzap, true))
         return false;
@@ -1117,23 +1110,11 @@ static bool _handle_wand(monster& mons)
         wand->name(DESC_QUALNAME, false, true, false, false);
 
     bool should_fire = false;
-    const wand_type kind = (wand_type)wand->sub_type;
-    switch (kind)
+    switch (mzap)
     {
-    case WAND_SCATTERSHOT:
+    case SPELL_SCATTERSHOT:
         should_fire = scattershot_tracer(&mons, power, beem.target);
         break;
-
-    case WAND_CLOUDS:
-        should_fire = mons_should_cloud_cone(&mons, power, beem.target);
-        break;
-
-    case WAND_DISINTEGRATION:
-        // Dial down damage from wands of disintegration, since
-        // disintegration beams can do large amounts of damage.
-        beem.damage.size = beem.damage.size * 2 / 3;
-
-        // Intentional fallthrough
     default:
         fire_tracer(&mons, beem);
         should_fire = mons_should_fire(beem);
