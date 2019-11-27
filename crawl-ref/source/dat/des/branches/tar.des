@@ -8,7 +8,7 @@
 
 {{
 function tar_setup(e)
-   e.place("Tar:$")
+   e.place("Tar")
    e.tags("no_rotate")
    e.kmask('O = no_item_gen')
    e.kitem('O = bone rune of Zot')
@@ -131,7 +131,7 @@ ENDMAP
 ##############################################################################
 
 NAME: grunt_tartarus_stairs_gauntlet_trap
-DEPTH: Tar, !Tar:$
+DEPTH: Tar
 TAGS: generate_awake patrolling no_trap_gen
 MONS: Tzitzimitl, shadow demon / reaper, soul eater, necrophage, shadow imp
 {{
@@ -177,7 +177,7 @@ ENDMAP
 ##############################################################################
 NAME:    hangedman_snap_crack_crunch
 TAGS:    transparent no_monster_gen
-DEPTH:   Tar, !Tar:$
+DEPTH:   Tar
 : if you.in_branch("Tar") then
 KMONS:   12 = patrolling reaper
 KMONS:   34 = patrolling tormentor
@@ -239,7 +239,7 @@ ENDMAP
 
 NAME:    hangedman_restless_catacombs
 TAGS:    no_monster_gen
-DEPTH:   Tar, !Tar:$
+DEPTH:   Tar
 MONS:    soul eater, patrolling curse skull
 MONS:    skeletal warrior / phantasmal warrior w:6 / \
          shadow wraith w:4 / guardian mummy w:4 / \
@@ -276,7 +276,7 @@ ENDMAP
 
 NAME:    hangedman_tartarus_temple_path
 TAGS:    transparent extra
-DEPTH:   Tar, !Tar:$
+DEPTH:   Tar
 SHUFFLE: hH / hH / Hh, iI / iI / Ii
 SUBST:   h : cccx, H : cxGF, i : cccx, I : cxGF
 SUBST:   d = d., + = +..., { = {}...., c = c:49 .:1, C = c
@@ -306,7 +306,7 @@ ENDMAP
 
 NAME:   nicolae_tar_cuneiform_heaven
 DEPTH:  Tar
-WEIGHT: 10, 1 (Tar:$)
+WEIGHT: 10, 1 (Tar)
 TAGS:   transparent decor extra allow_dup luniq tar_grunt_decor
 MAP
 ................
@@ -325,7 +325,7 @@ ENDMAP
 
 NAME:   nicolae_tar_cuneiform_sun
 DEPTH:  Tar
-WEIGHT: 10, 1 (Tar:$)
+WEIGHT: 10, 1 (Tar)
 TAGS:   transparent decor extra allow_dup luniq tar_grunt_decor
 MAP
 ............
@@ -343,7 +343,7 @@ ENDMAP
 
 NAME:   nicolae_tar_cuneiform_to_be
 DEPTH:  Tar
-WEIGHT: 10, 1 (Tar:$)
+WEIGHT: 10, 1 (Tar)
 TAGS:   transparent decor extra allow_dup luniq tar_grunt_decor
 MAP
 ...............
@@ -361,7 +361,7 @@ ENDMAP
 
 NAME:   nicolae_tar_cuneiform_two
 DEPTH:  Tar
-WEIGHT: 10, 1 (Tar:$)
+WEIGHT: 10, 1 (Tar)
 TAGS:   transparent decor extra allow_dup luniq tar_grunt_decor
 MAP
 .............
@@ -379,7 +379,7 @@ ENDMAP
 
 NAME:   nicolae_tar_cuneiform_three
 DEPTH:  Tar
-WEIGHT: 10, 1 (Tar:$)
+WEIGHT: 10, 1 (Tar)
 TAGS:   transparent decor extra allow_dup luniq tar_grunt_decor
 MAP
 ...................
@@ -397,7 +397,7 @@ ENDMAP
 
 NAME:   nicolae_tar_cuneiform_bird
 DEPTH:  Tar
-WEIGHT: 10, 1 (Tar:$)
+WEIGHT: 10, 1 (Tar)
 TAGS:   transparent decor extra allow_dup luniq tar_grunt_decor
 MAP
 ..................
@@ -416,7 +416,7 @@ ENDMAP
 
 NAME:   nicolae_tar_cuneiform_water
 DEPTH:  Tar
-WEIGHT: 10, 1 (Tar:$)
+WEIGHT: 10, 1 (Tar)
 TAGS:   transparent decor extra allow_dup luniq tar_grunt_decor
 MAP
 .............
@@ -434,7 +434,7 @@ ENDMAP
 
 NAME:   nicolae_tar_cuneiform_bread
 DEPTH:  Tar
-WEIGHT: 10, 1 (Tar:$)
+WEIGHT: 10, 1 (Tar)
 TAGS:   transparent decor extra allow_dup luniq tar_grunt_decor
 MAP
 ...................
@@ -454,7 +454,7 @@ ENDMAP
 
 NAME:   nicolae_tar_cuneiform_oil
 DEPTH:  Tar
-WEIGHT: 10, 1 (Tar:$)
+WEIGHT: 10, 1 (Tar)
 TAGS:   transparent decor extra allow_dup luniq tar_grunt_decor
 MAP
 .............
@@ -474,7 +474,7 @@ ENDMAP
 
 NAME:   nicolae_tar_cuneiform_not
 DEPTH:  Tar
-WEIGHT: 10, 1 (Tar:$)
+WEIGHT: 10, 1 (Tar)
 TAGS:   transparent decor extra allow_dup luniq tar_grunt_decor
 MAP
 ..............
@@ -497,7 +497,7 @@ ENDMAP
 
 NAME:   nicolae_tar_cuneiform_city
 DEPTH:  Tar
-WEIGHT: 10, 1 (Tar:$)
+WEIGHT: 10, 1 (Tar)
 TAGS:   transparent decor extra allow_dup luniq tar_grunt_decor
 MAP
 .................
@@ -519,7 +519,7 @@ MAP
 ENDMAP
 
 NAME:    nicolae_tar_fractal_crypt
-DEPTH:   Tar, !Tar:$
+DEPTH:   Tar
 TAGS:    transparent
 SHUFFLE: ae, bf, cg, dh
 SUBST:   e : ae, f : bf, g : cg, h : dh
@@ -560,7 +560,7 @@ ENDMAP
 
 NAME:    hangedman_damned_closets
 TAGS:    no_monster_gen
-DEPTH:   Tar, !Tar:$
+DEPTH:   Tar
 ORIENT:  float
 MONS:    shadow w:6 / shadow wraith / wraith w:6
 MONS:    soul eater, tormentor / shadow demon w:12
@@ -605,7 +605,7 @@ ENDMAP
 # the aura extends to the edge of the walls with the main doors.
 NAME:    hangedman_tartarus_silent_blood_keep
 TAGS:    no_monster_gen transparent patrolling
-DEPTH:   Tar, !Tar:$
+DEPTH:   Tar
 ORIENT:  float
 WEIGHT:  5
 MONS:    zombie / skeleton / spectral thing w:4

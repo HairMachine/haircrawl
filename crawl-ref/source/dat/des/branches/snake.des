@@ -282,7 +282,7 @@ ENDMAP
 NAME:   nicolae_sea_snake_s
 MONS:   naga mage, naga
 ORIENT: float
-DEPTH:  Snake:2-3
+DEPTH:  Snake
 TAGS:   no_monster_gen
 SHUFFLE: {[(
 SHUFFLE: (<
@@ -323,7 +323,7 @@ xxsssssxxxxxx
 ENDMAP
 
 NAME:   nicolae_cobra_stairs
-DEPTH:  Snake:2-3
+DEPTH:  Snake
 ORIENT: float
 TAGS:   no_pool_fixup patrolling
 SHUFFLE: }])
@@ -370,7 +370,7 @@ ENDMAP
 # The disgraced guardian serpent Aizul has been
 # demoted to watching the stairs.
 NAME:   nicolae_aizul_guard
-DEPTH:  Snake:2-3
+DEPTH:  Snake
 TAGS:   no_rotate no_hmirror no_vmirror transparent
 ORIENT: float
 SHUFFLE: ]})>
@@ -419,7 +419,7 @@ MAP
 ENDMAP
 
 NAME:   nicolae_coiled_stairwell_down
-DEPTH:  Snake, !Snake:$
+DEPTH:  Snake
 TAGS:   uniq_coiled_stairwell
 SUBST:  } = }])>
 MAP
@@ -441,7 +441,7 @@ xx.xxxx.x.x
 ENDMAP
 
 NAME:   nicolae_coiled_stairwell_up
-DEPTH:  Snake:2-
+DEPTH:  Snake
 TAGS:   uniq_coiled_stairwell
 SUBST:  { = {[(<
 MAP
@@ -611,7 +611,7 @@ ENDMAP
 
 NAME:    hangedman_snake_sidewinding
 TAGS:    allow_dup
-DEPTH:   Snake, !Snake:$, Zot, !Zot:$
+DEPTH:   Snake, Zot
 : if you.in_branch("Zot") then
 KMONS:  A = base draconian / green draconian w:4
 KMONS:  B = swamp dragon w:5 / fire dragon / ice dragon / storm dragon w:5
@@ -798,7 +798,7 @@ xx....xx..........xxx.........xxx.........xx...x
 ENDMAP
 
 NAME: nicolae_snake_salamander_stairs
-DEPTH: Snake, !Snake:$
+DEPTH: Snake
 : local level = you.depth() ; local weight = level * level
 KMONS: 1 = salamander
 SHUFFLE: ])}
@@ -864,7 +864,7 @@ xxx...c.B.....c.....C.c...xxx
 ENDMAP
 
 NAME: cheibrodos_snake_lava_hold
-DEPTH: Snake, !Snake:$
+DEPTH: Snake
 TAGS: no_item_gen no_monster_gen patrolling
 ORIENT: float
 NSUBST: ' = 2:'l / *:'
@@ -891,7 +891,7 @@ cccl..lccccclc..clc..c
 ENDMAP
 
 NAME: cheibrodos_snake_ritualist_ritual
-DEPTH: Snake, !Snake:$
+DEPTH: Snake
 TAGS: no_item_gen no_monster_gen no_pool_fixup patrolling transparent
 ORIENT: float
 MONS: naga mage / mana viper
@@ -1042,7 +1042,7 @@ ENDMAP
 ################################################################################
 # Snake Pit: the hunt
 NAME:    snake_hunt
-PLACE:   Snake:$
+PLACE:   Snake
 WEIGHT:  20
 TAGS:    no_rotate
 ORIENT:  northwest
@@ -1111,7 +1111,7 @@ ENDMAP
 # Snake Pit: old level
 #
 NAME:   snake_pit
-PLACE:  Snake:$
+PLACE:  Snake
 WEIGHT: 20
 ORIENT: southwest
 TAGS:   no_rotate
@@ -1164,7 +1164,7 @@ ENDMAP
 # Snake Pit: Coiled (minmay)
 #
 NAME:    minmay_snake_end_coiled
-PLACE:   Snake:$
+PLACE:   Snake
 TAGS:    no_rotate
 ORIENT:  southwest
 MONS:    naga
@@ -1229,7 +1229,7 @@ ENDMAP
 #
 NAME:   snake_pit_salamanders_mu
 TAGS:   no_monster_gen
-PLACE:  Snake:$
+PLACE:  Snake
 ORIENT: north
 TAGS:   no_rotate
 MONS:   naga
@@ -1290,7 +1290,7 @@ ENDMAP
 ################################################################################
 
 NAME:   grunt_snake_rune_spirals
-PLACE:  Snake:$
+PLACE:  Snake
 ORIENT: centre
 MONS:   naga / nothing
 MONS:   naga warrior / naga sharpshooter w:5 / naga w:15
@@ -1329,7 +1329,7 @@ ENDMAP
 ################################################################################
 
 NAME: grunt_snake_rune_pools
-PLACE: Snake:$
+PLACE: Snake
 TAGS: no_trap_gen no_monster_gen
 ORIENT: north
 MONS: nagaraja, guardian serpent
@@ -1378,7 +1378,7 @@ ENDMAP
 ################################################################################
 
 NAME:   grunt_snake_rune_serpentine_throne
-PLACE:  Snake:$
+PLACE:  Snake
 ORIENT: north
 KMONS:  L = nagaraja
 KITEM:  O = serpentine rune of Zot
@@ -1429,7 +1429,7 @@ ENDMAP
 ################################################################################
 
 NAME:   johnstein_snake_rune_scales
-PLACE:  Snake:$
+PLACE:  Snake
 ORIENT: north
 MONS:   naga / nothing
 MONS:   naga warrior / naga sharpshooter w:5 / naga w:15 / nothing

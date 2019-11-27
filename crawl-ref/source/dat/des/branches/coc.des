@@ -8,7 +8,7 @@
 
 {{
 function coc_setup(e)
-   e.place("Coc:$")
+   e.place("Coc")
    e.tags("no_rotate")
    e.kitem("$ = $ no_pickup")
    e.kmask('O = no_item_gen')
@@ -29,7 +29,7 @@ end
 
 NAME:   grunt_cocytus_stairs_refrigerator
 TAGS:   transparent
-DEPTH:  !Coc:$
+DEPTH:  Coc
 COLOUR: c = blue
 MONS:   Ice Fiend, blizzard demon, ice devil, white imp
 KMONS:  H = ice statue
@@ -52,7 +52,7 @@ xwww..3......
 ENDMAP
 
 NAME:    nicolae_coc_three_mouths
-DEPTH:   Coc, !Coc:$
+DEPTH:   Coc
 TAGS:    transparent extra decor
 SUBST:   j = >}}, b = >]], c = >))
 SHUFFLE: )}]
@@ -83,7 +83,7 @@ MAP
 ENDMAP
 
 NAME:    nicolae_coc_ice_floe
-DEPTH:   Coc:2-, !Coc:$
+DEPTH:   Coc
 SHUFFLE: {[(, }]}
 NSUBST:  D = 1:1 / 2:2 / *:34
 KMONS:   1 = Ice Fiend
@@ -115,7 +115,7 @@ www....xx.D.xx....www
 ENDMAP
 
 NAME:    nicolae_coc_snowflakes_chance_in_hell
-DEPTH:   Coc, !Coc:$
+DEPTH:   Coc
 ORIENT:  centre
 TAGS:    transparent extra decor
 SHUFFLE: abcdefghi, jklmno, ABCDEFGH
@@ -152,7 +152,7 @@ ENDMAP
 
 NAME:    nooodl_cocytus_jagged_cave
 ORIENT:  northwest
-DEPTH:   Coc, !Coc:$
+DEPTH:   Coc
 TAGS:    extra decor
 SUBST:   < : AB
 NSUBST:  A = 1:{ / 1:} / *:.

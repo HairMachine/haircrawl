@@ -3,6 +3,38 @@
 ###############################################################################
 
 {{
+function slime_portal(e)
+  local timeout_turns = crawl.random_range(2500, 3000)
+
+  local messager =
+    timed_msg {
+      initmsg = { "You hear the sound of gurgling slimes.",
+                  "There is an entrance to the slime pits on this level. "
+                  .. "Hurry and find it before the portal closes!" },
+      finalmsg = "You hear the gurgling stop.",
+
+      verb = 'gurgling',
+      noisemaker = 'portal',
+      ranges = {
+        { 5000, 'slow ' },  { 4000, '' },
+        { 2500, 'brisk ' }, { 1500, 'quick ' },
+        { 0, 'rapid ' }
+      }
+    }
+
+  e.lua_marker('O',
+    timed_marker {
+      disappear = "The portal closes.",
+      entity = 'portal',
+      turns = timeout_turns,
+      single_timed = true,
+      floor = "expired_portal",
+      feat_tile = "dngn_stone_arch",
+      msg = messager })
+  e.tags("slime_entry")
+  e.kfeat("O = enter_slime_pits")
+end
+
 function fixup_slime_vaults(data, triggerable, triggerer, marker, ev)
   if not dgn.persist.fix_slime_vaults then
     return
@@ -47,7 +79,7 @@ end
 # Weight balancer
 NAME:  slime_dummy
 TAGS:  slime_entry
-KFEAT: O = enter_slime_pits
+: slime_portal(_G)
 MAP
 O
 ENDMAP
@@ -57,7 +89,7 @@ NAME:   slime_altar_1
 TAGS:   slime_entry
 WEIGHT: 30
 KFEAT:  Z = altar_jiyva
-KFEAT:  O = enter_slime_pits
+: slime_portal(_G)
 MAP
 ....
 .OZ.
@@ -72,7 +104,7 @@ NSUBST: 1 = 1 / 1. , 2 = 2 / 2... , 3 = 3 / 3....
 MONS:   jelly / ooze
 MONS:   acid blob / slime creature w:5
 MONS:   azure jelly
-KFEAT:  O = enter_slime_pits
+: slime_portal(_G)
 MAP
 ccccc
 c111m.
@@ -83,9 +115,9 @@ ENDMAP
 
 NAME:  dpeg_slime_entry_enclosed_altar
 TAGS:  slime_entry
-KFEAT: O = enter_slime_pits
 KFEAT: S = slimy_wall
 KFEAT: _ = altar_jiyva
+: slime_portal(_G)
 MAP
   .....
  .ccccc.
@@ -103,8 +135,8 @@ NAME:   minmay_slime_entry_eyes
 TAGS:   slime_entry ruin_lair
 WEIGHT: 2
 MONS:   eye of devastation, eye of draining
-KFEAT:  O = enter_slime_pits
 KFEAT:  S = slimy_wall
+: slime_portal(_G)
 MAP
  ....   ....
 ..xx..x..xx..
@@ -124,7 +156,7 @@ ENDMAP
 NAME:   minmay_slime_entry_pillars
 TAGS:   slime_entry ruin_lair
 MONS:   jelly / slime creature
-KFEAT:  O = enter_slime_pits
+: slime_portal(_G)
 MAP
 ...........
 .ccc...ccc.
@@ -144,7 +176,7 @@ NAME:   minmay_slime_entry_jelly_boxes
 TAGS:   slime_entry ruin_lair
 WEIGHT: 5
 MONS:   jelly / ooze w:1 / nothing w:1
-KFEAT:  O = enter_slime_pits
+: slime_portal(_G)
 MAP
 .............
 .xxxxx.xxxxx.
@@ -165,7 +197,7 @@ NAME:   minmay_slime_entry_oklob_open
 TAGS:   slime_entry
 WEIGHT: 5
 MONS:   oklob plant / nothing w:20
-KFEAT:  O = enter_slime_pits
+: slime_portal(_G)
 MAP
  .....
 .......
@@ -181,8 +213,8 @@ TAGS:   slime_entry ruin_lair
 ORIENT: northeast
 WEIGHT: 5
 MONS:   oklob plant / nothing w:20
-KFEAT:  O = enter_slime_pits
 KFEAT:  S = slimy_wall
+: slime_portal(_G)
 MAP
 xxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxx......xxxxxx
@@ -201,8 +233,8 @@ NAME:   dpeg_slime_entry_corner
 TAGS:   slime_entry ruin_lair
 ORIENT: northwest
 WEIGHT: 5
-KFEAT:  O = enter_slime_pits
 KFEAT:  S = slimy_wall
+: slime_portal(_G)
 MAP
 xxxxxxxxxxx
 xSSSxxxxxx
@@ -219,9 +251,9 @@ TAGS: slime_entry transparent
 NSUBST: A = . / A, B = . / B, C = . / C
 SHUFFLE: ABCD
 SUBST: A = x, BCD = .
-KFEAT: O = enter_slime_pits
 KMONS: 1 = ooze / jelly / nothing
 KFEAT: x = slimy_wall
+: slime_portal(_G)
 MAP
   .........
  ...........
@@ -242,7 +274,7 @@ ENDMAP
 # Slime Pit specific non-ending non-entry vaults
 ################################################################################
 NAME: nicolae_slime_pool
-DEPTH: Slime, !Slime:$
+DEPTH: Slime
 TAGS: transparent
 MONS: slime creature
 ORIENT: float
@@ -269,7 +301,7 @@ d..fwwwfww.b
 ENDMAP
 
 NAME: nicolae_slime_jelly_donut
-DEPTH: Slime, !Slime:$
+DEPTH: Slime
 ORIENT: float
 SHUFFLE: abcdefgh
 SUBST: a = @, b : @., c : @.., d : @..., efgh = .
@@ -296,7 +328,7 @@ ENDMAP
 
 NAME: nicolae_slime_barrier
 TAGS: transparent extra
-DEPTH: Slime, !Slime:$
+DEPTH: Slime
 SHUFFLE: abcde
 SUBST: a = @, bcde = .
 MAP
@@ -329,7 +361,7 @@ ENDMAP
 
 NAME: nicolae_slime_welcoming_committee
 TAGS: no_monster_gen no_item_gen no_trap_gen
-DEPTH: Slime:2-, !Slime:$
+DEPTH: Slime
 SUBST: X = x., { = {[(
 KMONS: 1 : jelly w:20 / ooze / slime creature w:30 / \
    acid blob w:5 / death ooze w:5 / azure jelly w:5
@@ -348,7 +380,7 @@ xxxXX.....1.@
 ENDMAP
 
 NAME: nicolae_slime_phagocytosis
-DEPTH: Slime, !Slime:$
+DEPTH: Slime
 TAGS: transparent
 SUBST: a : .x, b : .x, c : .x, d : .x, e : .x, { = {[(, X = Wx, ' = ._
 NSUBST: W = 4:1 / *:W
@@ -379,7 +411,7 @@ MAP
 ENDMAP
 
 NAME: nicolae_slime_round_cave
-DEPTH: Slime:2-, !Slime:$
+DEPTH: Slime
 TAGS: no_monster_gen
 SHUFFLE: {}/()/[]
 NSUBST: a = X / .
@@ -414,7 +446,7 @@ zzX..0..XXxx.xxXX.....Xzz
 ENDMAP
 
 NAME: nicolae_slime_ancient_tower_intersection
-DEPTH: Slime, !Slime:$
+DEPTH: Slime
 WEIGHT: 2
 TAGS: extra decor transparent
 SUBST: c = ccc., X = x_, V = V..
@@ -444,7 +476,7 @@ XXxxxxxx@@@@@xxxxxxXX
 ENDMAP
 
 NAME: cheibrodos_slime_lost_civilization_1
-DEPTH: Slime, !Slime:$
+DEPTH: Slime
 TAGS: decor transparent ruin
 ORIENT: float
 SUBST: B = xxxW., C = W., D = VVW.
@@ -469,7 +501,7 @@ xxxxxxxxxxxxxxxxx
 ENDMAP
 
 NAME: cheibrodos_slime_lost_civilization_2
-DEPTH: Slime, !Slime:$
+DEPTH: Slime
 TAGS: decor
 ORIENT: float
 MAP
@@ -487,7 +519,7 @@ xxxx...xxxx
 ENDMAP
 
 NAME: cheibrodos_slime_lost_civilization_3
-DEPTH: Slime, !Slime:$
+DEPTH: Slime
 TAGS: decor transparent
 ORIENT: float
 SHUFFLE: W.
@@ -508,7 +540,7 @@ xxxxxxxxxxxxx
 ENDMAP
 
 NAME: cheibrodos_slime_lost_civilization_4
-DEPTH: Slime, !Slime:$
+DEPTH: Slime
 TAGS: decor
 MAP
 .x...x.
@@ -519,7 +551,7 @@ x..G..x
 ENDMAP
 
 NAME: cheibrodos_slime_lost_civilization_5
-DEPTH: Slime, !Slime:$
+DEPTH: Slime
 TAGS: decor
 SUBST: A=x, B=.
 SHUFFLE: AB
@@ -540,7 +572,7 @@ MAP
 ENDMAP
 
 NAME: cheibrodos_slime_lost_civilization_6
-DEPTH: Slime, !Slime:$
+DEPTH: Slime
 TAGS: decor
 SUBST: } = }G..
 MAP
@@ -560,7 +592,7 @@ MAP
 ENDMAP
 
 NAME: cheibrodos_slime_lost_civilization_7
-DEPTH: Slime, !Slime:$
+DEPTH: Slime
 TAGS: decor
 MAP
   ...........
@@ -577,7 +609,7 @@ MAP
 ENDMAP
 
 NAME: cheibrodos_slime_lost_civilization_8
-DEPTH: Slime, !Slime:$
+DEPTH: Slime
 TAGS: decor
 ORIENT: float
 SUBST: - = xxx., " = ...x
@@ -599,7 +631,7 @@ MAP
 ENDMAP
 
 NAME: cheibrodos_slime_lost_civilization_9
-DEPTH: Slime, !Slime:$
+DEPTH: Slime
 TAGS: decor transparent
 ORIENT: float
 SUBST: x = xxx., G = G..
@@ -618,7 +650,7 @@ MAP
 ENDMAP
 
 NAME: cheibrodos_slime_lost_civilization_10
-DEPTH: Slime, !Slime:$
+DEPTH: Slime
 TAGS: decor transparent
 ORIENT: float
 SUBST: x = xxxx.
@@ -640,7 +672,7 @@ ENDMAP
 
 # inspired by a comment of spacejung on SomethingAwful (dpeg)
 NAME:   dissolution_awaits
-DEPTH:  Slime:2-, !Slime:$
+DEPTH:  Slime
 KMONS:  1 = patrolling Dissolution, azure jelly / great orb of eyes
 MAP
  .....
@@ -655,7 +687,7 @@ ENDMAP
 # Slime Pit
 ################################################################################
 NAME:    slime_pit
-PLACE:   Slime:$
+PLACE:   Slime
 ORIENT:  encompass
 TAGS:    no_rotate no_dump
 MONS:    the Royal Jelly

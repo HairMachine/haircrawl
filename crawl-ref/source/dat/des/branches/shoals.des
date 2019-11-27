@@ -3,6 +3,37 @@
 ################################################################################
 
 {{
+function shoals_portal(e)
+  local timeout_turns = crawl.random_range(2500, 3000)
+
+  local messager =
+    timed_msg {
+      initmsg = { "You hear the errie sound of singing merfolk.",
+                  "There is an entrance to the shoals on this level. "
+                  .. "Hurry and find it before the portal closes!" },
+      finalmsg = "You hear the singing fade away.",
+
+      verb = 'singing',
+      noisemaker = 'portal',
+      ranges = {
+        { 5000, 'quiet ' },  { 4000, '' },
+        { 2500, 'resonant ' }, { 1500, 'loud ' },
+        { 0, 'deafening ' }
+      }
+    }
+
+  e.lua_marker('O',
+    timed_marker {
+      disappear = "The portal closes.",
+      entity = 'portal',
+      turns = timeout_turns,
+      single_timed = true,
+      floor = "expired_portal",
+      feat_tile = "dngn_stone_arch",
+      msg = messager })
+  e.tags("shoals_entry")
+  e.kfeat("O = enter_shoals")
+end
 
 function shoals_finale_setup(e, qualifier, decoy_count)
   qualifier = "_" .. qualifier
@@ -74,7 +105,7 @@ end
 
 NAME:   shoals_dummy_entry
 TAGS:   shoals_entry transparent
-KFEAT:  O = enter_shoals
+: shoals_portal(_G)
 MAP
 O
 ENDMAP
@@ -86,7 +117,7 @@ KMONS:  1 = merfolk siren
 KFEAT:  1 = w
 SUBST:  Y = W.
 SUBST:  y = Ww
-KFEAT:  O = enter_shoals
+: shoals_portal(_G)
 MAP
      xx...@...xx
    xxxWY.....YWxxx
@@ -103,7 +134,7 @@ TAGS:   shoals_entry transparent
 MONS:   snapping turtle
 SUBST:  w = wwwW
 TILE:   x = wall_pebble_lightgray
-KFEAT:  O = enter_shoals
+: shoals_portal(_G)
 MAP
   WWWWWWW
  WWwwwwwWW
@@ -121,7 +152,7 @@ ENDMAP
 NAME:   minmay_shoals_entry_centaurs
 TAGS:   shoals_entry transparent
 MONS:   centaur / nothing w:5, plant / nothing w:20
-KFEAT:  O = enter_shoals
+: shoals_portal(_G)
 MAP
    .......
   .2222222.
@@ -152,7 +183,7 @@ ENDMAP
 
 NAME:   elwin_shoals_entry_rocks
 TAGS:   shoals_entry transparent
-KFEAT:  O = enter_shoals
+: shoals_portal(_G)
 MAP
 .WW...W..
 WxxW..xWW
@@ -167,10 +198,10 @@ ENDMAP
 
 NAME:   elwin_shoals_entry_stream
 TAGS:   shoals_entry transparent
-KFEAT:  O = enter_shoals
 NSUBST: Z = 4:1 / *:W
 KFEAT:  1 = W
 KMONS:  1 = merfolk / merfolk siren
+: shoals_portal(_G)
 MAP
 ..xxx
 xZ..x
@@ -189,11 +220,11 @@ ENDMAP
 
 NAME:   elwin_shoals_entry_rooms
 TAGS:   shoals_entry transparent
-KFEAT:  O = enter_shoals
 NSUBST: 1 = 4:1 / *:W
 KFEAT:  1 = W
 KMONS:  1 = merfolk / merfolk siren / nothing w:40
 validate {{ return has_exit_from_glyph('O') }}
+: shoals_portal(_G)
 MAP
 @...xxxxxxx....
 .+xxxWWwWWxxxx.
@@ -364,7 +395,7 @@ WWW..x..x..WWW
 ENDMAP
 
 NAME:    st_cyclops
-DEPTH:   Shoals, !Shoals:$
+DEPTH:   Shoals
 MONS:    cyclops, stone giant / frost giant
 KMONS:   P = plant
 KMONS:   f = fungus
@@ -386,7 +417,7 @@ pyxxpppyx.1.
 ENDMAP
 
 NAME:    st_shoals_ruin
-DEPTH:   Shoals, !Shoals:$
+DEPTH:   Shoals
 TAGS:    no_pool_fixup
 MONS:    cyclops, frost giant, stone giant
 KMONS:   P = plant
@@ -415,7 +446,7 @@ ppxxp..p.fppxxpp
 ENDMAP
 
 NAME:    st_sunken_huts
-DEPTH:   Shoals, !Shoals:$
+DEPTH:   Shoals
 KMONS:   1 = merfolk javelineer
 KMONS:   2 = merfolk impaler
 KMONS:   3 = merfolk aquamancer
@@ -444,7 +475,7 @@ Wwwww4wwwZwwZw5XwwxwwwwwwwW
 ENDMAP
 
 NAME:    st_sunken_temple
-DEPTH:   Shoals, !Shoals:$
+DEPTH:   Shoals
 TAGS:    no_pool_fixup
 KMONS:   1 = merfolk javelineer
 KMONS:   2 = merfolk impaler
@@ -604,7 +635,7 @@ xxxcxxxxxcxxxxW@Wxxxxcxxx
 ENDMAP
 
 NAME: nicolae_shoals_so_close
-DEPTH: Shoals, !Shoals:$
+DEPTH: Shoals
 TAGS: no_pool_fixup water_ok no_item_gen no_trap_gen no_monster_gen
 KPROP: YycfZ. = no_tide
 KPROP: ZYcf. = no_tele_into
@@ -633,7 +664,7 @@ wwyyZY..Yyyffyyw
 ENDMAP
 
 NAME: nicolae_shoals_c_island
-DEPTH: Shoals, !Shoals:$
+DEPTH: Shoals
 TAGS: water_ok no_pool_fixup
 KPROP: .wW}xtC = no_tide
 SHUFFLE: }])
@@ -704,7 +735,7 @@ wwwwwww
 ENDMAP
 
 NAME: nicolae_shoals_hunting_party
-DEPTH: Shoals:2-
+DEPTH: Shoals
 TAGS: no_item_gen no_monster_gen
 KMONS: i = merfolk impaler band / merfolk javelineer band
 SUBST: : = .:3 h:1, W = .W
@@ -720,7 +751,7 @@ WWWWWWW
 ENDMAP
 
 NAME: nicolae_shoals_isolated_beach
-DEPTH: Shoals:2-
+DEPTH: Shoals
 TAGS: water_ok no_pool_fixup
 NSUBST: { = 1:{ / *:.
 SUBST: b = .wW, r = ..Wxx
@@ -765,7 +796,7 @@ ENDMAP
 
 NAME: nicolae_shoals_flooded_hall
 TAGS: transparent
-DEPTH: Shoals, !Shoals:$
+DEPTH: Shoals
 SHUFFLE: }}]]))>
 KPROP: .123wqx = no_tide
 SUBST: . = ....W, w = wWW..., q = w, x = xxxc
@@ -791,7 +822,7 @@ MAP
 ENDMAP
 
 NAME: nicolae_shoals_water_elemental_grotto
-DEPTH: Shoals, !Shoals:$
+DEPTH: Shoals
 TAGS: no_pool_fixup no_monster_gen no_trap_gen no_item_gen water_ok
 KPROP: .xrR-Ww = no_tide
 NSUBST: - = 1:] / *:-
@@ -934,7 +965,7 @@ ENDMAP
 
 NAME: wheals_shoals_ruined_temple
 TAGS: water_ok
-DEPTH: Shoals, !Shoals:$
+DEPTH: Shoals
 KPROP: c.GWuw1 = no_tide
 KMONS: 1 = kraken
 KFEAT: 1 = w
@@ -953,7 +984,7 @@ ccccccccccccccccccccccccccccccccc
 ENDMAP
 
 NAME: cheibrodos_shoals_oceanic_diplomacy
-DEPTH: Shoals, !Shoals:$
+DEPTH: Shoals
 TAGS: water_ok no_item_gen no_monster_gen
 ORIENT: float
 SHUFFLE: 1Ww / 2DD
@@ -983,7 +1014,7 @@ MAP
 ENDMAP
 
 NAME: cheibrodos_shoals_roost
-DEPTH: Shoals, !Shoals:$
+DEPTH: Shoals
 TAGS: water_ok no_monster_gen
 ORIENT: float
 MONS: harpy, manticore
@@ -1092,7 +1123,7 @@ ENDMAP
 
 # XXX: Rare teleport islets possibilities.
 NAME: nicolae_shoals_kraken_party
-DEPTH: Shoals, !Shoals:1
+DEPTH: Shoals
 TAGS: no_monster_gen no_trap_gen water_ok
 SUBST: { = {[(, . = ......wW, - = ...W
 KFEAT: 1 = w
@@ -1203,7 +1234,7 @@ ENDMAP
 
 NAME:   argonaut_golden_fleece
 TAGS:   no_pool_fixup no_trap_gen no_monster_gen no_item_gen
-DEPTH:  Shoals, !Shoals:$
+DEPTH:  Shoals
 ORIENT: northwest
 # Fudging the myth a bunch, due to it being weak
 # to use only one "drakon" by this branch depth.
@@ -1291,7 +1322,7 @@ ENDMAP
 
 NAME: cheibrodos_shoals_satyrical_garden
 TAGS: no_monster_gen no_tide no_trap_gen
-DEPTH: Shoals, !Shoals:$
+DEPTH: Shoals
 ORIENT: float
 KMONS: P = bush
 MONS: faun, satyr, centaur
@@ -1323,7 +1354,7 @@ ENDMAP
 
 NAME: cheibrodos_shoals_three_sisters
 TAGS: no_item_gen no_monster_gen
-DEPTH: Shoals, !Shoals:$
+DEPTH: Shoals
 ORIENT: float
 KMONS: P = plant
 MONS: sea snake, merfolk aquamancer
@@ -1354,7 +1385,7 @@ ENDMAP
 
 NAME: cheibrodos_shoals_baths
 TAGS: no_monster_gen no_tide no_pool_fixup
-DEPTH: Shoals, !Shoals:$
+DEPTH: Shoals
 ORIENT: float
 KMONS: " = merfolk siren / w:5 merfolk
 KMONS: ' = merfolk aquamancer
@@ -1412,20 +1443,20 @@ ENDMAP
 
 NAME: shoals_end_simple
 ORIENT: float
-PLACE: Shoals:$
+PLACE: Shoals
 : shoals_finale_setup(_G, 'simple')
 
 # HangedMan's alternative Shoals ending
 NAME: shoals_end_hangedman
 ORIENT: float
-PLACE: Shoals:$
+PLACE: Shoals
 WEIGHT: 8
 : shoals_finale_setup(_G, 'hangedman', crawl.random_range(5,6))
 
 # Grunt's icy Shoals ending
 NAME: shoals_end_grunt_ice
 ORIENT: float
-PLACE: Shoals:$
+PLACE: Shoals
 WEIGHT: 8
 : shoals_finale_setup(_G, 'grunt_ice', crawl.random_range(5,6))
 
@@ -1433,7 +1464,7 @@ WEIGHT: 8
 # Weighted lower on account of being more open and nasty.
 NAME: shoals_end_grunt_garden
 ORIENT: float
-PLACE: Shoals:$
+PLACE: Shoals
 WEIGHT: 4
 : shoals_finale_setup(_G, 'grunt_garden', crawl.random_range(5,6))
 

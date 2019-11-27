@@ -4,6 +4,38 @@
 
 # Functionality for one of Grunt's vaults.
 {{
+function swamp_portal(e)
+  local timeout_turns = crawl.random_range(2500, 3000)
+
+  local messager =
+    timed_msg {
+      initmsg = { "You hear the sound of a bubbling swamp.",
+                  "There is an entrance to the swamp on this level. "
+                  .. "Hurry and find it before the portal closes!" },
+      finalmsg = "You hear the bubbling die away.",
+
+      verb = 'bubbling',
+      noisemaker = 'portal',
+      ranges = {
+        { 5000, 'slow ' },  { 4000, '' },
+        { 2500, 'brisk ' }, { 1500, 'quick ' },
+        { 0, 'rapid ' }
+      }
+    }
+
+  e.lua_marker('O',
+    timed_marker {
+      disappear = "The portal closes.",
+      entity = 'portal',
+      turns = timeout_turns,
+      single_timed = true,
+      floor = "expired_portal",
+      feat_tile = "dngn_stone_arch",
+      msg = messager })
+  e.tags("swamp_entry")
+  e.kfeat("O = enter_swamp")
+end
+
 function callback.grunt_lady_of_the_lake_trigger(data, triggerable, triggerer,
                                                  marker, ev)
   if data.triggered then
@@ -44,7 +76,7 @@ end
 # This is basically the dummy balancer.
 NAME:   swamp_mist
 TAGS:   swamp_entry transparent
-KFEAT:  O = enter_swamp
+: swamp_portal(_G)
 MARKER: O = lua:fog_machine { \
              pow_min = 8, pow_max = 12, delay = 25, \
              size = 2, walk_dist = 1, spread_rate= 33 }
@@ -55,12 +87,12 @@ ENDMAP
 # Scenery, no threat.
 NAME:   swamp_mist_pool
 TAGS:   swamp_entry no_pool_fixup transparent
-KFEAT:  O = enter_swamp
 MARKER: O = lua:fog_machine { \
              pow_min = 8, pow_max = 12, delay = 25, \
              size = 2, walk_dist = 1, spread_rate= 33 }
 SUBST:  '= t.., "= tw, t=ttw, w=Ww
 validate {{ return glyphs_connected("O", "@") }}
+: swamp_portal(_G)
 MAP
        @
    't"wwt@
@@ -79,10 +111,10 @@ SUBST:  W = 1WWWWW, t = ttt., T = tttW, W = WWWwww., ' = W
 NSUBST: 1 = 2:1 / 1WWWWW
 KMONS:  1 = vampire mosquito
 KFEAT:  1 = w / W
-KFEAT:  O = enter_swamp
 MARKER: O = lua:fog_machine { \
              pow_min = 8, pow_max = 12, delay = 25, \
              size = 2, walk_dist = 1, spread_rate= 33 }
+: swamp_portal(_G)
 MAP
    ttttt
   tTTTTTt
@@ -100,10 +132,10 @@ NAME:   minmay_swamp_entry_wisps
 TAGS:   swamp_entry transparent
 WEIGHT: 2
 MONS:   insubstantial wisp / nothing
-KFEAT:  O = enter_swamp
 MARKER: O = lua:fog_machine { \
              pow_min = 8, pow_max = 12, delay = 25, \
              size = 2, walk_dist = 1, spread_rate= 33 }
+: swamp_portal(_G)
 MAP
 111
 1O1
@@ -115,10 +147,10 @@ TAGS:   swamp_entry transparent
 WEIGHT: 5
 MONS:   swamp drake / komodo dragon / hydra / swamp dragon
 MONS:   crocodile / iguana
-KFEAT:  O = enter_swamp
 MARKER: O = lua:fog_machine { \
              pow_min = 8, pow_max = 12, delay = 25, \
              size = 2, walk_dist = 1, spread_rate= 33 }
+: swamp_portal(_G)
 MAP
 2.1
 .O.
@@ -130,10 +162,10 @@ TAGS:   swamp_entry
 SUBST:  T = tww
 KMONS:  w = swamp worm / tyrant leech / nothing w:89
 KFEAT:  w = w / W
-KFEAT:  O = enter_swamp
 MARKER: O = lua:fog_machine { \
              pow_min = 8, pow_max = 12, delay = 25, \
              size = 2, walk_dist = 1, spread_rate= 33 }
+: swamp_portal(_G)
 MAP
  ttttt
 ttTTTtt
@@ -149,10 +181,10 @@ TAGS:   swamp_entry transparent
 WEIGHT: 2
 KMONS:  w = electric eel / nothing w:40
 KFEAT:  w = w / W
-KFEAT:  O = enter_swamp
 MARKER: O = lua:fog_machine { \
              pow_min = 8, pow_max = 12, delay = 25, \
              size = 2, walk_dist = 1, spread_rate= 33 }
+: swamp_portal(_G)
 MAP
   .....
  .......
@@ -167,7 +199,6 @@ ENDMAP
 
 NAME: nicolae_swamp_entry_splash_gauntlet
 TAGS: swamp_entry patrolling transparent
-KFEAT: O = enter_swamp
 MARKER: O = lua:fog_machine { pow_min = 8, pow_max = 12, delay = 25, \
    size = 2, walk_dist = 1, spread_rate = 33 }
 SUBST: D = twww
@@ -176,6 +207,7 @@ NSUBST: L = tt. / .
 KMONS: 1 = swamp worm / bog body / nothing
 KMONS: 2 = electric eel
 KFEAT: 12 = w
+: swamp_portal(_G)
 MAP
     ......tttttttt
   ...ttttttttttttttttt
@@ -191,12 +223,12 @@ NAME:    skrybe_swamp_entry_bodies
 TAGS:    swamp_entry no_pool_fixup transparent
 KMONS:   1 = patrolling bog body
 KFEAT:   1 = W
-KFEAT:   O = enter_swamp
 NSUBST:  n = 1:1 / 1=W1 / *:W
 NSUBST:  W = 4:t / *:W
 MARKER:  O = lua:fog_machine { \
              pow_min = 8, pow_max = 12, delay = 25, \
              size = 2, walk_dist = 1, spread_rate= 33 }
+: swamp_portal(_G)
 MAP
  .....
 ..WWW..
@@ -214,11 +246,11 @@ MONS:   iguana / komodo dragon / crocodile / tyrant leech
 KMONS:  s = swamp worm / nothing w:70
 KFEAT:  s = w / W
 NSUBST: - = 2:1 / 2:2 / .
-KFEAT:  O = enter_swamp
 KFEAT:  T = .
 MARKER: T = lua:fog_machine { \
              pow_min = 8, pow_max = 12, delay = 25, \
              size = 2, walk_dist = 1, spread_rate= 33 }
+: swamp_portal(_G)
 MAP
  ttttttt@@tt
  twwWWWW...tt
@@ -324,7 +356,7 @@ ENDMAP
 # Swamp's layout is chaotic and samey; fill it with decorative vaults.
 NAME:   swamp_ruins_default
 TAGS:   luniq_extradecor chance_extradecor allow_dup extra no_dump
-PLACE:  Swamp, !Swamp:$
+PLACE:  Swamp
 {{
   local n = 1
   hook("post_place", function()
@@ -334,7 +366,7 @@ PLACE:  Swamp, !Swamp:$
 
 NAME:   serial_swamp_ruin
 TAGS:   luniq_serial luniq_extradecor chance_extradecor extra
-PLACE:  Swamp, !Swamp:$
+PLACE:  Swamp
 WEIGHT: 2
 {{
   local n = 2 + crawl.random2(2)
@@ -345,7 +377,7 @@ WEIGHT: 2
 
 NAME:   swamp_other_decor
 TAGS:   luniq_extradecor chance_extradecor allow_dup extra no_dump
-PLACE:  Swamp, !Swamp:$
+PLACE:  Swamp
 WEIGHT: 8
 {{
   local n = 1
@@ -415,7 +447,7 @@ ENDMAP
 
 NAME: nicolae_swamp_stair_fork
 TAGS: extra decor
-DEPTH: Swamp:2-, !Swamp:$
+DEPTH: Swamp
 SHUFFLE: {}[]()
 SUBST: W = w., T = t.
 MAP
@@ -547,7 +579,7 @@ ENDMAP
 
 NAME: wheals_swamp_sinkhole
 TAGS: extra no_monster_gen decor
-DEPTH: Swamp:1-2
+DEPTH: Swamp
 WEIGHT: 5
 KFEAT: ^ = known shaft trap
 SUBST: u = Ww
@@ -945,7 +977,7 @@ ENDMAP
 
 NAME:    hangedman_swamp_phenomena
 TAGS:    no_pool_fixup no_monster_gen patrolling transparent
-DEPTH:   Swamp, !Swamp:$
+DEPTH:   Swamp
 KMONS:   1 = insubstantial wisp
 KMONS:   2 = ball lightning
 KMONS:   3 = lightning spire
@@ -967,7 +999,7 @@ ENDMAP
 
 NAME:    hangedman_swamp_wriggling
 TAGS:    no_pool_fixup no_monster_gen patrolling transparent
-DEPTH:   Swamp, !Swamp:$
+DEPTH:   Swamp
 KMONS:   1 = swamp worm / tyrant leech w:5 / nothing w:5
 KMONS:   2 = tyrant leech
 KFEAT:   12 = shallow_water
@@ -987,7 +1019,7 @@ ENDMAP
 
 NAME:    hangedman_swamp_ravenous
 TAGS:    no_pool_fixup no_monster_gen patrolling transparent
-DEPTH:   Swamp, !Swamp:$
+DEPTH:   Swamp
 MONS:    bog body, necrophage, ghoul
 SUBST:   jl = t
 KFEAT:   % = shallow_water / .
@@ -1011,7 +1043,7 @@ ENDMAP
 
 NAME:    hangedman_swamp_muck
 TAGS:    no_pool_fixup no_monster_gen patrolling transparent
-DEPTH:   Swamp, !Swamp:$
+DEPTH:   Swamp
 KMONS:   1 = slime creature / jelly
 KMONS:   2 = slime creature
 KMONS:   3 = brown very ugly thing
@@ -1095,7 +1127,7 @@ xxxB...twt...Wxxx
 ENDMAP
 
 NAME:    st_shrine_of_shade
-DEPTH:   Swamp, !Swamp:$
+DEPTH:   Swamp
 MONS:    bog body w:20 / necrophage w:5 / ghoul w:5 / nothing w:25, shadow
 KMONS:   P = withered plant
 SUBST:   p = Pp, p = PP., o = P..
@@ -1116,7 +1148,7 @@ opccoo.ppccpo
 ENDMAP
 
 NAME:    st_swamp_mini
-DEPTH:   Swamp, !Swamp:$
+DEPTH:   Swamp
 KMONS:   1 = hydra
 KMONS:   2 = swamp dragon
 KFEAT:   12 = shallow_water
@@ -1132,7 +1164,7 @@ MAP
 ENDMAP
 
 NAME:    st_swamp_ruins_1
-DEPTH:   Swamp, !Swamp:$
+DEPTH:   Swamp
 KMONS:   1 = hydra
 KMONS:   2 = swamp dragon
 KMONS:   3 = swamp drake
@@ -1156,7 +1188,7 @@ C.cc.....cc.C
 ENDMAP
 
 NAME:    st_swamp_ruins_2
-DEPTH:   Swamp, !Swamp:$
+DEPTH:   Swamp
 KMONS:   1 = hydra
 KMONS:   2 = swamp dragon
 KMONS:   3 = swamp drake
@@ -1181,7 +1213,7 @@ MAP
 ENDMAP
 
 NAME:    st_swamp_ruins_3
-DEPTH:   Swamp, !Swamp:$
+DEPTH:   Swamp
 KMONS:   1 = hydra
 KMONS:   2 = swamp dragon
 KMONS:   3 = swamp drake
@@ -1202,7 +1234,7 @@ MAP
 ENDMAP
 
 NAME:    st_swamp_ruins_4
-DEPTH:   Swamp, !Swamp:$
+DEPTH:   Swamp
 KMONS:   1 = hydra
 KMONS:   2 = swamp dragon
 KMONS:   3 = swamp drake
@@ -1512,7 +1544,7 @@ ENDMAP
 
 NAME:    hangedman_swamp_double_dragon
 TAGS:    no_monster_gen patrolling
-DEPTH:   Swamp:2-, !Swamp:$
+DEPTH:   Swamp
 MONS:    fire dragon, lindwurm
 MONS:    ice dragon, bog body / hydra simulacrum w:8
 MONS:    swamp dragon, alligator / hydra w:8
@@ -1538,7 +1570,7 @@ ENDMAP
 
 NAME:    cheibrodos_swamp_mausoleum
 TAGS:    no_monster_gen no_pool_fixup
-DEPTH:   Swamp:2-, !Swamp:$
+DEPTH:   Swamp
 ORIENT:  south
 WEIGHT:  5
 MONS:    spectral hydra / spectral swamp dragon, death drake, necromancer
@@ -1591,7 +1623,7 @@ ENDMAP
 
 NAME:  cheibrodos_swamp_kobolds
 TAGS:  no_item_gen no_monster_gen
-DEPTH: Swamp, !Swamp:$
+DEPTH: Swamp
 MONS:  kobold demonologist
 ITEM:  book of callings, book of summonings
 SUBST: ' = %:20 d:1 e:1
@@ -1612,7 +1644,7 @@ ENDMAP
 
 NAME:  cheibrodos_swamp_pet_leeches
 TAGS:  no_item_gen no_monster_gen
-DEPTH: Swamp, !Swamp:$
+DEPTH: Swamp
 MONS:  vampire ; long sword . robe, tyrant leech
 KPROP: e' = no_tele_into
 KPROP: .21 = bloody / w:30 nothing
@@ -1631,7 +1663,7 @@ ENDMAP
 
 NAME:  cheibrodos_swamp_minitomb
 TAGS:  no_item_gen no_monster_gen
-DEPTH: Swamp, !Swamp:$
+DEPTH: Swamp
 KMONS: - = bog body w:20 / troll zombie / troll skeleton / shadow w:5
 KITEM: - = w:5 gold / w:2 any jewellery / w:20 nothing
 SUBST: ' = .W
@@ -1652,7 +1684,7 @@ ENDMAP
 
 NAME:  cheibrodos_swamp_slimy
 TAGS:  no_item_gen no_monster_gen
-DEPTH: Swamp, !Swamp:$
+DEPTH: Swamp
 MONS:  slime creature
 MAP
    tcGct
@@ -1688,7 +1720,7 @@ ENDMAP
 
 NAME: nicolae_swamp_oklob_treasure_island
 TAGS: no_pool_fixup
-DEPTH: Swamp, !Swamp:$
+DEPTH: Swamp
 SHUFFLE: Aa/Bb/Cc/Dd/Ee/Ff/Gg/Hh/Ii, %*$
 NSUBST: ' = 1:^ / 1:o / *:'
 SUBST: abcde = w, fghi = t, ABCDE = .wW, FGHI = .t, ' = ':100 $$$%%, \
@@ -1719,7 +1751,7 @@ _..BbbB'''''DddD.._
 ENDMAP
 
 NAME: cheibrodos_swamp_heart_of_darkness
-DEPTH: Swamp:2-, !Swamp:$
+DEPTH: Swamp
 TAGS: no_item_gen no_monster_gen
 ORIENT: northeast
 MONS: spiny frog / ugly thing / hydra / hornet
@@ -1746,7 +1778,7 @@ tttwWttttttt1www.tttttttt  tc3.+.cccttt
 ENDMAP
 
 NAME: cheibrodos_swamp_tower_of_moss
-DEPTH: Swamp, !Swamp:$
+DEPTH: Swamp
 TAGS: ruin
 ORIENT: float
 MONS: toadstool
@@ -1857,7 +1889,7 @@ _.tt.tttt.t.tt.ttttt_
 ENDMAP
 
 NAME: nicolae_swamp_phyte_club
-DEPTH: Swamp:2-, !Swamp:$
+DEPTH: Swamp
 ORIENT: float
 TAGS: transparent no_monster_gen no_item_gen
 NSUBST: M = 1:M / 1:H / 2 = hmmf / 2:A / *:.
@@ -1947,7 +1979,7 @@ default-depth:
 #
 NAME:    swamp
 TAGS:    transparent no_monster_gen
-PLACE:   Swamp:$
+PLACE:   Swamp
 WEIGHT:  20
 ORIENT:  float
 TAGS:    no_rotate
@@ -1988,7 +2020,7 @@ ENDMAP
 #
 NAME:    swamp_alternative
 TAGS:    transparent no_monster_gen no_pool_fixup no_rotate
-PLACE:   Swamp:$
+PLACE:   Swamp
 WEIGHT:  20
 ORIENT:  float
 MONS:    swamp dragon, swamp drake, hydra, lindwurm, rime drake, bog body
@@ -2029,7 +2061,7 @@ ENDMAP
 #
 NAME:    swamp_old_school
 TAGS:    no_pool_fixup
-PLACE:   Swamp:$
+PLACE:   Swamp
 WEIGHT:  20
 ORIENT:  southeast
 MONS:    swamp dragon, hydra, swamp drake
@@ -2077,7 +2109,7 @@ ENDMAP
 # Swamp:5 alternative (due)
 NAME:    swamp_fiery
 TAGS:    transparent no_pool_fixup no_rotate
-PLACE:   Swamp:$
+PLACE:   Swamp
 ORIENT:  float
 MONS:    fire dragon, lindwurm / fire crab w:8, swamp dragon / hydra w:12
 MONS:    swamp drake / steam dragon w:4
@@ -2115,7 +2147,7 @@ ENDMAP
 #
 NAME:    swamp_icy
 TAGS:    no_pool_fixup no_rotate transparent
-PLACE:   Swamp:$
+PLACE:   Swamp
 ORIENT:  southeast
 MONS:    ice dragon, hydra simulacrum, freezing wraith, azure jelly
 KMONS:   ? = swamp worm simulacrum / swamp drake simulacrum
@@ -2167,7 +2199,7 @@ ENDMAP
 #
 NAME:    swamp_pestilence
 TAGS:    no_pool_fixup
-PLACE:   Swamp:$
+PLACE:   Swamp
 ORIENT:  southeast
 MONS:    spectral swamp dragon / spectral hydra
 MONS:    hydra zombie / swamp dragon zombie
@@ -2228,7 +2260,7 @@ ENDMAP
 # occupied by demons, beasts, messes of flesh, and other vile tricks.
 NAME:    swamp_vile
 TAGS:    no_pool_fixup no_monster_gen
-PLACE:   Swamp:$
+PLACE:   Swamp
 ORIENT:  southeast
 MONS:    bog body / ugly thing, shadow / orange demon / small abomination w:2
 MONS:    large abomination / very ugly thing / thrashing horror w:6
@@ -2279,7 +2311,7 @@ ENDMAP
 # "Everyone said I was daft to build a castle on a swamp..."
 NAME:    grunt_swamp_rune_castle
 TAGS:    no_monster_gen no_trap_gen transparent
-PLACE:   Swamp:$
+PLACE:   Swamp
 ORIENT:  float
 MONS:    swamp dragon, swamp drake, hydra, bog body
 MONS:    fungus w:12 / plant w:5 / bush w:1
@@ -2323,7 +2355,7 @@ ENDMAP
 # Another Basic swamp end, by johnstein
 # about 27 basic swamp enemies & 1/11 chance of L. Hydra
 NAME:    swamp_basic_johnstein
-PLACE:   Swamp:$
+PLACE:   Swamp
 ORIENT:  float
 WEIGHT:  20
 SUBST:   1 = 111''
