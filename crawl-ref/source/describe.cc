@@ -2045,6 +2045,10 @@ string get_item_description(const item_def &item, bool verbose,
                            " The device is presently inert." : "");
         }
         break;
+    case OBJ_WANDS:
+        description << "A magical device containing a limited number of castings of a single spell.\n";
+        description << "\nIt constantly radiates magical energy, causing small amounts of contamination when carried.";
+        break;
 
     case OBJ_POTIONS:
 #ifdef DEBUG_BLOOD_POTIONS
@@ -2068,15 +2072,10 @@ string get_item_description(const item_def &item, bool verbose,
             }
         }
 #endif
-
     case OBJ_SCROLLS:
     case OBJ_ORBS:
     case OBJ_GOLD:
     case OBJ_RUNES:
-    case OBJ_WANDS:
-        description << "A magical device containing a limited number of castings of a single spell.\n";
-        description << "\nIt constantly radiates magical energy, causing small amounts of contamination when carried.";
-        break;
 #if TAG_MAJOR_VERSION == 34
     case OBJ_RODS:
 #endif

@@ -578,6 +578,7 @@ unsigned int item_value(item_def item, bool ident)
             case SCR_FEAR:
             case SCR_IMMOLATION:
             case SCR_MAGIC_MAPPING:
+            case SCR_NOISE:
                 valued += 35;
                 break;
 
@@ -592,11 +593,6 @@ unsigned int item_value(item_def item, bool ident)
             case SCR_CURSE_JEWELLERY:
 #endif
                 valued += 20;
-                break;
-
-            case SCR_NOISE:
-            case SCR_RANDOM_USELESSNESS:
-                valued += 10;
                 break;
             }
         }
@@ -828,9 +824,8 @@ bool is_worthless_consumable(const item_def &item)
         case POT_SLOWING:
         case POT_DECAY:
         case POT_POISON:
-#endif
-        case POT_DEGENERATION:
             return true;
+#endif
         default:
             return false;
         }
@@ -841,9 +836,9 @@ bool is_worthless_consumable(const item_def &item)
         case SCR_CURSE_ARMOUR:
         case SCR_CURSE_WEAPON:
         case SCR_CURSE_JEWELLERY:
+            
 #endif
-        case SCR_NOISE:
-        case SCR_RANDOM_USELESSNESS:
+        case SCR_RANDOM_USELESSNESS:    
             return true;
         default:
             return false;
