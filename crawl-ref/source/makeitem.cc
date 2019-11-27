@@ -1381,10 +1381,9 @@ static void _generate_potion_item(item_def& item, int force_type,
                                             66, POT_DEGENERATION,
                                             66, POT_BRILLIANCE,
                                             53, POT_MUTATION,
-                                            35, POT_INVISIBILITY,
-                                            35, POT_RESISTANCE,
-                                            35, POT_MAGIC,
-                                             2, POT_EXPERIENCE);
+                                            45, POT_RESISTANCE,
+                                            45, POT_MAGIC,
+                                            10, POT_EXPERIENCE);
         }
         while (agent == GOD_XOM
                && _is_boring_item(OBJ_POTIONS, stype)
@@ -1424,7 +1423,6 @@ static void _generate_scroll_item(item_def& item, int force_type,
                  40, SCR_ENCHANT_ARMOUR,
                  40, SCR_ENCHANT_WEAPON,
                  40, SCR_MAGIC_MAPPING,
-                 32, SCR_FEAR,
                  32, SCR_FOG,
                  32, SCR_BLINKING,
                  32, SCR_IMMOLATION,
