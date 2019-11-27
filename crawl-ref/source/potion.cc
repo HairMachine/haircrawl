@@ -872,8 +872,10 @@ public:
         for (int i = 0; i < NUM_STATS; ++i)
             if (lose_stat(static_cast<stat_type>(i), 1 + random2(3)))
                 success = true;
-        // Throw a big cloud of miasma! Yikes!
+        // Throw a big cloud of miasma! Yikes! ~Hair
         big_cloud(CLOUD_MIASMA, &you, you.pos(), 50, 4 + random2(4));
+        // But not on top of you, that's insane. ~Hair
+        delete_cloud(you.pos());
         return success;
     }
 
