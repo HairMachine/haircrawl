@@ -1244,7 +1244,11 @@ int player_hunger_rate(bool temp)
  */
 int player_total_spell_levels()
 {
-    return floor((you.experience_level + 1) / 3);
+    int sc = you.skill(SK_SPELLCASTING, 1, false, true, false);
+    if (sc <= 2)
+        return sc;
+    else    
+        return 2 + floor((sc + 1) / 3);
 }
 
 /**
