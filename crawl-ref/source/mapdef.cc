@@ -5653,12 +5653,26 @@ void item_list::parse_raw_name(string name, item_spec &spec)
     }
 
     // Special casing for wands. Any wand mentioned in a vault is returned as a silly old wand of magic darts. ~Hair
+    // It would be nice to have this properly work.
     if (starts_with(name, "wand")) {
         spec.base_type = OBJ_WANDS;
         spec.sub_type = 0;
         spec.plus2 = 3;
         return;
     }
+
+    // More special casing: mapping removed items to their equivalents. This is instead of fixing all the
+    // vaults - the hope is to have greated merge compatibility with core. ~Hair
+    if (name == "potion of heal wounds")
+        name = "potion of ambrosia";
+    else if (name == "potion of haste")
+        name = "potion of flight";
+    else if (name == "potion of might" || name == "potion of agility")
+        name = "potion of beserk rage";
+    else if (name == "potion of cancellation")
+        name = "potion of curing";
+    else if (name == "scroll of fear")
+        name = "scroll of noise";
 
     item_kind parsed = item_kind_by_name(name);
     if (parsed.base_type != OBJ_UNASSIGNED)
