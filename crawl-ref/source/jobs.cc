@@ -117,8 +117,12 @@ void give_job_equipment(job_type job)
             plus = spec.props["charges"];
         if (spec.props.exists("plus"))
             plus = spec.props["plus"];
-        newgame_make_item(spec.base_type, spec.sub_type, max(spec.qty, 1),
-                          plus, spec.ego);
+        item_def* it = newgame_make_item(spec.base_type, spec.sub_type, max(spec.qty, 1), plus, spec.ego);
+        // More wand-specific fixes. ~Hair
+        if (it->base_type == OBJ_WANDS) {
+            it->sub_type = random2(NUM_WANDS);
+            it->spell = random_wand_spell(1);
+        }
     }
 }
 
