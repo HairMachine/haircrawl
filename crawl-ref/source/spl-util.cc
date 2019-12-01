@@ -475,9 +475,10 @@ int spell_difficulty(spell_type which_spell)
     switch (base_lvl) {
         case 1:
         case 2:
+        case 3:
             return base_lvl;
         default:
-            return base_lvl * 3 - 4;
+            return base_lvl * 3 - 7;
     }
 }
 
