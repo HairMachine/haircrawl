@@ -1310,12 +1310,16 @@ bool is_high_tier_wand(int type)
     }
 }
 
+int random_wand_spell(const int item_level) {
+    book_type book = _choose_book_type(item_level);
+    vector<spell_type> available_spells = spellbook_template(book);
+    return available_spells[random2(available_spells.size())];
+}
+
 static void _generate_wand_item(item_def& item, int force_type, int item_level)
 {
     // We generate a beautiful random spell wand based on spell books, as these are guaranteed to have castable spells in them. ~Hair
-    book_type book = _choose_book_type(item_level);
-    vector<spell_type> available_spells = spellbook_template(book);
-    item.spell = available_spells[random2(available_spells.size())];
+    item.spell = random_wand_spell(item_level);
     
     // This looks strange. That's because it is. We're doing this to randomise the tile graphic; it will likely change. ~Hair
     item.sub_type = random2(NUM_WANDS);
@@ -1904,7 +1908,7 @@ int items(bool allow_uniques,
                                     10, OBJ_STAVES,
                                     30, OBJ_BOOKS,
                                     50, OBJ_JEWELLERY,
-                                   140, OBJ_WANDS,
+                                   100, OBJ_WANDS,
                                    212, OBJ_ARMOUR,
                                    212, OBJ_WEAPONS,
                                    176, OBJ_POTIONS,

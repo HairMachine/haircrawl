@@ -496,6 +496,11 @@ static void _setup_generic(const newgame_def& ng)
     if (you.char_class == JOB_WANDERER)
         memorise_wanderer_spell();
 
+    // Give everyone a random wand. Hooray! ~Hair
+    item_def* nw = newgame_make_item(OBJ_WANDS, random2(NUM_WANDS), 1, 5);
+    nw->spell = random_wand_spell(1);
+    nw->flags |= 0x00000002; // ISFLAG_KNOW_TYPE (I did not include the header file because... too much of that anyway ~Hair)
+    
     // A first pass to link the items properly.
     for (int i = 0; i < ENDOFPACK; ++i)
     {

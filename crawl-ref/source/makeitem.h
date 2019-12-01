@@ -31,6 +31,7 @@ bool got_curare_roll(const int item_level);
 void reroll_brand(item_def &item, int item_level);
 
 bool is_high_tier_wand(int type);
+int random_wand_spell(const int item_level);
 
 void squash_plusses(int item_slot);
 #if defined(DEBUG_DIAGNOSTICS) || defined(DEBUG_TESTS)
