@@ -654,7 +654,7 @@ struct missile_def
 static int Missile_index[NUM_MISSILES];
 static const missile_def Missile_prop[] =
 {
-    { MI_DART,          "dart",          0, 100, 2,  true  },
+    { MI_DART,          "dart",          0, 0, 2,  true  },
 #if TAG_MAJOR_VERSION == 34
     { MI_NEEDLE,        "needle",        0, 100, 2,  false },
 #endif

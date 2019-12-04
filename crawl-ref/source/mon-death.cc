@@ -1795,7 +1795,6 @@ item_def* monster_die(monster& mons, killer_type killer,
     const bool timeout       = killer == KILL_TIMEOUT;
     const bool fake_abjure   = mons.has_ench(ENCH_FAKE_ABJURATION);
     const bool gives_player_xp = mons_gives_xp(mons, you);
-    bool drop_items          = !hard_reset;
     const bool submerged     = mons.submerged();
     bool in_transit          = false;
     const bool was_banished  = (killer == KILL_BANISHED);
@@ -2292,13 +2291,7 @@ item_def* monster_die(monster& mons, killer_type killer,
             // KILL_RESET monsters no longer lose their whole inventory, only
             // items they were generated with.
             if (mons.pacified() || !mons.needs_abyss_transit())
-            {
-                // A banished monster that doesn't go on the transit list
-                // loses all items.
-                if (!mons.is_summoned())
-                    drop_items = false;
                 break;
-            }
 
             // Monster goes to the Abyss.
             mons.flags |= MF_BANISHED;
@@ -2309,7 +2302,6 @@ item_def* monster_die(monster& mons, killer_type killer,
             }
             set_unique_annotation(&mons, BRANCH_ABYSS);
             in_transit = true;
-            drop_items = false;
             mons.firing_pos.reset();
             // Make monster stop patrolling and/or travelling.
             mons.patrol_point.reset();
@@ -2317,16 +2309,7 @@ item_def* monster_die(monster& mons, killer_type killer,
             mons.travel_target = MTRAV_NONE;
             break;
 
-        case KILL_RESET:
-            drop_items = false;
-            break;
-
-        case KILL_TIMEOUT:
-        case KILL_DISMISSED:
-            break;
-
         default:
-            drop_items = false;
             break;
     }
 
@@ -2396,8 +2379,6 @@ item_def* monster_die(monster& mons, killer_type killer,
                  && !in_transit && !mons.pacified()
                  && mons_felid_can_revive(&mons))
         {
-            drop_items = false;
-
             // Like Boris, but regenerates immediately
             if (mons_is_mons_class(&mons, MONS_NATASHA))
                 you.unique_creatures.set(MONS_NATASHA, false);
@@ -2567,21 +2548,7 @@ item_def* monster_die(monster& mons, killer_type killer,
         arena_monster_died(&mons, killer, killer_index, silent, corpse);
 
     const coord_def mwhere = mons.pos();
-    if (drop_items)
-    {
-        // monster_drop_things may lead to a level excursion (via
-        // god_id_item -> ... -> ShoppingList::item_type_identified),
-        // which fails to save/restore the dead monster. Keep it alive
-        // since we still need it.
-        unwind_var<int> fakehp(mons.hit_points, 1);
-        monster_drop_things(&mons, YOU_KILL(killer) || pet_kill);
-    }
-    else
-    {
-        // Destroy the items belonging to MF_HARD_RESET monsters so they
-        // don't clutter up mitm[].
-        mons.destroy_inventory();
-    }
+    mons.destroy_inventory();
 
     if (leaves_corpse && corpse)
     {

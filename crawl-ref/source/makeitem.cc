@@ -642,10 +642,8 @@ static void _generate_missile_item(item_def& item, int force_type,
                                    20, MI_ARROW,
                                    12, MI_BOLT,
                                    12, MI_SLING_BULLET,
-                                   10, MI_DART,
                                    3,  MI_BOOMERANG,
                                    2,  MI_JAVELIN,
-                                   1,  MI_THROWING_NET,
                                    1,  MI_LARGE_ROCK);
     }
 
