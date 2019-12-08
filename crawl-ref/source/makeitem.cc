@@ -1253,7 +1253,7 @@ static book_type _choose_book_type(int item_level)
     const int rarity = book_rarity(book);
     ASSERT(rarity != 100); // 'removed item' - ugh...
 
-    if (!one_chance_in(100) && x_chance_in_y(rarity-1, item_level+1))
+    if (rarity < item_level / 3 || (!one_chance_in(100) && x_chance_in_y(rarity-1, item_level+1)))
         return _choose_book_type(item_level); // choose something else
 
     return book;
