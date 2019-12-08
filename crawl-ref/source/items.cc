@@ -1988,7 +1988,6 @@ static bool _merge_wand_charges(const item_def &it, int &inv_slot, bool quiet)
     for (inv_slot = 0; inv_slot < ENDOFPACK; inv_slot++)
     {
         if (you.inv[inv_slot].base_type != OBJ_WANDS
-            || you.inv[inv_slot].sub_type != it.sub_type
             || you.inv[inv_slot].spell != it.spell)
         {
             continue;
