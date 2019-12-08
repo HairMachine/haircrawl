@@ -84,6 +84,9 @@ void initialise_branch_depths()
     disabled_branch.push_back(random_choose(BRANCH_SWAMP, BRANCH_SHOALS));
     disabled_branch.push_back(random_choose(BRANCH_SNAKE, BRANCH_SPIDER));
 
+    // NewHell: choose one of the 4 hell branches and disable the rest. ~Hair
+    disabled_branch.push_back(random_choose(BRANCH_DIS, BRANCH_GEHENNA, BRANCH_COCYTUS, BRANCH_TARTARUS));
+
     for (branch_type disabled : disabled_branch)
     {
         dprf("Disabling branch: %s", branches[disabled].shortname);
