@@ -5668,7 +5668,7 @@ void item_list::parse_raw_name(string name, item_spec &spec)
     else if (name == "potion of haste")
         name = "potion of flight";
     else if (name == "potion of might" || name == "potion of agility")
-        name = "potion of beserk rage";
+        name = "potion of berserk rage";
     else if (name == "potion of cancellation")
         name = "potion of curing";
     else if (name == "scroll of fear")

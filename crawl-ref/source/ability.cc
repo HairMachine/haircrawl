@@ -1380,7 +1380,7 @@ static bool _check_ability_possible(const ability_def& abil, bool quiet = false)
         || you.duration[DUR_WATER_HOLD] && !you.res_water_drowning())
     {
         talent tal = get_talent(abil.ability, false);
-        if (tal.is_invocation)
+        if (tal.is_invocation && abil.ability != ABIL_RENOUNCE_RELIGION)
         {
             if (!quiet)
             {
@@ -2359,7 +2359,7 @@ static spret _do_ability(const ability_def& abil, bool fail)
 
     case ABIL_TSO_CLEANSING_FLAME:
     {
-        targeter_los hitfunc(&you, LOS_SOLID, 2);
+        targeter_radius hitfunc(&you, LOS_SOLID, 2);
         {
             if (stop_attack_prompt(hitfunc, "harm", _cleansing_flame_affects))
                 return spret::abort;
