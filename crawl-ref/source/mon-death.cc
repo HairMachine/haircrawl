@@ -1276,7 +1276,7 @@ static bool _explode_monster(monster* mons, killer_type killer,
     // FIXME: show_more == you.see_cell(mons->pos())
     if (type == MONS_LURKING_HORROR)
     {
-        targeter_los hitfunc(mons, LOS_SOLID);
+        targeter_radius hitfunc(mons, LOS_SOLID);
         flash_view_delay(UA_MONSTER, DARKGRAY, 300, &hitfunc);
     }
     else
@@ -1900,7 +1900,8 @@ item_def* monster_die(monster& mons, killer_type killer,
     }
     else if (mons.type == MONS_FIRE_VORTEX
              || mons.type == MONS_SPATIAL_VORTEX
-             || mons.type == MONS_TWISTER)
+             || mons.type == MONS_TWISTER
+             || (mons.type == MONS_FOXFIRE && mons.steps_remaining == 0))
     {
         if (!silent && !mons_reset && !was_banished)
         {
@@ -1917,6 +1918,12 @@ item_def* monster_die(monster& mons, killer_type killer,
 
         if (killer == KILL_RESET)
             killer = KILL_DISMISSED;
+    }
+    else if (mons.type == MONS_FOXFIRE)
+    {
+        // Foxfires are unkillable, they either dissapate by timing out
+        // or hit something.
+        silent = true;
     }
     else if (mons.type == MONS_SIMULACRUM)
     {
