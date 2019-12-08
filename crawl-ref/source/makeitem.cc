@@ -1253,7 +1253,7 @@ static book_type _choose_book_type(int item_level)
     const int rarity = book_rarity(book);
     ASSERT(rarity != 100); // 'removed item' - ugh...
 
-    if (rarity < item_level / 3 || (!one_chance_in(100) && x_chance_in_y(rarity-1, item_level+1)))
+    if (!one_chance_in(100) && x_chance_in_y(rarity-1, item_level+1))
         return _choose_book_type(item_level); // choose something else
 
     return book;
@@ -1316,18 +1316,25 @@ int random_wand_spell(const int item_level) {
 
 static void _generate_wand_item(item_def& item, int force_type, int item_level)
 {
-    // We generate a beautiful random spell wand based on spell books, as these are guaranteed to have castable spells in them. ~Hair
+    // We generate a beautiful random spell wand based on spell books, as these are guaranteed to have castable spells in them. 
+    // High level books often have low-level spells so we do a check on that as well. ~Hair
     item.spell = random_wand_spell(item_level);
     
-    // This looks strange. That's because it is. We're doing this to randomise the tile graphic; it will likely change. ~Hair
-    item.sub_type = random2(NUM_WANDS);
-    
-    // Add wand charges and ensure we have at least one charge.
-    item.charges = 1 + random2avg(wand_charge_value(item.sub_type), 3);
+    if (item_level > 27) 
+        item_level = 27;
 
-    // Don't let monsters pickup early high-tier wands
-    if (item_level < 2 && is_high_tier_wand(item.sub_type))
-        item.flags |= ISFLAG_NO_PICKUP;
+    if (item_level - random2(item_level) > spell_difficulty(static_cast<spell_type>(item.spell)))
+    {
+        _generate_wand_item(item, force_type, item_level);
+    }
+    else
+    {
+        // This looks strange. That's because it is. We're doing this to randomise the tile graphic; it will likely change. ~Hair
+        item.sub_type = random2(NUM_WANDS);
+
+        // Add wand charges and ensure we have at least one charge.
+        item.charges = 1 + random2avg(wand_charge_value(item.sub_type), 3);   
+    }
 }
 
 static void _generate_food_item(item_def& item, int force_quant, int force_type)
