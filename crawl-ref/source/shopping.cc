@@ -187,6 +187,12 @@ int artefact_value(const item_def &item)
     return (ret > 0) ? ret : 0;
 }
 
+static unsigned int _wand_value(item_def item) 
+{
+    double charge_cost = 1 + item.charges / 6;
+    return 30 + spell_difficulty(static_cast<spell_type>(item.spell)) * 40 * charge_cost;
+}
+
 unsigned int item_value(item_def item, bool ident)
 {
     // Note that we pass item in by value, since we want a local
@@ -398,56 +404,7 @@ unsigned int item_value(item_def item, bool ident)
         break;
 
     case OBJ_WANDS:
-        if (!item_type_known(item))
-            valued += 40;
-        else
-        {
-            // true if the wand is of a good type, a type with significant
-            // inherent value even when empty. Good wands are less expensive
-            // per charge.
-            bool good = false;
-            switch (item.sub_type)
-            {
-            case WAND_CLOUDS:
-            case WAND_SCATTERSHOT:
-                valued += 120;
-                good = true;
-                break;
-
-            case WAND_ACID:
-            case WAND_DIGGING:
-                valued += 80;
-                good = true;
-                break;
-
-            case WAND_ICEBLAST:
-            case WAND_DISINTEGRATION:
-                valued += 40;
-                good = true;
-                break;
-
-            case WAND_ENSLAVEMENT:
-            case WAND_POLYMORPH:
-            case WAND_PARALYSIS:
-                valued += 20;
-                break;
-
-            case WAND_FLAME:
-            case WAND_RANDOM_EFFECTS:
-                valued += 10;
-                break;
-
-            default:
-                valued += 6;
-                break;
-            }
-
-            if (item_ident(item, ISFLAG_KNOW_PLUSES))
-            {
-                if (good) valued += (valued * item.plus) / 4;
-                else      valued += (valued * item.plus) / 2;
-            }
-        }
+        valued += _wand_value(item);
         break;
 
     case OBJ_POTIONS:
