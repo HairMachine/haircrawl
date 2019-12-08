@@ -273,7 +273,7 @@ const Branch branches[NUM_BRANCHES] =
       WHITE, YELLOW,
       '4', {}, branch_noise::normal },
 
-    { BRANCH_BAILEY, BRANCH_DUNGEON, 4, 6, 1, 11,
+    { BRANCH_BAILEY, BRANCH_DUNGEON, 6, 8, 1, 11,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_BAILEY, DNGN_EXIT_BAILEY, NUM_FEATURES,
       "Bailey", "a bailey", "Bailey",
