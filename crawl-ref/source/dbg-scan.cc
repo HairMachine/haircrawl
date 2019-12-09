@@ -629,8 +629,6 @@ void check_map_validity()
             portal = DNGN_ENTER_PANDEMONIUM;
         else if (you.depth == 4)
             portal = DNGN_ENTER_ABYSS;
-        else if (you.depth == 2)
-            portal = DNGN_ENTER_HELL;
     }
 
     dungeon_feature_type exit = DNGN_UNSEEN;

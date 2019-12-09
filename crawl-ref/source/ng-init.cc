@@ -85,7 +85,12 @@ void initialise_branch_depths()
     disabled_branch.push_back(random_choose(BRANCH_SNAKE, BRANCH_SPIDER));
 
     // NewHell: choose one of the 4 hell branches and disable the rest. ~Hair
-    disabled_branch.push_back(random_choose(BRANCH_DIS, BRANCH_GEHENNA, BRANCH_COCYTUS, BRANCH_TARTARUS));
+    int hell_branch = random_range(BRANCH_DIS, BRANCH_TARTARUS);
+    for (int i = BRANCH_DIS; i <= BRANCH_TARTARUS; i++)
+    {
+        if (i != hell_branch)    
+            disabled_branch.push_back(static_cast<branch_type>(i));
+    }
 
     for (branch_type disabled : disabled_branch)
     {

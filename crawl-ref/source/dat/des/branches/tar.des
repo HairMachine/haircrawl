@@ -95,6 +95,17 @@ function tar_dig_maze(e, x, y)
 end
 }}
 
+##############################################################################
+# Tartarus entry vaults
+##############################################################################
+
+NAME:   tartarus_dummy_entry
+TAGS:   tartarus_entry transparent
+KFEAT:  O = enter_tartarus
+MAP
+O
+ENDMAP
+
 
 ##############################################################################
 # Tartarus
