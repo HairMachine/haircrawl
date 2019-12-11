@@ -7,6 +7,35 @@
 : crawl_require('dlua/vault.lua')
 
 {{
+function geh_portal(e)
+  local timeout_turns = crawl.random_range(2500, 3000)
+
+  local messager =
+    timed_msg {
+      initmsg = { "You hear the distant gibbering of demonic voices...",
+                  "Hark! There is a gateway to Gehenna on this level. " ..
+                  "Find the entrance quickly before the gate is sealed!" },
+      finalmsg = "With a final tortured howl, the noises cease.",
+      verb = 'cackling',
+      noisemaker = 'horde of demons',
+      ranges = {
+        { 5000, 'faint ' },  { 4000, '' }, { 2500, 'loud ' },
+        { 1500, 'thunderous ' }, { 0, 'deafening ' }
+      }
+    }
+
+  e.lua_marker('O',
+    timed_marker {
+      turns = timeout_turns,
+      msg = messager,
+      floor = 'stone_arch',
+      feat_tile = 'stone_arch',
+      single_timed = true,
+      dstname = 'geh' })
+  e.kfeat("O = enter_gehenna")
+  e.tags("gehenna_entry geh_entry transparent")
+end
+
 function geh_setup(e)
    e.place("Geh:$")
    e.kmask('O = no_item_gen')
@@ -19,6 +48,16 @@ function geh_setup(e)
    e.set_feature_name("metal_wall", "tempered metal wall")
 end
 }}
+
+##############################################################################
+# Gehenna entry vaults
+##############################################################################
+
+NAME:   gehenna_dummy_entry
+: geh_portal(_G)
+MAP
+O
+ENDMAP
 
 
 ##############################################################################
@@ -69,7 +108,7 @@ ENDMAP
 
 NAME:    hangedman_generic_boss_arena
 TAGS:    no_monster_gen
-DEPTH:   Geh, !Geh:$
+DEPTH:   Geh
 MONS:    hell knight, hellion, balrug, balrug
 MONS:    hell hound, sun demon, hell hog
 KFEAT:   L = l
@@ -103,7 +142,7 @@ ENDMAP
 
 NAME:    hangedman_hellfire_club
 TAGS:    transparent no_monster_gen
-DEPTH:   Geh, !Geh:$
+DEPTH:   Geh
 MONS:    red draconian scorcher
 MONS:    red draconian stormcaller
 MONS:    hellion
@@ -190,7 +229,7 @@ ENDMAP
 
 NAME:    hangedman_elemental_corridor
 TAGS:    no_monster_gen no_pool_fixup allow_dup
-DEPTH:   Geh, Coc, Zot, !Geh:$, !Coc:$, !Zot:$, Abyss
+DEPTH:   Geh, Coc, Zot, Abyss
 SHUFFLE: 123456, }] / }] / {[ / **
 :  if you.in_branch("Geh") then
 MONS:    brimstone fiend / balrug / hellion
@@ -254,7 +293,7 @@ ENDMAP
 ##############################################################################
 
 NAME:    nicolae_geh_sunburst
-DEPTH:   Geh, !Geh:$
+DEPTH:   Geh
 TAGS:    transparent extra decor
 SHUFFLE: abcdefgh/!''''!!!/!!''!!''/!''!!''!/!'!'!'!'/!!!'!!!'/!!!!!!!'/''''''''
 SUBST:   { = }}}{
@@ -283,7 +322,7 @@ MAP
 ENDMAP
 
 NAME:    nicolae_geh_lava_in_the_way
-DEPTH:   Geh:2-, !Geh:$
+DEPTH:   Geh
 SHUFFLE: {[(, }])
 KPROP:   '; = no_tele_into
 NSUBST:  ' = 1:1 / *:., ; = 1:1 / *:.
@@ -307,7 +346,7 @@ xxx;;;;;xxx
 ENDMAP
 
 NAME:     nicolae_geh_fiery_graves
-DEPTH:    Geh, !Geh:$
+DEPTH:    Geh
 TAGS:     transparent extra decor
 SUBVAULT: A : nicolae_fiery_grave
 SUBVAULT: B : nicolae_fiery_grave
@@ -350,7 +389,7 @@ ENDMAP
 
 NAME:    hangedman_gehenna_grave_pits
 TAGS:    transparent extra decor allow_dup luniq
-DEPTH:   Geh, !Geh:$
+DEPTH:   Geh
 KFEAT:   ' = open_door
 # Randomized: lava pit edges, extra entrance, door pair openness.
 SUBST:   ! = {[(<}])> ':40 +:40 .:120
@@ -388,7 +427,7 @@ ENDMAP
 
 NAME: nicolae_geh_amphitheater
 TAGS: extra decor transparent
-DEPTH: Geh, !Geh:1
+DEPTH: Geh
 SUBST: { = {[(
 MAP
    lllll
