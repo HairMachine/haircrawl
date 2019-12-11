@@ -7,6 +7,35 @@
 : crawl_require('dlua/vault.lua')
 
 {{
+function dis_portal(e)
+  local timeout_turns = crawl.random_range(2500, 3000)
+
+  local messager =
+    timed_msg {
+      initmsg = { "You hear the distant gibbering of demonic voices...",
+                  "Hark! There is a gateway to Dis on this level. " ..
+                  "Find the entrance quickly before the gate is sealed!" },
+      finalmsg = "With a final tortured howl, the noises cease.",
+      verb = 'cackling',
+      noisemaker = 'horde of demons',
+      ranges = {
+        { 5000, 'faint ' },  { 4000, '' }, { 2500, 'loud ' },
+        { 1500, 'thunderous ' }, { 0, 'deafening ' }
+      }
+    }
+
+  e.lua_marker('O',
+    timed_marker {
+      turns = timeout_turns,
+      msg = messager,
+      floor = 'stone_arch',
+      feat_tile = 'stone_arch',
+      single_timed = true,
+      dstname = 'dis' })
+  e.kfeat("O = enter_dis")
+  e.tags("dis_entry transparent")
+end
+
 function dis_setup(e)
    e.place("Dis:$")
    e.tags("dis", "no_rotate")
@@ -66,8 +95,7 @@ end
 ##############################################################################
 
 NAME:   dis_dummy_entry
-TAGS:   dis_entry transparent
-KFEAT:  O = enter_dis
+: dis_portal(_G)
 MAP
 O
 ENDMAP
