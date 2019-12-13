@@ -120,21 +120,21 @@ const Branch branches[NUM_BRANCHES] =
       'B', {}, branch_noise::quiet },
 #endif
 
-    { BRANCH_CRYPT, BRANCH_VAULTS, 2, 2, 3, 19,
+    { BRANCH_CRYPT, BRANCH_VAULTS, 2, 2, 1, 19,
       brflag::dangerous_end,
       DNGN_ENTER_CRYPT, DNGN_EXIT_CRYPT, NUM_FEATURES,
       "Crypt", "the Crypt", "Crypt",
       nullptr,
       LIGHTGREY, BROWN,
-      'C', {}, branch_noise::quiet },
+      'C', { RUNE_TOMB }, branch_noise::quiet },
 
-    { BRANCH_TOMB, BRANCH_CRYPT, 3, 3, 3, 21,
+    { BRANCH_TOMB, NUM_BRANCHES, 1, 1, 3, 21,
       brflag::islanded | brflag::dangerous_end | brflag::no_shafts,
       DNGN_ENTER_TOMB, DNGN_EXIT_TOMB, NUM_FEATURES,
       "Tomb", "the Tomb of the Ancients", "Tomb",
       nullptr,
       BROWN, BROWN,
-      'W', { RUNE_TOMB }, branch_noise::quiet },
+      'W', {}, branch_noise::quiet },
 #if TAG_MAJOR_VERSION > 34
 
     { BRANCH_DEPTHS, BRANCH_DUNGEON, 12, 12, 2, 22,
