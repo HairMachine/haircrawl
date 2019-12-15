@@ -36,7 +36,7 @@ const Branch branches[NUM_BRANCHES] =
       BROWN, BROWN,
       'O', {}, branch_noise::normal },
 
-    { BRANCH_ELF, BRANCH_ORC, 1, 1, 3, 15,
+    { BRANCH_ELF, BRANCH_SPIDER, 1, 1, 3, 15,
       brflag::dangerous_end,
       DNGN_ENTER_ELF, DNGN_EXIT_ELF, NUM_FEATURES,
       "Elven Halls", "the Elven Halls", "Elf",
@@ -94,7 +94,7 @@ const Branch branches[NUM_BRANCHES] =
       BROWN, YELLOW,
       'N', { RUNE_SPIDER }, branch_noise::normal },
 
-    { BRANCH_SLIME, BRANCH_LAIR, 3, 4, 3, 17,
+    { BRANCH_SLIME, BRANCH_SWAMP, 1, 1, 3, 17,
       brflag::no_items | brflag::dangerous_end | brflag::spotty,
       DNGN_ENTER_SLIME, DNGN_EXIT_SLIME, NUM_FEATURES,
       "Slime Pits", "the Pits of Slime", "Slime",
@@ -186,7 +186,7 @@ const Branch branches[NUM_BRANCHES] =
       MAGENTA, MAGENTA,
       'Y', { RUNE_TARTARUS }, branch_noise::normal },
 
-    { BRANCH_ZOT, BRANCH_DEPTHS, 2, 2, 1, 27,
+    { BRANCH_ZOT, BRANCH_DEPTHS, 2, 2, 2, 27,
       brflag::dangerous_end,
       DNGN_ENTER_ZOT, DNGN_EXIT_ZOT, NUM_FEATURES,
       "Zot", "the Realm of Zot", "Zot",
@@ -223,7 +223,7 @@ const Branch branches[NUM_BRANCHES] =
       'R', { RUNE_DEMONIC, RUNE_MNOLEG, RUNE_LOM_LOBON, RUNE_CEREBOV,
              RUNE_GLOORX_VLOQ }, branch_noise::normal },
 
-    { BRANCH_ZIGGURAT, BRANCH_DEPTHS, 2, 2, 27, 27,
+    { BRANCH_ZIGGURAT, BRANCH_ZOT, 1, 1, 27, 27,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_ZIGGURAT, DNGN_EXIT_ZIGGURAT, DNGN_FLOOR,
       "Ziggurat", "a ziggurat", "Zig",
@@ -304,7 +304,7 @@ const Branch branches[NUM_BRANCHES] =
       '7', {}, branch_noise::normal },
 #endif
 
-    { BRANCH_VOLCANO, BRANCH_LAIR, 1, 3, 1, 14,
+    { BRANCH_VOLCANO, BRANCH_ORC, 1, 1, 1, 14,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_VOLCANO, DNGN_EXIT_VOLCANO, NUM_FEATURES,
       "Volcano", "a volcano", "Volcano",
