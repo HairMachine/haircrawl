@@ -723,7 +723,7 @@ ENDMAP
 ######################### Vestibule Tartarus
 NAME: vestibule_tar_old
 TAGS: vestibule_tar
-KFEAT: T = enter_tartarus
+KFEAT: T = enter_abyss
 KMONS: T = revenant / shadow dragon
 FTILE: +'T = floor_infernal_blank
 TILE: c = dngn_stone_dark
@@ -748,7 +748,7 @@ ENDMAP
 
 NAME: vestibule_tar_mu
 TAGS: vestibule_tar
-KFEAT:  T=enter_tartarus
+KFEAT:  T=enter_abyss
 FTILE:  =T3Dz+'; = floor_infernal_blank
 TILE:   c = dngn_stone_dark
 SUBST:  ; = .
@@ -777,7 +777,7 @@ ENDMAP
 
 NAME:   vestibule_tar_nicolae_necropolis
 TAGS:   vestibule_tar
-KFEAT:  T = enter_tartarus
+KFEAT:  T = enter_abyss
 SUBST:  d = ccc., z = zzz..
 KMONS:  z = place:Depths:1 zombie
 KMONS:  b = revenant / lich / vampire mage / ancient lich / mummy priest / \
@@ -804,7 +804,7 @@ ENDMAP
 
 NAME: vestibule_tar_grunt_deathgaze
 TAGS: vestibule_tar
-KFEAT: T = enter_tartarus
+KFEAT: T = enter_abyss
 KMONS: T = revenant / lich / shadow dragon
 MONS: ancient champion band, reaper / soul eater, skeletal warrior band
 FTILE: +'T12 = floor_infernal_blank
@@ -831,7 +831,7 @@ ENDMAP
 ######################### Vestibule Gehenna
 NAME: vestibule_geh_old
 TAGS: vestibule_geh
-KFEAT: G = enter_gehenna
+KFEAT: G = enter_gehenna / enter_dis / enter_cocytus / enter_tartarus
 KMONS: G = hellion / balrug
 : hell_lava_spawns(_G)
 MAP
@@ -855,7 +855,7 @@ ENDMAP
 
 NAME: vestibule_geh_mu
 TAGS: vestibule_geh
-KFEAT:  G=enter_gehenna
+KFEAT:  G=enter_gehenna / enter_dis / enter_cocytus / enter_tartarus
 SUBST:  L = l.
 KMONS:  5 = crimson imp
 KMONS:  2 = hellion
@@ -888,7 +888,7 @@ SHUFFLE: ab/cd/ef, cd/cd/gh, ef/ef/ef/ij
 NSUBST:  a = G / H / ', b = 1:' / 2:'pp / *:p
 NSUBST:  h = 1:. / 2:.qq / *:q, j = 1:. / 2:.rr / *:r
 SUBST:   p : llXXx, q : llXXx, r : llXXx
-KFEAT:   G = enter_gehenna
+KFEAT:   G = enter_gehenna / enter_dis / enter_cocytus / enter_tartarus
 SUBST:   ce = x, d : xlllLX., f : xlllLX., gi = ....m, m = mm.
 SUBST:   L = l., X = xl
 KMONS:   H = hellion
@@ -917,7 +917,7 @@ ENDMAP
 
 NAME: vestibule_geh_grunt_obsidian_fortress
 TAGS: vestibule_geh
-KFEAT: G = enter_gehenna
+KFEAT: G = enter_gehenna / enter_dis / enter_cocytus / enter_tartarus
 MONS: balrug / hellion, sun demon / smoke demon
 MONS: red devil / orange demon / hell hound / hell hog
 MONS: red devil / orange demon / hell hound / hell hog
@@ -947,7 +947,7 @@ ENDMAP
 ######################### Vestibule Cocytus
 NAME: vestibule_coc_old
 TAGS: vestibule_coc
-KFEAT: C = enter_cocytus
+KFEAT: C = enter_pandemonium
 KMONS: C = blizzard demon / ice statue
 : hell_water_spawns(_G)
 MAP
@@ -971,7 +971,7 @@ ENDMAP
 
 NAME: vestibule_coc_mu
 TAGS: vestibule_coc
-KFEAT:  C=enter_cocytus
+KFEAT:  C=enter_pandemonium
 SUBST:  8 = 8 .:59
 KMONS:  8 = ice statue
 KMONS:  3 = ice devil
@@ -997,7 +997,7 @@ ENDMAP
 
 NAME:    vestibule_coc_nicolae_fridge_bridge
 TAGS:    vestibule_coc no_pool_fixup
-KFEAT:   C = enter_cocytus
+KFEAT:   C = enter_pandemonium
 SHUFFLE: ab
 SUBST:   a = I, b : w., W = w.
 KMONS:   I = ice statue
@@ -1030,7 +1030,7 @@ MONS: blizzard demon, ice devil / freezing wraith
 NSUBST: 3 = 3:3 / *:.
 SUBST: W = wW.
 KFEAT: A = stone_arch
-KFEAT: C = enter_cocytus
+KFEAT: C = enter_pandemonium
 KFEAT: W = W
 : hell_water_spawns(_G)
 MAP
@@ -1055,7 +1055,7 @@ ENDMAP
 ######################### Vestibule Dis
 NAME: vestibule_dis_old
 TAGS: vestibule_dis
-KFEAT: D = enter_dis
+KFEAT: D = enter_zot
 KMONS: D = war gargoyle / reaper
 FTILE: +'D = floor_infernal_blank
 MAP
@@ -1079,7 +1079,7 @@ ENDMAP
 
 NAME: vestibule_dis_mu
 TAGS: vestibule_dis
-KFEAT:  D=enter_dis
+KFEAT:  D=enter_zot
 KMONS:  8 = iron golem
 KMONS:  3 = rust devil
 KMONS:  6 = war gargoyle
@@ -1105,7 +1105,7 @@ ENDMAP
 
 NAME:   vestibule_dis_nicolae_mini_city_of_dis
 TAGS:   vestibule_dis
-KFEAT:  D = enter_dis
+KFEAT:  D = enter_zot
 NSUBST: E = + / v, F = + / v, q = + / v, p = + / v, \
         B = 1:+ / 1:+vv / *:v, Z = 1:+ / 1:+v / *:v
 SUBST:  2 = 22., 3 = 33.
@@ -1139,7 +1139,7 @@ TAGS: vestibule_dis
 MONS: war gargoyle / iron dragon, iron troll / iron golem
 MONS: rust devil / iron imp w:5
 NSUBST: D = 1:D / *:A
-KFEAT: D = enter_dis
+KFEAT: D = enter_zot
 KFEAT: A = stone_arch
 MAP
 .......v.vvvvxxxxxxxvvvv.v.......
