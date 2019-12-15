@@ -4448,11 +4448,7 @@ static bool _apply_item_props(item_def &item, const item_spec &spec,
 
     if (item.base_type == OBJ_RUNES)
     {
-        if (you.runes[item.sub_type])
-        {
-            destroy_item(item, true);
-            return false;
-        }
+        // Removed the runes destroying themselves if the player already has it. ~Hair
         item_colour(item);
     }
 

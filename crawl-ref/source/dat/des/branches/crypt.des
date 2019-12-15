@@ -1441,7 +1441,6 @@ KMONS:  4 = vampire mage
 KMONS:  5 = skeletal warrior / phantasmal warrior
 KMONS:  6 = vampire knight w:15 / jiangshi
 KMONS:  7 = vampire knight / skeletal warrior / w:15 zombie / wraith / w:5 nothing
-KITEM:  % = golden rune of Zot
 # ghost layout
 : elseif brnd > 0 then
 MONS:   curse skull
@@ -1465,11 +1464,12 @@ MONS:   mummy / guardian mummy / w:5 nothing
 NSUBST: / = 1:| / 2:* / *:%
 NSUBST: %*| = 1:d / 1:h
 : crypt_loot_plus(_G)
+KITEM:  > = golden rune of Zot
 MAP
 cccccccccccccccvvvvvvvvvvvvvvvvvccccccccccccccc
 ccccccccccccccvv..WWWWWWWWWWW..vvcccccccccccccc
 cccccccccccccvv..WWWWWWWWWWWWW..vvccccccccccccc
-cccccccccccccv...WWWb.b%b.bWWW...vccccccccccccc
+cccccccccccccv...WWWb.b>b.bWWW...vccccccccccccc
 cccccccccccccv...WWb$$|*|$$bWW...vccccccccccccc
 cccccccccccccv...WW.$/|1|/$.WW...vccccccccccccc
 cccccccccccccv...WWb$$|*|$$bWW...vccccccccccccc
@@ -1552,11 +1552,11 @@ NSUBST: P = > / |**
 NSUBST: O = 1:>
 SUBST:  P = |**
 : end
-KITEM:  > = golden rune of Zot
 # Loot randomisation
 SUBST:  % = %$, * = *%, / = |**
 NSUBST: *| = d / 1=h
 : crypt_loot_plus(_G)
+KITEM:  > = golden rune of Zot
 MAP
 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 vwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwv
@@ -1864,12 +1864,12 @@ KMONS:  C = hellwing
 KMONS:  E = skeleton w:13 / nothing
 KMONS:  F = patrolling reaper
 : end
-KITEM:  R = golden rune of Zot
 SUBST:  n : ncc
 : set_feature_name("granite_statue", "gravestone")
 : set_feature_name("tree", "dead tree")
 NSUBST: *| = 1:d / 1:h
 : crypt_loot_plus(_G)
+KITEM:  R = golden rune of Zot
 MAP
 tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
 tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
@@ -2009,10 +2009,11 @@ MONS:   generate_awake sphinx
 SUBST:  '" = .
 NSUBST:  %*| = 1:d / 1:h
 : crypt_loot_plus(_G)
+KITEM:  > = golden rune of Zot
 MAP
                 ccccccccccccccccccccccccccccccc
                 ccccccccccccccccccccccccccccccc
-                cc*$*c|%*.......**|c.........cc
+                cc*$*c|%*...>...**|c.........cc
                 cc$3$c|*...'2'...%|c..G.3.G..cc
                 cc...c|%|.......|%|c.........cc
                 ccc+cccccc.....ccccccc+cccBBBcc
