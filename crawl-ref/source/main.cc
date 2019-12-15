@@ -1297,6 +1297,18 @@ static bool _can_take_stairs(dungeon_feature_type ftype, bool down,
                          min_runes);
                 return false;
             }
+            
+            // Pan requires the Hell rune. ~Hair
+            if (it->id == BRANCH_PANDEMONIUM && !you.runes[RUNE_GEHENNA]) {
+                mprf("You need the Hell Rune to open this gate. Quick, before it closes forever!");
+                return false;
+            }
+            
+            // Zig requires the Orb of Zot. ~Hair
+            if (it->id == BRANCH_ZIGGURAT && !player_has_orb()) {
+                mprf("You need the Orb of Zot to enter this place.");
+                return false;
+            }
         }
 
         break;
