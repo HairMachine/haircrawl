@@ -5,6 +5,33 @@
 ##############################################################################
 
 {{
+function hell_portal(e)
+  local timeout_turns = crawl.random_range(2500, 3000)
+
+  local messager =
+    timed_msg {
+      initmsg = { "You hear the distant gibbering of demonic voices...",
+                  "Hark! There is a gateway to one of the domains of Hell on this level. " ..
+                  "Find the entrance quickly before the gate is sealed!" },
+      finalmsg = "With a final tortured howl, the noises cease.",
+      verb = 'cackling',
+      noisemaker = 'horde of demons',
+      ranges = {
+        { 5000, 'faint ' },  { 4000, '' }, { 2500, 'loud ' },
+        { 1500, 'thunderous ' }, { 0, 'deafening ' }
+      }
+    }
+
+  e.lua_marker('G',
+    timed_marker {
+      turns = timeout_turns,
+      msg = messager,
+      floor = 'expired_portal',
+      feat_tile = 'dngn_return_hell',
+      single_timed = true,
+      dstname = 'geh' })
+end
+
 function hell_entry_feature(e, glyph)
     return
 end
@@ -831,9 +858,10 @@ ENDMAP
 ######################### Vestibule Gehenna
 NAME: vestibule_geh_old
 TAGS: vestibule_geh
-KFEAT: G = enter_gehenna / enter_dis / enter_cocytus / enter_tartarus
+KFEAT: G = enter_gehenna
 KMONS: G = hellion / balrug
 : hell_lava_spawns(_G)
+: hell_portal(_G)
 MAP
 xxxxxxxxxxxxxx.l.l.xxxxxxxxxxxxxx
  xxxxxxxxxx...l.l.l...xxxxxxxxxx
@@ -855,7 +883,7 @@ ENDMAP
 
 NAME: vestibule_geh_mu
 TAGS: vestibule_geh
-KFEAT:  G=enter_gehenna / enter_dis / enter_cocytus / enter_tartarus
+KFEAT:  G=enter_gehenna
 SUBST:  L = l.
 KMONS:  5 = crimson imp
 KMONS:  2 = hellion
@@ -863,6 +891,7 @@ KMONS:  3 = red devil
 KMONS:  2 = reaper / soul eater
 FTILE:  x'5a2V+ = floor_infernal_blank
 : hell_lava_spawns(_G)
+: hell_portal(_G)
 MAP
 lllllllllllllllllllllllllllllllll
  Lllllllllllllllllllllllllllllll
@@ -888,7 +917,7 @@ SHUFFLE: ab/cd/ef, cd/cd/gh, ef/ef/ef/ij
 NSUBST:  a = G / H / ', b = 1:' / 2:'pp / *:p
 NSUBST:  h = 1:. / 2:.qq / *:q, j = 1:. / 2:.rr / *:r
 SUBST:   p : llXXx, q : llXXx, r : llXXx
-KFEAT:   G = enter_gehenna / enter_dis / enter_cocytus / enter_tartarus
+KFEAT:   G = enter_gehenna
 SUBST:   ce = x, d : xlllLX., f : xlllLX., gi = ....m, m = mm.
 SUBST:   L = l., X = xl
 KMONS:   H = hellion
@@ -896,6 +925,7 @@ KMONS:   m = crimson imp / red devil / smoke demon
 KMONS:   ' = hell beast / hell hound / hell hog / nothing w:140
 FTILE:   AH' = floor_infernal_blank
 : hell_lava_spawns(_G)
+: hell_portal(_G)
 MAP
 .........bab.........dcd.........
  ...m..bbbabbb.....dddcddd..m...
@@ -917,7 +947,7 @@ ENDMAP
 
 NAME: vestibule_geh_grunt_obsidian_fortress
 TAGS: vestibule_geh
-KFEAT: G = enter_gehenna / enter_dis / enter_cocytus / enter_tartarus
+KFEAT: G = enter_gehenna
 MONS: balrug / hellion, sun demon / smoke demon
 MONS: red devil / orange demon / hell hound / hell hog
 MONS: red devil / orange demon / hell hound / hell hog
@@ -925,6 +955,7 @@ NSUBST: 2 = 3:2 / *:.
 NSUBST: 3 = 3:3 / *:.
 FTILE: 123+G = floor_infernal_blank
 : hell_lava_spawns(_G)
+: hell_portal(_G)
 MAP
 lllllllllccccccccccccccclllllllll
  llllllccc'''c''1''c'''cccllllll
