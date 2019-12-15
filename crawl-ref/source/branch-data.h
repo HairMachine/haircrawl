@@ -160,7 +160,7 @@ const Branch branches[NUM_BRANCHES] =
       "Dis", "the Iron City of Dis", "Dis",
       nullptr,
       CYAN, BROWN,
-      'I', { RUNE_DIS }, branch_noise::normal },
+      'I', {}, branch_noise::normal },
 
     { BRANCH_GEHENNA, BRANCH_VESTIBULE, 1, 1, 1, 28,
       brflag::no_items | brflag::dangerous_end,
@@ -176,7 +176,7 @@ const Branch branches[NUM_BRANCHES] =
       "Cocytus", "Cocytus", "Coc",
       nullptr,
       LIGHTBLUE, LIGHTCYAN,
-      'X', { RUNE_COCYTUS }, branch_noise::normal },
+      'X', {}, branch_noise::normal },
 
     { BRANCH_TARTARUS, NUM_BRANCHES, 1, 1, 1, 28,
       brflag::no_items | brflag::dangerous_end,
@@ -184,7 +184,7 @@ const Branch branches[NUM_BRANCHES] =
       "Tartarus", "Tartarus", "Tar",
       nullptr,
       MAGENTA, MAGENTA,
-      'Y', { RUNE_TARTARUS }, branch_noise::normal },
+      'Y', {}, branch_noise::normal },
 
     { BRANCH_ZOT, BRANCH_VESTIBULE, 1, 1, 2, 27,
       brflag::dangerous_end,
@@ -220,7 +220,7 @@ const Branch branches[NUM_BRANCHES] =
       "You enter the halls of Pandemonium!\n"
       "To return, you must find a gate leading back.",
       BLACK, BLACK, // set specially
-      'R', { RUNE_DEMONIC, RUNE_MNOLEG, RUNE_LOM_LOBON, RUNE_CEREBOV,
+      'R', { RUNE_MNOLEG, RUNE_LOM_LOBON, RUNE_CEREBOV,
              RUNE_GLOORX_VLOQ }, branch_noise::normal },
 
     { BRANCH_ZIGGURAT, BRANCH_ZOT, 1, 1, 27, 27,
