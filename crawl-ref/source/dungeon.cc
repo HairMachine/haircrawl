@@ -2677,9 +2677,8 @@ static bool _pan_level()
         }
     }
 
-    // Unique pan lords become more common as you travel through pandemonium.
-    if (x_chance_in_y(1 + place_info.levels_seen, 5 + place_info.levels_seen)
-        && !all_demons_generated)
+    // Pan lords always generate until there are none left.
+    if (!all_demons_generated)
     {
         do
         {
@@ -2693,12 +2692,12 @@ static bool _pan_level()
 
     if (which_demon >= 0)
         vault = random_map_for_tag(pandemon_level_names[which_demon], false, false, MB_FALSE);
-    else
-        vault = random_map_for_tag("pan_fixed_rune", false, false, MB_FALSE);
 
-    // If we've run out of rune vaults, generate a boring normal vault instead.
-    if (!vault)
+    // If we've run out of demons, generate a boring normal vault instead. Pan is now over basically.
+    if (!vault) {
         vault = random_map_in_depth(level_id::current(), false, MB_FALSE);
+        mpr("You feel staying in this place would be unproductive.");
+    }
     
     // Every Pan level should have a primary vault.
     ASSERT(vault);
