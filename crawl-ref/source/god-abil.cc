@@ -2818,15 +2818,12 @@ static void _setup_gozag_shop(int index, vector<shop_type> &valid_shops)
     ASSERT(!you.props.exists(make_stringf(GOZAG_SHOPKEEPER_NAME_KEY, index)));
 
     shop_type type = NUM_SHOPS;
-    if (index == 0 && !you_foodless(false))
-        type = SHOP_FOOD;
-    else
-    {
-        int choice = random2(valid_shops.size());
-        type = valid_shops[choice];
-        // Don't choose this shop type again for this merchant call.
-        valid_shops.erase(valid_shops.begin() + choice);
-    }
+    
+    int choice = random2(valid_shops.size());
+    type = valid_shops[choice];
+    // Don't choose this shop type again for this merchant call.
+    valid_shops.erase(valid_shops.begin() + choice);
+    
     you.props[make_stringf(GOZAG_SHOP_TYPE_KEY, index)].get_int() = type;
 
     you.props[make_stringf(GOZAG_SHOPKEEPER_NAME_KEY, index)].get_string()
