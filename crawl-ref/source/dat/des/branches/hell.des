@@ -6,6 +6,32 @@
 
 {{
 function hell_portal(e)
+  local timeout_turns = crawl.random_range(1500, 2000)
+
+  local messager =
+    timed_msg {
+      initmsg = { "You hear the distant roaring of devilish voices...",
+                  "Hark! There is a gateway to one of the domains of Hell on this level. " ..
+                  "Find the entrance quickly before the gate is sealed!" },
+      finalmsg = "With a final tortured howl, the noises cease.",
+      verb = 'roaring',
+      noisemaker = 'army of devils',
+      ranges = {
+        { 5000, 'faint ' },  { 4000, '' }, { 2500, 'loud ' },
+        { 1500, 'thunderous ' }, { 0, 'deafening ' }
+      }
+    }
+
+  e.lua_marker('G',
+    timed_marker {
+      turns = timeout_turns,
+      msg = messager,
+      floor = 'expired_portal',
+      feat_tile = 'dngn_return_hell',
+      single_timed = true})
+end
+
+function hell_pan_portal(e)
   local timeout_turns = crawl.random_range(2500, 3000)
 
   local messager =
@@ -22,14 +48,12 @@ function hell_portal(e)
       }
     }
 
-  e.lua_marker('G',
+  e.lua_marker('C',
     timed_marker {
       turns = timeout_turns,
       msg = messager,
       floor = 'expired_portal',
-      feat_tile = 'dngn_return_hell',
-      single_timed = true,
-      dstname = 'geh' })
+      single_timed = true})
 end
 
 function hell_entry_feature(e, glyph)
@@ -981,6 +1005,7 @@ TAGS: vestibule_coc
 KFEAT: C = enter_pandemonium
 KMONS: C = blizzard demon / ice statue
 : hell_water_spawns(_G)
+: hell_pan_portal(_G)
 MAP
 wwwwwwwwwwwwwwwwCwwwwwwwwww......
  wwwwwwwwwwwwww....wwwwwww......
@@ -1007,6 +1032,7 @@ SUBST:  8 = 8 .:59
 KMONS:  8 = ice statue
 KMONS:  3 = ice devil
 : hell_water_spawns(_G)
+: hell_pan_portal(_G)
 MAP
 ...........wwwwwwwwwww...........
  ....33...wwwwwwwwwwwww...33....
@@ -1035,6 +1061,7 @@ KMONS:   I = ice statue
 KMONS:   3 = blizzard demon
 KMONS:   2 = ice devil / freezing wraith / white imp / nothing
 : hell_water_spawns(_G)
+: hell_pan_portal(_G)
 MAP
 wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
  WWWWwwwwwwwww.....wwwwwwwwwWWWW
@@ -1064,6 +1091,7 @@ KFEAT: A = stone_arch
 KFEAT: C = enter_pandemonium
 KFEAT: W = W
 : hell_water_spawns(_G)
+: hell_pan_portal(_G)
 MAP
 wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
  wwwwwWWWWWWWWWWwWWWWWWWWWWwwwww
