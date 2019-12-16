@@ -6,6 +6,36 @@
 ##############################################################################
 
 {{
+function crypt_portal(e)
+  local timeout_turns = crawl.random_range(2500, 3000)
+
+  local messager =
+    timed_msg {
+      initmsg = { "You hear the distant moaning of evil sprits...",
+                  "Hark! There is a gateway to the Crypt on this level. " ..
+                  "Find the entrance quickly before the gate is sealed!" },
+      finalmsg = "With a final bone-chilling groan, the noises cease.",
+      verb = 'moaning',
+      noisemaker = 'host of evil spirits',
+      ranges = {
+        { 5000, 'unsettling ' },  { 4000, '' }, { 2500, 'spooky ' },
+        { 1500, 'frightening ' }, { 0, 'terrifying ' }
+      }
+    }
+
+  e.lua_marker('O',
+    timed_marker {
+      turns = timeout_turns,
+      msg = messager,
+      floor = 'stone_arch',
+      feat_tile = 'enter_crypt',
+      single_timed = true,
+      dstname = 'Crypt' })
+  e.kfeat("O = enter_crypt")
+  e.tags("crypt_entry transparent")
+  e.kmons("0 = place:Crypt:1")
+end
+
 function crypt_drop_grates(data, triggerable, triggerer, marker, ev)
     if data.trig == true then
         return
@@ -55,12 +85,6 @@ function callback.grunt_crypt_arrival_guards_awaken(data,triggerable,trigger,mar
     end
 end
 
-function crypt_entry(e)
-    e.tags("crypt_entry vaults_entry_crypt")
-    e.kmons("0 = place:Crypt:1")
-    e.kfeat("O = enter_crypt")
-end
-
 function crypt_loot_plus(e)
   -- Since Crypt is an optional, late, difficult branch,
   -- provide some unreliable but high quality incentives.
@@ -106,17 +130,14 @@ end
 
 ##############################################################################
 NAME:   dummy_crypt_entry
-WEIGHT: 50
-TAGS:   crypt_entry extra transparent
-KFEAT:  O = enter_crypt
+: crypt_portal(_G)
 MAP
 O
 ENDMAP
 
 ##############################################################################
 NAME:   minmay_crypt_entry_simple_round
-TAGS:   transparent
-: crypt_entry(_G)
+: crypt_portal(_G)
 MAP
 .........
 ..ccccc..
@@ -133,8 +154,7 @@ ENDMAP
 
 ##############################################################################
 NAME:   minmay_crypt_entry_simple_box
-TAGS:   transparent
-: crypt_entry(_G)
+: crypt_portal(_G)
 MAP
 .......
 .cc.cc.
@@ -147,8 +167,7 @@ ENDMAP
 
 ##############################################################################
 NAME:   minmay_crypt_entry_simple_statues
-TAGS:   transparent
-: crypt_entry(_G)
+: crypt_portal(_G)
 MAP
 ...........
 .x.......x.
@@ -165,9 +184,8 @@ ENDMAP
 
 ##############################################################################
 NAME:   minmay_crypt_entry_simple_sparse
-TAGS:   transparent
 ORIENT: float
-: crypt_entry(_G)
+: crypt_portal(_G)
 MAP
 ...........
 .x...x...x.
@@ -184,8 +202,7 @@ ENDMAP
 
 ##############################################################################
 NAME:   minmay_crypt_entry_simple_walls
-TAGS:   transparent
-: crypt_entry(_G)
+: crypt_portal(_G)
 MAP
 ..........
 .xxxxxxxx.
@@ -206,8 +223,7 @@ ENDMAP
 
 ##############################################################################
 NAME:   minmay_crypt_entry_simple_corners
-TAGS:   transparent
-: crypt_entry(_G)
+: crypt_portal(_G)
 MAP
 ...........
 .xx.....xx.
@@ -224,8 +240,7 @@ ENDMAP
 
 ##############################################################################
 NAME:   minmay_crypt_entry_simple_plaza
-TAGS:   transparent
-: crypt_entry(_G)
+: crypt_portal(_G)
 MAP
 ......................
 ..............xxxxxxx.
@@ -240,9 +255,8 @@ ENDMAP
 
 ##############################################################################
 NAME:   minmay_crypt_entry_skeletal_spiral
-TAGS:   transparent
 MONS:   skeleton w:20 / skeletal warrior
-: crypt_entry(_G)
+: crypt_portal(_G)
 MAP
 ...........
 .xxxxxxxxx.
@@ -259,12 +273,11 @@ ENDMAP
 
 ##############################################################################
 NAME:    minmay_crypt_entry_necro_gods
-TAGS:    transparent
 WEIGHT:  30
 SHUFFLE: AB
 KFEAT:   A = altar_kikubaaqudgha
 KFEAT:   B = altar_yredelemnul
-: crypt_entry(_G)
+: crypt_portal(_G)
 MAP
 ...........
 .G.ccccc.G.
@@ -281,9 +294,8 @@ ENDMAP
 
 ##############################################################################
 NAME:    minmay_crypt_entry_nasty_monster
-TAGS:    transparent
 MONS:    bone dragon w:25 / lich / shadow dragon w:5
-: crypt_entry(_G)
+: crypt_portal(_G)
 MAP
 .........
 .x.....x.
@@ -301,10 +313,9 @@ ENDMAP
 
 ##############################################################################
 NAME:   minmay_crypt_entry_vampire_xt
-TAGS:   transparent
 MONS:   vampire, vampire knight / vampire mage
 SUBST:  V = VVVY
-: crypt_entry(_G)
+: crypt_portal(_G)
 MAP
 ................
 .xxxxx....xxxxx.
@@ -326,10 +337,9 @@ ENDMAP
 
 ##############################################################################
 NAME:    blue_anna_dwarven_crypt
-TAGS:    transparent
 MONS:    death knight
 MONS:    shadow wraith / wraith / wight w:5
-: crypt_entry(_G)
+: crypt_portal(_G)
 MAP
 cccc@cccc
 c.......c
@@ -945,7 +955,7 @@ ENDMAP
 
 NAME: nicolae_crypt_stairs_room
 TAGS: extra allow_dup luniq
-DEPTH: Crypt, !Crypt:1, !Crypt:$
+DEPTH: Crypt
 SHUFFLE: AB, CDE, FH/FH/HF
 SUBST: + = +@, BCD = c, A : GGGc.., E : Gc., F : GV..
 NSUBST: H = { / }
@@ -964,7 +974,7 @@ ENDMAP
 
 NAME:    hangedman_hall_of_fallen_heroes
 TAGS:    no_monster_gen no_item_gen
-DEPTH:   Crypt:2-
+DEPTH:   Crypt
 ORIENT:  float
 MONS:    wight band, phantasmal warrior
 MONS:    skeletal warrior ; long sword | war axe | trident | flail . \
@@ -1110,7 +1120,7 @@ cccc*ccc...v0cc
 ENDMAP
 
 NAME: cheibrodos_crypt_down_in_the_bonehoard
-DEPTH: Crypt, !Crypt:$
+DEPTH: Crypt
 TAGS: no_item_gen no_monster_gen no_pool_fixup
 ORIENT: float
 MONS: lich, mummy priest, freezing wraith / w:5 flayed ghost
@@ -1144,7 +1154,7 @@ cc.ccccc.cc...c+WWWWWcc...cc
 ENDMAP
 
 NAME: cheibrodos_crypt_eye_of_stone
-DEPTH: Crypt, !Crypt:$
+DEPTH: Crypt
 TAGS: no_item_gen no_monster_gen
 ORIENT: float
 MONS: floating eye / curse skull, obsidian statue / orange crystal statue
@@ -1174,7 +1184,7 @@ cc.4.cAc...cV...
 ENDMAP
 
 NAME: nicolae_crypt_statuary_hall
-DEPTH: Crypt, !Crypt:1, !Crypt:$
+DEPTH: Crypt
 TAGS: decor transparent
 SHUFFLE: {[(, }])
 MAP
@@ -1246,7 +1256,7 @@ ENDMAP
 
 # deep troll shamans will buff undead trolls too!
 NAME:    skrybe_necro_troll_1
-DEPTH:   Crypt, !Crypt:$
+DEPTH:   Crypt
 TAGS:    no_monster_gen uniq_necro_troll
 KMONS:   S = deep troll shaman
 KFEAT:   S = ] / } / )
@@ -1351,7 +1361,7 @@ ENDMAP
 
 NAME: cheibrodos_crypt_draghalla
 TAGS: no_item_gen no_monster_gen
-DEPTH: Crypt, !Crypt:$
+DEPTH: Crypt
 ORIENT: float
 # Monster density might be off here
 MONS: fire dragon skeleton / quicksilver dragon skeleton w:5 \
@@ -1396,7 +1406,7 @@ ENDMAP
 NAME:   church_of_pain_bobbens
 ORIENT: northwest
 TAGS:   no_monster_gen no_item_gen layout_city
-PLACE:  Crypt:$
+PLACE:  Crypt
 # MONSTER LAYOUT
 # boss (1)
 # boss guard (2)
@@ -1454,11 +1464,12 @@ MONS:   mummy / guardian mummy / w:5 nothing
 NSUBST: / = 1:| / 2:* / *:%
 NSUBST: %*| = 1:d / 1:h
 : crypt_loot_plus(_G)
+KITEM:  > = golden rune of Zot
 MAP
 cccccccccccccccvvvvvvvvvvvvvvvvvccccccccccccccc
 ccccccccccccccvv..WWWWWWWWWWW..vvcccccccccccccc
 cccccccccccccvv..WWWWWWWWWWWWW..vvccccccccccccc
-cccccccccccccv...WWWb.b.b.bWWW...vccccccccccccc
+cccccccccccccv...WWWb.b>b.bWWW...vccccccccccccc
 cccccccccccccv...WWb$$|*|$$bWW...vccccccccccccc
 cccccccccccccv...WW.$/|1|/$.WW...vccccccccccccc
 cccccccccccccv...WWb$$|*|$$bWW...vccccccccccccc
@@ -1510,7 +1521,7 @@ ENDMAP
 NAME:   cryptofortress_bobbens
 ORIENT: encompass
 TAGS:   no_monster_gen no_item_gen no_pool_fixup no_rotate no_vmirror
-PLACE:  Crypt:$
+PLACE:  Crypt
 KFEAT:  A = w
 KMONS:  A = flying skull
 KMONS:  B = ancient lich
@@ -1541,11 +1552,11 @@ NSUBST: P = > / |**
 NSUBST: O = 1:>
 SUBST:  P = |**
 : end
-KFEAT:  > = enter_tomb
 # Loot randomisation
 SUBST:  % = %$, * = *%, / = |**
 NSUBST: *| = d / 1=h
 : crypt_loot_plus(_G)
+KITEM:  > = golden rune of Zot
 MAP
 vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 vwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwv
@@ -1621,7 +1632,7 @@ ENDMAP
 NAME:   david_glass_crypt
 ORIENT: float
 TAGS:   no_item_gen no_rotate transparent
-PLACE:  Crypt:$
+PLACE:  Crypt
 MARKER: m = lua:portal_desc {wall_phase = 1}
 KFEAT:  m = iron_grate
 KMASK:  1 = opaque
@@ -1669,7 +1680,7 @@ ENDMAP
 NAME:   quadcrypt_mu
 ORIENT: encompass
 TAGS:   no_monster_gen no_item_gen no_pool_fixup no_rotate no_vmirror no_hmirror
-PLACE:  Crypt:$
+PLACE:  Crypt
 ####### chapel garden
 SUBST:  F = f ?
 SUBST:  f = p:1 .:1
@@ -1725,19 +1736,7 @@ NSUBST: K = 1:+ / *:v
 NSUBST: ' = 1:+ / *:v
 NSUBST: " = 1:+ / *:v
 NSUBST: *| = 1:d / 1:h
-####### Tomb entrance
-: if crawl.one_chance_in(4) then
-KFEAT:  L = enter_tomb
-KFEAT:  _ = altar_kikubaaqudgha
-SUBST:  O = $
-: elseif crawl.one_chance_in(3) then
-KFEAT:  _ = enter_tomb
-SUBST:  O = $
-: else
-KFEAT:  _ = altar_kikubaaqudgha
-NSUBST: O = 1:> / *:$
-KFEAT:  > = enter_tomb
-: end
+KITEM:  > = golden rune of Zot
 SUBST:  ? = $ % * |:1
 : crypt_loot_plus(_G)
 MAP
@@ -1746,7 +1745,7 @@ vccccccccccccccccccccccccc......"...Bvvvvvvvvvvvvvvvvvvvvvv
 vc..D..c.....c....Bc..+..c.ffff.vvvBLvvvvvvvvvvvvvvvvvvvvvv
 vc.c.c.+.....+....cc..+..c.ffFf.vvvv"vvvvvvvvvvvvvnP+.....v
 vc.._..+...D.c....Bc..c..m.ffFf.vO???||$$$.vvvvv..nPn|????v
-vc.c.c.c.....c....cc..c..c.ffff.v?$$$$$$$$.vvvv...nPn$$$$$v
+vc.c.c.c.....c....cc..c..c.ffff.v?$$$$>$$$.vvvv...nPn$$$$$v
 vc.....ccc+ccc....Bc..cGGc.ffff.vnnnnnnnnn+vvv..H.nPn$$O$$v
 vc.....c.....c....cc..c..c.ffff.v..........vv.....nPn$$$$$v
 vc.....c?....c..A.Bc..c..m..fff.v..........vv.uvu.nPn$$$$$v
@@ -1815,7 +1814,7 @@ ENDMAP
 #
 NAME:   evilmike_haunted_forest
 ORIENT: encompass
-PLACE:  Crypt:$
+PLACE:  Crypt
 TAGS:   no_monster_gen no_item_gen no_pool_fixup no_rotate
 SUBST:  T = t.
 SUBST:  v = cccc.-
@@ -1832,7 +1831,6 @@ SUBST:  x: c, -'": ., ?: |
 SUBST:  D = +, d = cc+
 NSUBST: * = 12:* / 12:% / *:$
 KFEAT:  m = iron_grate
-KFEAT:  > = enter_tomb
 MONS:   w:3 patrolling lich / w:1 patrolling revenant
 MONS:   patrolling zombie / nothing
 MONS:   jumping spider / wolf spider / redback / w:19 nothing
@@ -1871,6 +1869,7 @@ SUBST:  n : ncc
 : set_feature_name("tree", "dead tree")
 NSUBST: *| = 1:d / 1:h
 : crypt_loot_plus(_G)
+KITEM:  R = golden rune of Zot
 MAP
 tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
 tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
@@ -1881,7 +1880,7 @@ ttT"TttTT..t..v---vvv.T....T..t..TTt.TTT.t....T..TtttttttTTTWWWwwwwwwwwwwwwwWttt
 tt""ttT..t...Tv--...."..ccccc...T...ccccc.T..t..TTTTtttttttTTWWWWWWwwtwwwwwWTttt
 tt""ttTt...T..vv."""....c*0-+.......+CC*c...T.T..t..TttttttttTTWWWTtttttWWW.Tttt
 tt""TtT..T..""".""".....c*-cccccccccccC*c.......t..t..ttttttttTTT.ttttttTW.Ttttt
-ttT""T.t.."""""""".....cccccc9-----Hcccccc......T....t.TTTTTtttttT.TtttT..Tttttt
+ttT""T.t.."""""""".....cccccc9--R--Hcccccc......T....t.TTTTTtttttT.TtttT..Tttttt
 tttT"""""""".......T...c------*|||*------c..555....t.....t.tTtttttT.TtT.TTtttttt
 ttttt"""""".vvvvv.....ccc--xx**|V|**xx--ccc..555...t..tt..t...TTtttT....Tttttttt
 ttttttTtT"".v--4vvv...ccc--xx-*|||*-xx--ccc.......T.....t....t..TttttT.TTttttttt
@@ -1909,7 +1908,7 @@ ttttttTt...cccdcccccccccc-xxx--'''--xxx-ccccccccccdccc...v%---4-v........Ttttttt
 tttttttT..............ccc-xxx--'''--xxx-ccc..............vvvvvvvv....T.t.tTttttt
 ttttttttTt....xxxxx....n-------'''-------n...555....T..............--v....Tttttt
 tttttttT......x*1*x....n---B---'''---B---n..555......ccccccccc....--Tv..t.Tttttt
-ttttttT.t..T..x*|*x...ccc-xxx--'''--xxx-ccc...T......c$$$>$$$c...--44vT...tTtttt
+ttttttT.t..T..x*|*x...ccc-xxx--'''--xxx-ccc...T......c$$$%$$$c...--44vT...tTtttt
 ttttttT.......x***x...ccc-xxx--'''--xxx-ccc.T........c$$$$$$$c..vvvvvvvvvv.Ttttt
 tttttttT.t.T..xx-xx....n-------'''-------n.......T...c$$$7$$$c..--4--vT..t.Ttttt
 ttttttttT......x+x.....n-------'''-------n.....t..t..c**666**c....---v..t...Tttt
@@ -1961,7 +1960,7 @@ ENDMAP
 # Loot:
 #  roughly similar loot to evilmike's haunted forest
 NAME:   due_elkab
-PLACE:  Crypt:$
+PLACE:  Crypt
 ORIENT: north
 TAGS:   no_monster_gen no_item_gen no_pool_fixup no_rotate no_trap_gen
 TAGS:   layout_city
@@ -2010,10 +2009,11 @@ MONS:   generate_awake sphinx
 SUBST:  '" = .
 NSUBST:  %*| = 1:d / 1:h
 : crypt_loot_plus(_G)
+KITEM:  > = golden rune of Zot
 MAP
                 ccccccccccccccccccccccccccccccc
                 ccccccccccccccccccccccccccccccc
-                cc*$*c|%*.......**|c.........cc
+                cc*$*c|%*...>...**|c.........cc
                 cc$3$c|*...'2'...%|c..G.3.G..cc
                 cc...c|%|.......|%|c.........cc
                 ccc+cccccc.....ccccccc+cccBBBcc
@@ -2064,7 +2064,7 @@ ENDMAP
 #
 NAME:    grunt_crypt_end_deaths_head
 TAGS:    patrolling no_monster_gen no_rotate no_hmirror no_vmirror
-PLACE:   Crypt:$
+PLACE:   Crypt
 ORIENT:  encompass
 MONS:    skeletal warrior / jiangshi, flying skull band
 SHUFFLE: 34 / 56 / 78 / 90, AB / CD / EF / HI / JK / LM / NO / PQ
@@ -2113,7 +2113,7 @@ KMONS:   S = ancient champion
 KMONS:   T = skeletal warrior
 : end
 
-KFEAT:   R = enter_tomb
+KITEM:   R = golden rune of Zot
 KFEAT:   _ = altar_yredelemnul / altar_kikubaaqudgha
 SHUFFLE: {[(<
 
@@ -2183,7 +2183,7 @@ ENDMAP
 
 NAME:    lightli_unholy_cathedral
 TAGS:    no_monster_gen layout_city
-PLACE:   Crypt:$
+PLACE:   Crypt
 ORIENT:  north
 MONS:    ancient champion, lich / revenant, jiangshi / ghoul w:2
 MONS:    profane servitor / bone dragon / curse toe / \

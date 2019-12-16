@@ -5,12 +5,59 @@
 ##############################################################################
 
 {{
+function hell_portal(e)
+  local timeout_turns = crawl.random_range(1500, 2000)
+
+  local messager =
+    timed_msg {
+      initmsg = { "You hear the distant roaring of devilish voices...",
+                  "Hark! There is a gateway to one of the domains of Hell on this level. " ..
+                  "Find the entrance quickly before the gate is sealed!" },
+      finalmsg = "With a final tortured howl, the noises cease.",
+      verb = 'roaring',
+      noisemaker = 'army of devils',
+      ranges = {
+        { 5000, 'faint ' },  { 4000, '' }, { 2500, 'loud ' },
+        { 1500, 'thunderous ' }, { 0, 'deafening ' }
+      }
+    }
+
+  e.lua_marker('G',
+    timed_marker {
+      turns = timeout_turns,
+      msg = messager,
+      floor = 'expired_portal',
+      feat_tile = 'dngn_return_hell',
+      single_timed = true})
+end
+
+function hell_pan_portal(e)
+  local timeout_turns = crawl.random_range(2500, 3000)
+
+  local messager =
+    timed_msg {
+      initmsg = { "You hear the distant gibbering of demonic voices...",
+                  "Hark! There is a gateway to one of the domains of Hell on this level. " ..
+                  "Find the entrance quickly before the gate is sealed!" },
+      finalmsg = "With a final tortured howl, the noises cease.",
+      verb = 'cackling',
+      noisemaker = 'horde of demons',
+      ranges = {
+        { 5000, 'faint ' },  { 4000, '' }, { 2500, 'loud ' },
+        { 1500, 'thunderous ' }, { 0, 'deafening ' }
+      }
+    }
+
+  e.lua_marker('C',
+    timed_marker {
+      turns = timeout_turns,
+      msg = messager,
+      floor = 'expired_portal',
+      single_timed = true})
+end
+
 function hell_entry_feature(e, glyph)
-    e.tags("extra luniq_enter_hell chance_enter_hell")
-    e.depth_chance("Depths", 10000)
--- D:21-27 entries for save compat, remove when TAG_MAJOR_VERSION > 34
-    e.depth_chance("D:21-", 10000)
-    e.kfeat(glyph .. " = enter_hell")
+    return
 end
 
 function hell_entry_tier(e, tier)
@@ -727,7 +774,7 @@ ENDMAP
 ######################### Vestibule Tartarus
 NAME: vestibule_tar_old
 TAGS: vestibule_tar
-KFEAT: T = enter_tartarus
+KFEAT: T = enter_abyss
 KMONS: T = revenant / shadow dragon
 FTILE: +'T = floor_infernal_blank
 TILE: c = dngn_stone_dark
@@ -752,7 +799,7 @@ ENDMAP
 
 NAME: vestibule_tar_mu
 TAGS: vestibule_tar
-KFEAT:  T=enter_tartarus
+KFEAT:  T=enter_abyss
 FTILE:  =T3Dz+'; = floor_infernal_blank
 TILE:   c = dngn_stone_dark
 SUBST:  ; = .
@@ -781,7 +828,7 @@ ENDMAP
 
 NAME:   vestibule_tar_nicolae_necropolis
 TAGS:   vestibule_tar
-KFEAT:  T = enter_tartarus
+KFEAT:  T = enter_abyss
 SUBST:  d = ccc., z = zzz..
 KMONS:  z = place:Depths:1 zombie
 KMONS:  b = revenant / lich / vampire mage / ancient lich / mummy priest / \
@@ -808,7 +855,7 @@ ENDMAP
 
 NAME: vestibule_tar_grunt_deathgaze
 TAGS: vestibule_tar
-KFEAT: T = enter_tartarus
+KFEAT: T = enter_abyss
 KMONS: T = revenant / lich / shadow dragon
 MONS: ancient champion band, reaper / soul eater, skeletal warrior band
 FTILE: +'T12 = floor_infernal_blank
@@ -838,6 +885,7 @@ TAGS: vestibule_geh
 KFEAT: G = enter_gehenna
 KMONS: G = hellion / balrug
 : hell_lava_spawns(_G)
+: hell_portal(_G)
 MAP
 xxxxxxxxxxxxxx.l.l.xxxxxxxxxxxxxx
  xxxxxxxxxx...l.l.l...xxxxxxxxxx
@@ -867,6 +915,7 @@ KMONS:  3 = red devil
 KMONS:  2 = reaper / soul eater
 FTILE:  x'5a2V+ = floor_infernal_blank
 : hell_lava_spawns(_G)
+: hell_portal(_G)
 MAP
 lllllllllllllllllllllllllllllllll
  Lllllllllllllllllllllllllllllll
@@ -900,6 +949,7 @@ KMONS:   m = crimson imp / red devil / smoke demon
 KMONS:   ' = hell beast / hell hound / hell hog / nothing w:140
 FTILE:   AH' = floor_infernal_blank
 : hell_lava_spawns(_G)
+: hell_portal(_G)
 MAP
 .........bab.........dcd.........
  ...m..bbbabbb.....dddcddd..m...
@@ -929,6 +979,7 @@ NSUBST: 2 = 3:2 / *:.
 NSUBST: 3 = 3:3 / *:.
 FTILE: 123+G = floor_infernal_blank
 : hell_lava_spawns(_G)
+: hell_portal(_G)
 MAP
 lllllllllccccccccccccccclllllllll
  llllllccc'''c''1''c'''cccllllll
@@ -951,9 +1002,10 @@ ENDMAP
 ######################### Vestibule Cocytus
 NAME: vestibule_coc_old
 TAGS: vestibule_coc
-KFEAT: C = enter_cocytus
+KFEAT: C = enter_pandemonium
 KMONS: C = blizzard demon / ice statue
 : hell_water_spawns(_G)
+: hell_pan_portal(_G)
 MAP
 wwwwwwwwwwwwwwwwCwwwwwwwwww......
  wwwwwwwwwwwwww....wwwwwww......
@@ -975,11 +1027,12 @@ ENDMAP
 
 NAME: vestibule_coc_mu
 TAGS: vestibule_coc
-KFEAT:  C=enter_cocytus
+KFEAT:  C=enter_pandemonium
 SUBST:  8 = 8 .:59
 KMONS:  8 = ice statue
 KMONS:  3 = ice devil
 : hell_water_spawns(_G)
+: hell_pan_portal(_G)
 MAP
 ...........wwwwwwwwwww...........
  ....33...wwwwwwwwwwwww...33....
@@ -1001,13 +1054,14 @@ ENDMAP
 
 NAME:    vestibule_coc_nicolae_fridge_bridge
 TAGS:    vestibule_coc no_pool_fixup
-KFEAT:   C = enter_cocytus
+KFEAT:   C = enter_pandemonium
 SHUFFLE: ab
 SUBST:   a = I, b : w., W = w.
 KMONS:   I = ice statue
 KMONS:   3 = blizzard demon
 KMONS:   2 = ice devil / freezing wraith / white imp / nothing
 : hell_water_spawns(_G)
+: hell_pan_portal(_G)
 MAP
 wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
  WWWWwwwwwwwww.....wwwwwwwwwWWWW
@@ -1034,9 +1088,10 @@ MONS: blizzard demon, ice devil / freezing wraith
 NSUBST: 3 = 3:3 / *:.
 SUBST: W = wW.
 KFEAT: A = stone_arch
-KFEAT: C = enter_cocytus
+KFEAT: C = enter_pandemonium
 KFEAT: W = W
 : hell_water_spawns(_G)
+: hell_pan_portal(_G)
 MAP
 wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
  wwwwwWWWWWWWWWWwWWWWWWWWWWwwwww
@@ -1059,7 +1114,7 @@ ENDMAP
 ######################### Vestibule Dis
 NAME: vestibule_dis_old
 TAGS: vestibule_dis
-KFEAT: D = enter_dis
+KFEAT: D = enter_zot
 KMONS: D = war gargoyle / reaper
 FTILE: +'D = floor_infernal_blank
 MAP
@@ -1083,7 +1138,7 @@ ENDMAP
 
 NAME: vestibule_dis_mu
 TAGS: vestibule_dis
-KFEAT:  D=enter_dis
+KFEAT:  D=enter_zot
 KMONS:  8 = iron golem
 KMONS:  3 = rust devil
 KMONS:  6 = war gargoyle
@@ -1109,7 +1164,7 @@ ENDMAP
 
 NAME:   vestibule_dis_nicolae_mini_city_of_dis
 TAGS:   vestibule_dis
-KFEAT:  D = enter_dis
+KFEAT:  D = enter_zot
 NSUBST: E = + / v, F = + / v, q = + / v, p = + / v, \
         B = 1:+ / 1:+vv / *:v, Z = 1:+ / 1:+v / *:v
 SUBST:  2 = 22., 3 = 33.
@@ -1143,7 +1198,7 @@ TAGS: vestibule_dis
 MONS: war gargoyle / iron dragon, iron troll / iron golem
 MONS: rust devil / iron imp w:5
 NSUBST: D = 1:D / *:A
-KFEAT: D = enter_dis
+KFEAT: D = enter_zot
 KFEAT: A = stone_arch
 MAP
 .......v.vvvvxxxxxxxvvvv.v.......

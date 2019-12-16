@@ -36,7 +36,7 @@ const Branch branches[NUM_BRANCHES] =
       BROWN, BROWN,
       'O', {}, branch_noise::normal },
 
-    { BRANCH_ELF, BRANCH_ORC, 1, 1, 3, 15,
+    { BRANCH_ELF, BRANCH_SPIDER, 1, 1, 3, 15,
       brflag::dangerous_end,
       DNGN_ENTER_ELF, DNGN_EXIT_ELF, NUM_FEATURES,
       "Elven Halls", "the Elven Halls", "Elf",
@@ -94,7 +94,7 @@ const Branch branches[NUM_BRANCHES] =
       BROWN, YELLOW,
       'N', { RUNE_SPIDER }, branch_noise::normal },
 
-    { BRANCH_SLIME, BRANCH_LAIR, 3, 4, 3, 17,
+    { BRANCH_SLIME, BRANCH_SWAMP, 1, 1, 1, 17,
       brflag::no_items | brflag::dangerous_end | brflag::spotty,
       DNGN_ENTER_SLIME, DNGN_EXIT_SLIME, NUM_FEATURES,
       "Slime Pits", "the Pits of Slime", "Slime",
@@ -102,7 +102,7 @@ const Branch branches[NUM_BRANCHES] =
       GREEN, BROWN,
       'M', { RUNE_SLIME }, branch_noise::quiet },
 
-    { BRANCH_VAULTS, BRANCH_DUNGEON, 10, 11, 2, 19,
+    { BRANCH_VAULTS, BRANCH_DUNGEON, 10, 11, 3, 19,
       brflag::dangerous_end,
       DNGN_ENTER_VAULTS, DNGN_EXIT_VAULTS, NUM_FEATURES,
       "Vaults", "the Vaults", "Vaults",
@@ -120,21 +120,21 @@ const Branch branches[NUM_BRANCHES] =
       'B', {}, branch_noise::quiet },
 #endif
 
-    { BRANCH_CRYPT, BRANCH_VAULTS, 2, 2, 3, 19,
+    { BRANCH_CRYPT, BRANCH_VAULTS, 2, 2, 1, 19,
       brflag::dangerous_end,
       DNGN_ENTER_CRYPT, DNGN_EXIT_CRYPT, NUM_FEATURES,
       "Crypt", "the Crypt", "Crypt",
       nullptr,
       LIGHTGREY, BROWN,
-      'C', {}, branch_noise::quiet },
+      'C', { RUNE_TOMB }, branch_noise::quiet },
 
-    { BRANCH_TOMB, BRANCH_CRYPT, 3, 3, 3, 21,
+    { BRANCH_TOMB, NUM_BRANCHES, 1, 1, 3, 21,
       brflag::islanded | brflag::dangerous_end | brflag::no_shafts,
       DNGN_ENTER_TOMB, DNGN_EXIT_TOMB, NUM_FEATURES,
       "Tomb", "the Tomb of the Ancients", "Tomb",
       nullptr,
       BROWN, BROWN,
-      'W', { RUNE_TOMB }, branch_noise::quiet },
+      'W', {}, branch_noise::quiet },
 #if TAG_MAJOR_VERSION > 34
 
     { BRANCH_DEPTHS, BRANCH_DUNGEON, 12, 12, 2, 22,
@@ -146,7 +146,7 @@ const Branch branches[NUM_BRANCHES] =
       'U', {}, branch_noise::normal },
 #endif
 
-    { BRANCH_VESTIBULE, NUM_BRANCHES, 27, 27, 1, 27,
+    { BRANCH_VESTIBULE, BRANCH_DUNGEON, 12, 12, 1, 27,
       brflag::no_items,
       DNGN_ENTER_HELL, DNGN_EXIT_HELL, NUM_FEATURES,
       "Hell", "the Vestibule of Hell", "Hell",
@@ -154,15 +154,15 @@ const Branch branches[NUM_BRANCHES] =
       LIGHTGREY, LIGHTRED,
       'H', {}, branch_noise::normal },
 
-    { BRANCH_DIS, BRANCH_VESTIBULE, 1, 1, 3, 28,
+    { BRANCH_DIS, NUM_BRANCHES, 1, 1, 1, 28,
       brflag::no_items | brflag::dangerous_end,
       DNGN_ENTER_DIS, DNGN_ENTER_HELL, DNGN_ENTER_HELL,
       "Dis", "the Iron City of Dis", "Dis",
       nullptr,
       CYAN, BROWN,
-      'I', { RUNE_DIS }, branch_noise::normal },
+      'I', {}, branch_noise::normal },
 
-    { BRANCH_GEHENNA, BRANCH_VESTIBULE, 1, 1, 3, 28,
+    { BRANCH_GEHENNA, BRANCH_VESTIBULE, 1, 1, 1, 28,
       brflag::no_items | brflag::dangerous_end,
       DNGN_ENTER_GEHENNA, DNGN_ENTER_HELL, DNGN_ENTER_HELL,
       "Gehenna", "Gehenna", "Geh",
@@ -170,23 +170,23 @@ const Branch branches[NUM_BRANCHES] =
       BROWN, RED,
       'G', { RUNE_GEHENNA }, branch_noise::normal },
 
-    { BRANCH_COCYTUS, BRANCH_VESTIBULE, 1, 1, 3, 28,
+    { BRANCH_COCYTUS, NUM_BRANCHES, 1, 1, 1, 28,
       brflag::no_items | brflag::dangerous_end,
       DNGN_ENTER_COCYTUS, DNGN_ENTER_HELL, DNGN_ENTER_HELL,
       "Cocytus", "Cocytus", "Coc",
       nullptr,
       LIGHTBLUE, LIGHTCYAN,
-      'X', { RUNE_COCYTUS }, branch_noise::normal },
+      'X', {}, branch_noise::normal },
 
-    { BRANCH_TARTARUS, BRANCH_VESTIBULE, 1, 1, 3, 28,
+    { BRANCH_TARTARUS, NUM_BRANCHES, 1, 1, 1, 28,
       brflag::no_items | brflag::dangerous_end,
       DNGN_ENTER_TARTARUS, DNGN_ENTER_HELL, DNGN_ENTER_HELL,
       "Tartarus", "Tartarus", "Tar",
       nullptr,
       MAGENTA, MAGENTA,
-      'Y', { RUNE_TARTARUS }, branch_noise::normal },
+      'Y', {}, branch_noise::normal },
 
-    { BRANCH_ZOT, BRANCH_DEPTHS, 2, 2, 1, 27,
+    { BRANCH_ZOT, BRANCH_VESTIBULE, 1, 1, 2, 27,
       brflag::dangerous_end,
       DNGN_ENTER_ZOT, DNGN_EXIT_ZOT, NUM_FEATURES,
       "Zot", "the Realm of Zot", "Zot",
@@ -220,10 +220,10 @@ const Branch branches[NUM_BRANCHES] =
       "You enter the halls of Pandemonium!\n"
       "To return, you must find a gate leading back.",
       BLACK, BLACK, // set specially
-      'R', { RUNE_DEMONIC, RUNE_MNOLEG, RUNE_LOM_LOBON, RUNE_CEREBOV,
+      'R', { RUNE_MNOLEG, RUNE_LOM_LOBON, RUNE_CEREBOV,
              RUNE_GLOORX_VLOQ }, branch_noise::normal },
 
-    { BRANCH_ZIGGURAT, BRANCH_DEPTHS, 2, 2, 27, 27,
+    { BRANCH_ZIGGURAT, BRANCH_ZOT, 1, 1, 27, 27,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_ZIGGURAT, DNGN_EXIT_ZIGGURAT, DNGN_FLOOR,
       "Ziggurat", "a ziggurat", "Zig",
@@ -304,7 +304,7 @@ const Branch branches[NUM_BRANCHES] =
       '7', {}, branch_noise::normal },
 #endif
 
-    { BRANCH_VOLCANO, BRANCH_LAIR, 1, 3, 1, 14,
+    { BRANCH_VOLCANO, BRANCH_ORC, 1, 1, 1, 14,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_VOLCANO, DNGN_EXIT_VOLCANO, NUM_FEATURES,
       "Volcano", "a volcano", "Volcano",
@@ -331,7 +331,7 @@ const Branch branches[NUM_BRANCHES] =
 #endif
 #if TAG_MAJOR_VERSION == 34
 
-    { BRANCH_DEPTHS, BRANCH_DUNGEON, 12, 12, 2, 22,
+    { BRANCH_DEPTHS, NUM_BRANCHES, 12, 12, 2, 22,
       brflag::none,
       DNGN_ENTER_DEPTHS, DNGN_EXIT_DEPTHS, NUM_FEATURES,
       "Depths", "the Depths", "Depths",

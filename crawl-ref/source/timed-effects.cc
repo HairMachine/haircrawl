@@ -198,7 +198,26 @@ static void _minor_hell_summons()
 /// Nasty things happen to people who spend too long in Hell.
 static void _hell_effects(int /*time_delta*/)
 {
-    return;
+    if (!player_in_hell())
+        return;
+
+    // 50% chance at max piety
+    if (have_passive(passive_t::resist_hell_effects)
+        && x_chance_in_y(you.piety, MAX_PIETY * 2) || is_sanctuary(you.pos()))
+    {
+        simple_god_message("'s power protects you from the chaos of Hell!");
+        return;
+    }
+
+    _hell_effect_noise();
+
+    if (one_chance_in(3))
+        _random_hell_miscast();
+    else if (x_chance_in_y(5, 9))
+        _themed_hell_summon_or_miscast();
+
+    if (one_chance_in(3))   // NB: No "else"
+        _minor_hell_summons();
 }
 
 static void _handle_magic_contamination()

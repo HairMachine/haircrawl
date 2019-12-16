@@ -11,8 +11,6 @@
 #
 # There is one Ziggurat in Depths.
 
-default-depth: Depths
-
 # In case there is an encompass vault on the level.
 NAME:   ziggurat_fallback
 TAGS:   zig_entry

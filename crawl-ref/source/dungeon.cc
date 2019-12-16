@@ -2677,9 +2677,8 @@ static bool _pan_level()
         }
     }
 
-    // Unique pan lords become more common as you travel through pandemonium.
-    if (x_chance_in_y(1 + place_info.levels_seen, 5 + place_info.levels_seen)
-        && !all_demons_generated)
+    // Pan lords always generate until there are none left.
+    if (!all_demons_generated)
     {
         do
         {
@@ -2693,12 +2692,12 @@ static bool _pan_level()
 
     if (which_demon >= 0)
         vault = random_map_for_tag(pandemon_level_names[which_demon], false, false, MB_FALSE);
-    else
-        vault = random_map_for_tag("pan_fixed_rune", false, false, MB_FALSE);
 
-    // If we've run out of rune vaults, generate a boring normal vault instead.
-    if (!vault)
+    // If we've run out of demons, generate a boring normal vault instead. Pan is now over basically.
+    if (!vault) {
         vault = random_map_in_depth(level_id::current(), false, MB_FALSE);
+        mpr("You feel staying in this place would be unproductive.");
+    }
     
     // Every Pan level should have a primary vault.
     ASSERT(vault);
@@ -3486,7 +3485,6 @@ static void _place_branch_entrances(bool use_vaults)
         branch_entrance_placed[it->id] = false;
         if (!could_be_placed
             && !branch_is_unfinished(it->id)
-            && !is_hell_subbranch(it->id)
             && ((you.depth >= it->mindepth
                  && you.depth <= it->maxdepth)
                 || level_id::current() == brentry[it->id]))
@@ -3518,7 +3516,7 @@ static void _place_branch_entrances(bool use_vaults)
     {
         // Vestibule and hells are placed by other means.
         // Likewise, if we already have an entrance, keep going.
-        if (is_hell_branch(it->id) || branch_entrance_placed[it->id])
+        if (branch_entrance_placed[it->id])
             continue;
 
         if (it->entry_stairs != NUM_FEATURES
@@ -4449,11 +4447,7 @@ static bool _apply_item_props(item_def &item, const item_spec &spec,
 
     if (item.base_type == OBJ_RUNES)
     {
-        if (you.runes[item.sub_type])
-        {
-            destroy_item(item, true);
-            return false;
-        }
+        // Removed the runes destroying themselves if the player already has it. ~Hair
         item_colour(item);
     }
 
@@ -5767,6 +5761,11 @@ static void _stock_shop_item(int j, shop_type shop_type_,
  */
 void place_spec_shop(const coord_def& where, shop_spec &spec, int shop_level)
 {
+    // Re-map any food shops to a general store. Winnin with minimal code changes! ~Hair
+    if (spec.sh_type == SHOP_FOOD) {
+        spec.sh_type = SHOP_GENERAL;
+    }
+
     rng::subgenerator shop_rng; // isolate shop rolls from levelgen
     no_notes nx;
 

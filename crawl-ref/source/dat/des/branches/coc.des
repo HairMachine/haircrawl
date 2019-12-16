@@ -7,6 +7,35 @@
 : crawl_require('dlua/vault.lua')
 
 {{
+function coc_portal(e)
+  local timeout_turns = crawl.random_range(2500, 3000)
+
+  local messager =
+    timed_msg {
+      initmsg = { "You hear the distant gibbering of demonic voices...",
+                  "Hark! There is a gateway to Cocytus on this level. " ..
+                  "Find the entrance quickly before the gate is sealed!" },
+      finalmsg = "With a final tortured howl, the noises cease.",
+      verb = 'cackling',
+      noisemaker = 'horde of demons',
+      ranges = {
+        { 5000, 'faint ' },  { 4000, '' }, { 2500, 'loud ' },
+        { 1500, 'thunderous ' }, { 0, 'deafening ' }
+      }
+    }
+
+  e.lua_marker('O',
+    timed_marker {
+      turns = timeout_turns,
+      msg = messager,
+      floor = 'stone_arch',
+      feat_tile = 'stone_arch',
+      single_timed = true,
+      dstname = 'coc' })
+  e.kfeat("O = enter_cocytus")
+  e.tags("cocytus_entry coc_entry transparent")
+end
+
 function coc_setup(e)
    e.place("Coc:$")
    e.tags("no_rotate")
@@ -24,12 +53,22 @@ end
 }}
 
 ##############################################################################
+# Cocytus entry vaults
+##############################################################################
+
+NAME:   cocytus_dummy_entry
+: coc_portal(_G)
+MAP
+O
+ENDMAP
+
+##############################################################################
 # Cocytus
 ##############################################################################
 
 NAME:   grunt_cocytus_stairs_refrigerator
 TAGS:   transparent
-DEPTH:  !Coc:$
+DEPTH:  Coc
 COLOUR: c = blue
 MONS:   Ice Fiend, blizzard demon, ice devil, white imp
 KMONS:  H = ice statue
@@ -52,7 +91,7 @@ xwww..3......
 ENDMAP
 
 NAME:    nicolae_coc_three_mouths
-DEPTH:   Coc, !Coc:$
+DEPTH:   Coc
 TAGS:    transparent extra decor
 SUBST:   j = >}}, b = >]], c = >))
 SHUFFLE: )}]
@@ -83,7 +122,7 @@ MAP
 ENDMAP
 
 NAME:    nicolae_coc_ice_floe
-DEPTH:   Coc:2-, !Coc:$
+DEPTH:   Coc
 SHUFFLE: {[(, }]}
 NSUBST:  D = 1:1 / 2:2 / *:34
 KMONS:   1 = Ice Fiend
@@ -115,7 +154,7 @@ www....xx.D.xx....www
 ENDMAP
 
 NAME:    nicolae_coc_snowflakes_chance_in_hell
-DEPTH:   Coc, !Coc:$
+DEPTH:   Coc
 ORIENT:  centre
 TAGS:    transparent extra decor
 SHUFFLE: abcdefghi, jklmno, ABCDEFGH
@@ -152,7 +191,7 @@ ENDMAP
 
 NAME:    nooodl_cocytus_jagged_cave
 ORIENT:  northwest
-DEPTH:   Coc, !Coc:$
+DEPTH:   Coc
 TAGS:    extra decor
 SUBST:   < : AB
 NSUBST:  A = 1:{ / 1:} / *:.
