@@ -12,7 +12,7 @@ const Branch branches[NUM_BRANCHES] =
     //  floor colour, rock colour
     //  travel shortcut, runes, ambient noise level
 
-    { BRANCH_DUNGEON, NUM_BRANCHES, 0, 0, 12, 0,
+    { BRANCH_DUNGEON, NUM_BRANCHES, 0, 0, 8, 0,
       brflag::none,
       NUM_FEATURES, DNGN_EXIT_DUNGEON, NUM_FEATURES,
       "Dungeon", "the Dungeon", "D",
@@ -28,7 +28,7 @@ const Branch branches[NUM_BRANCHES] =
       LIGHTGREY, BROWN,
       'T', {}, branch_noise::normal },
 
-    { BRANCH_ORC, BRANCH_DUNGEON, 8, 10, 1, 10,
+    { BRANCH_ORC, BRANCH_DUNGEON, 6, 8, 1, 10,
       brflag::spotty,
       DNGN_ENTER_ORC, DNGN_EXIT_ORC, NUM_FEATURES,
       "Orcish Mines", "the Orcish Mines", "Orc",
@@ -54,7 +54,7 @@ const Branch branches[NUM_BRANCHES] =
       'K', {}, branch_noise::normal },
 #endif
 
-    { BRANCH_LAIR, BRANCH_DUNGEON, 7, 9, 4, 10,
+    { BRANCH_LAIR, BRANCH_DUNGEON, 5, 7, 4, 10,
       brflag::none,
       DNGN_ENTER_LAIR, DNGN_EXIT_LAIR, NUM_FEATURES,
       "Lair", "the Lair of Beasts", "Lair",
@@ -273,7 +273,7 @@ const Branch branches[NUM_BRANCHES] =
       WHITE, YELLOW,
       '4', {}, branch_noise::normal },
 
-    { BRANCH_BAILEY, BRANCH_DUNGEON, 6, 8, 1, 11,
+    { BRANCH_BAILEY, BRANCH_DUNGEON, 5, 6, 1, 11,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_BAILEY, DNGN_EXIT_BAILEY, NUM_FEATURES,
       "Bailey", "a bailey", "Bailey",
@@ -317,7 +317,7 @@ const Branch branches[NUM_BRANCHES] =
       '8', {}, branch_noise::normal },
 #endif
 
-    { BRANCH_WIZLAB, BRANCH_DEPTHS, 1, 1, 1, 24,
+    { BRANCH_WIZLAB, BRANCH_DEPTHS, 2, 3, 1, 24,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_WIZLAB, DNGN_EXIT_WIZLAB, NUM_FEATURES,
       "Wizlab", "a wizard's laboratory", "WizLab",
@@ -331,7 +331,7 @@ const Branch branches[NUM_BRANCHES] =
 #endif
 #if TAG_MAJOR_VERSION == 34
 
-    { BRANCH_DEPTHS, NUM_BRANCHES, 12, 12, 2, 22,
+    { BRANCH_DEPTHS, BRANCH_DUNGEON, 8, 8, 4, 22,
       brflag::none,
       DNGN_ENTER_DEPTHS, DNGN_EXIT_DEPTHS, NUM_FEATURES,
       "Depths", "the Depths", "Depths",
@@ -354,7 +354,7 @@ const Branch branches[NUM_BRANCHES] =
 #endif
 #if TAG_MAJOR_VERSION == 34
 
-    { BRANCH_GAUNTLET, BRANCH_DUNGEON, 9, 12, 1, 15,
+    { BRANCH_GAUNTLET, BRANCH_DEPTHS, 1, 2, 1, 15,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_GAUNTLET, DNGN_EXIT_GAUNTLET, DNGN_EXIT_THROUGH_ABYSS,
       "Gauntlet", "a Gauntlet", "Gauntlet",
