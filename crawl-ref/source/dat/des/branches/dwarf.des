@@ -1,0 +1,61 @@
+##############################################################################
+# The Dwarven Halls
+#
+# This file is here for save compatibility reasons, and should be removed when
+# TAG_MAJOR_VERSION >= 35. (i.e, it is only necessary if the TAG_MAJOR_VERSION
+# is 34)
+##############################################################################
+: crawl_require('dlua/vault.lua')
+
+{{
+function dwarf_portal(e)
+  local timeout_turns = crawl.random_range(2500, 3000)
+
+  local messager =
+    timed_msg {
+      initmsg = { "You hear the distant mining of dwarves...",
+                  "Hark! There is a gateway to the Dwarven Hall on this level. " ..
+                  "Find the entrance quickly before the gate is sealed!" },
+      finalmsg = "With a thunder of falling rocks, the noises cease.",
+      verb = 'digging',
+      noisemaker = 'a host of dwarves',
+      ranges = {
+        { 5000, 'faint ' },  { 4000, '' }, { 2500, 'loud ' },
+        { 1500, 'thunderous ' }, { 0, 'deafening ' }
+      }
+    }
+
+  e.lua_marker('O',
+    timed_marker {
+      turns = timeout_turns,
+      msg = messager,
+      floor = 'expired_portal',
+      single_timed = true})
+end
+}}
+
+# Dummy Dwarf entry
+NAME:   dwarf_dummy
+TAGS:   dwarf_entry transparent
+ORIENT: float
+KFEAT:  O = enter_dwarven_hall
+: dwarf_portal(_G)
+MAP
+O
+ENDMAP
+
+###############
+# Rune Vaults #
+###############
+
+default-depth: Dwarf
+
+NAME:   dwarf_rune_basic
+ORIENT: float
+PLACE:  Dwarf
+KITEM:  R = iron rune of Zot
+MAP
+xx@xx
+x.R.x
+xxxxx
+ENDMAP

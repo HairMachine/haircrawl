@@ -35,7 +35,6 @@ end
 }}
 
 # Dummy Blade entry
-
 NAME:   blade_dummy
 TAGS:   blade_entry transparent
 ORIENT: float

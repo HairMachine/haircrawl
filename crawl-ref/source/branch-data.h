@@ -45,13 +45,13 @@ const Branch branches[NUM_BRANCHES] =
       'E', {}, branch_noise::normal },
 #if TAG_MAJOR_VERSION == 34
 
-    { BRANCH_DWARF, BRANCH_ELF, -1, -1, 0, 17,
+    { BRANCH_DWARF, BRANCH_SNAKE, 1, 1, 1, 17,
       brflag::none,
       DNGN_ENTER_DWARF, DNGN_EXIT_DWARF, NUM_FEATURES,
       "Dwarven Hall", "the Dwarven Hall", "Dwarf",
       nullptr,
       BROWN, BROWN,
-      'K', {}, branch_noise::normal },
+      'K', { RUNE_DIS }, branch_noise::normal },
 #endif
 
     { BRANCH_LAIR, BRANCH_DUNGEON, 5, 7, 4, 10,
