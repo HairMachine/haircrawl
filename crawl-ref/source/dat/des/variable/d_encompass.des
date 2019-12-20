@@ -119,7 +119,7 @@ NAME:    hangedman_spin_cycle
 TAGS:    no_monster_gen no_item_gen no_trap_gen patrolling uniq_d_encompass
 ORIENT:  encompass
 DEPTH:   Depths:2-
-PLACE:   D:$, Depths:$
+PLACE:   Depths:$
 WEIGHT:  1 (D:$), 2 (Depths:$), 10
 KMONS:   - = plant
 KMONS:   _ = demonic plant
