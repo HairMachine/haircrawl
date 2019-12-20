@@ -1288,11 +1288,38 @@ int player_hunger_rate(bool temp)
  */
 int player_total_spell_levels()
 {
-    int sc = you.skill(SK_SPELLCASTING, 1, false, true, false);
-    if (sc <= 2)
-        return sc;
-    else    
-        return 2 + floor((sc + 1) / 3);
+    int sc = you.experience_level;
+    switch (sc) 
+    {
+        case 1:
+            return 1;
+        case 2:
+            return 2;
+        case 3:
+        case 4:
+        case 5:
+            return 3;
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+            return 4;
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+            return 5;
+        case 15:
+        case 16:
+        case 17:
+        case 18:
+        case 19:
+        case 20:
+            return 6;
+        default:
+            return 7;
+    }
 }
 
 /**
