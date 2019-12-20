@@ -7,6 +7,45 @@
 ##############################################################################
 : crawl_require('dlua/vault.lua')
 
+{{
+function blade_portal(e)
+  local timeout_turns = crawl.random_range(2500, 3000)
+
+  local messager =
+    timed_msg {
+      initmsg = { "You hear the distant clashing of blades...",
+                  "Hark! There is a gateway to the Hall of Blades on this level. " ..
+                  "Find the entrance quickly before the gate is sealed!" },
+      finalmsg = "With a final great crash, the noises cease.",
+      verb = 'clashing',
+      noisemaker = 'army of dancing weapons',
+      ranges = {
+        { 5000, 'faint ' },  { 4000, '' }, { 2500, 'loud ' },
+        { 1500, 'thunderous ' }, { 0, 'deafening ' }
+      }
+    }
+
+  e.lua_marker('O',
+    timed_marker {
+      turns = timeout_turns,
+      msg = messager,
+      floor = 'expired_portal',
+      single_timed = true})
+end
+}}
+
+# Dummy Blade entry
+
+NAME:   blade_dummy
+TAGS:   blade_entry transparent
+ORIENT: float
+KFEAT:  O = enter_hall_of_blades
+: blade_portal(_G)
+MAP
+O
+ENDMAP
+
+
 # Main layout
 NAME:    hall_of_blades
 TAGS:    no_dump no_monster_gen
@@ -16,6 +55,7 @@ ORIENT:  encompass
 SHUFFLE: C{D[ / C{D[ / D{C[ / D[C{ / D{D[
 SUBST:   C = c, D[ = ., E : c.., F : c.., c : cv
 NSUBST:  { : 1:{ / *:., . : 6:0 / 6 = 0. / 6 = 0... / *:.
+KITEM:   R = demonic rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccxxx
@@ -31,7 +71,7 @@ xxxcE....ccc..............................................ccc....Ecxxx
 xxxcE.....c................................................c.....Ecxxx
 xxxc.............................[DD..............................cxxx
 xxxc.............CC..............DDDD..............CC.............cxxx
-xxxcE1...0......CCCC.............DDDD.............CCCC......0...2Ecxxx
+xxxcE1...0......CCCC.............DDDD.............CCCC......0..R2Ecxxx
 xxxc.............CC..............DDDD..............CC.............cxxx
 xxxc..............................DD..............................cxxx
 xxxcE.....c................................................c.....Ecxxx

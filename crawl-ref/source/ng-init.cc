@@ -69,6 +69,7 @@ void initialise_branch_depths()
     for (int branch = 0; branch < NUM_BRANCHES; ++branch)
     {
         const Branch *b = &branches[branch];
+        mprf("Branch name: %s", b->longname);
         ASSERT(b->id == branch);
     }
 

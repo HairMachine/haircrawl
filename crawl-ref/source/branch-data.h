@@ -111,13 +111,13 @@ const Branch branches[NUM_BRANCHES] =
       'V', { RUNE_VAULTS }, branch_noise::normal },
 #if TAG_MAJOR_VERSION == 34
 
-    { BRANCH_BLADE, BRANCH_VAULTS, 3, 4, 1, 21,
+    { BRANCH_BLADE, BRANCH_SHOALS, 1, 1, 1, 21,
       brflag::no_items,
       DNGN_ENTER_BLADE, DNGN_EXIT_BLADE, NUM_FEATURES,
       "Hall of Blades", "the Hall of Blades", "Blade",
       nullptr,
       LIGHTGREY, BROWN,
-      'B', {}, branch_noise::quiet },
+      'B', { RUNE_DEMONIC }, branch_noise::quiet },
 #endif
 
     { BRANCH_CRYPT, BRANCH_VAULTS, 2, 2, 1, 19,
