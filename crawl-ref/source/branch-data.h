@@ -102,7 +102,7 @@ const Branch branches[NUM_BRANCHES] =
       GREEN, BROWN,
       'M', { RUNE_SLIME }, branch_noise::quiet },
 
-    { BRANCH_VAULTS, BRANCH_DUNGEON, 10, 11, 3, 19,
+    { BRANCH_VAULTS, BRANCH_DEPTHS, 2, 2, 3, 19,
       brflag::dangerous_end,
       DNGN_ENTER_VAULTS, DNGN_EXIT_VAULTS, NUM_FEATURES,
       "Vaults", "the Vaults", "Vaults",
@@ -146,7 +146,7 @@ const Branch branches[NUM_BRANCHES] =
       'U', {}, branch_noise::normal },
 #endif
 
-    { BRANCH_VESTIBULE, BRANCH_DUNGEON, 12, 12, 1, 27,
+    { BRANCH_VESTIBULE, BRANCH_DEPTHS, 4, 4, 1, 27,
       brflag::no_items,
       DNGN_ENTER_HELL, DNGN_EXIT_HELL, NUM_FEATURES,
       "Hell", "the Vestibule of Hell", "Hell",
@@ -317,7 +317,7 @@ const Branch branches[NUM_BRANCHES] =
       '8', {}, branch_noise::normal },
 #endif
 
-    { BRANCH_WIZLAB, BRANCH_DEPTHS, 2, 3, 1, 24,
+    { BRANCH_WIZLAB, BRANCH_DEPTHS, 3, 3, 1, 24,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_WIZLAB, DNGN_EXIT_WIZLAB, NUM_FEATURES,
       "Wizlab", "a wizard's laboratory", "WizLab",

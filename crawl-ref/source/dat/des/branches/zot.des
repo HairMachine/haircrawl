@@ -11,7 +11,9 @@
 
 {{
 function zot_entry_setup(e)
-    e.place("Depths:$")
+    -- This effectively completely stops Zot vaults from spawning - because it now spawns in Vestibule.
+    -- As usual this change is a hack but maintains maximum upstream compatibility. ~Hair
+    e.place("Depths:10")
     e.orient("float")
     e.kfeat("O = enter_zot")
     e.mons("patrolling base draconian")
