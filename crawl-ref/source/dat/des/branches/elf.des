@@ -9,6 +9,31 @@
 : crawl_require('dlua/vault.lua')
 
 {{
+function elf_portal(e)
+  local timeout_turns = crawl.random_range(2500, 3000)
+
+  local messager =
+    timed_msg {
+      initmsg = { "You hear the distant singing of elves...",
+                  "Hark! There is a gateway to the Elven Halls on this level. " ..
+                  "Find the entrance quickly before the gate is sealed!" },
+      finalmsg = "With a thunder of falling rocks, the noises cease.",
+      verb = 'signing',
+      noisemaker = 'a host of elves',
+      ranges = {
+        { 5000, 'faint ' },  { 4000, '' }, { 2500, 'loud ' },
+        { 1500, 'thunderous ' }, { 0, 'deafening ' }
+      }
+    }
+
+  e.lua_marker('O',
+    timed_marker {
+      turns = timeout_turns,
+      msg = messager,
+      floor = 'expired_portal',
+      single_timed = true})
+end
+
 function elven_blade_entry(e)
   e.tags("elf_blade_entry no_monster_gen unrand")
   e.mons("patrolling dancing weapon ; dagger good_item | mundane falchion w:6")
@@ -83,6 +108,17 @@ end
 ##############################################################################
 
 ##############################################################################
+# Dummy Elf entry
+NAME:   elf_entry_dummy
+TAGS:   elf_entry transparent
+ORIENT: float
+KFEAT:  O = enter_elven_halls
+: elf_portal(_G)
+MAP
+O
+ENDMAP
+
+##############################################################################
 # Dummy Elf arrival vault
 
 NAME:   elf_arrival_dummy
@@ -97,7 +133,7 @@ ENDMAP
 ##############################################################################
 
 NAME:    elf_arrival_001
-PLACE:   Elf:1
+PLACE:   Elf
 ORIENT:  west
 TAGS:    patrolling
 SHUFFLE: asd/x$+
@@ -119,7 +155,7 @@ ENDMAP
 ##############################################################################
 
 NAME:    elf_arrival_002
-PLACE:   Elf:1
+PLACE:   Elf
 ORIENT:  south
 TAGS:    patrolling
 MONS:    deep elf mage
@@ -142,7 +178,7 @@ ENDMAP
 
 NAME:    eino_elf_arrival_customs
 ORIENT:  southwest
-PLACE:   Elf:1
+PLACE:   Elf
 TAGS:    patrolling
 MONS:    deep elf mage
 MONS:    deep elf mage / nothing
@@ -163,7 +199,7 @@ ENDMAP
 ##############################################################################
 
 NAME:    eino_elf_arrival_shootout
-PLACE:   Elf:1
+PLACE:   Elf
 ORIENT:  float
 TAGS:    patrolling
 MONS:    deep elf mage / nothing
@@ -187,7 +223,7 @@ ENDMAP
 ##############################################################################
 
 NAME:   eino_elf_arrival_sip
-PLACE:  Elf:1
+PLACE:  Elf
 ORIENT: south
 TAGS:   patrolling
 TAGS:   no_monster_gen
@@ -210,7 +246,7 @@ ENDMAP
 ##############################################################################
 
 NAME:   eino_elf_arrival_the_gate
-PLACE:  Elf:1
+PLACE:  Elf
 ORIENT: south
 TAGS:   patrolling
 MONS:   deep elf mage
@@ -236,7 +272,7 @@ ENDMAP
 NAME:    eino_elf_arrival_altar
 TAGS:    patrolling
 ORIENT:  west
-PLACE:   Elf:1
+PLACE:   Elf
 SHUFFLE: 12
 KFEAT:   C = altar_vehumet
 MONS:    deep elf mage
@@ -258,7 +294,7 @@ ENDMAP
 
 NAME:   minmay_elf_arrival_circle
 ORIENT: float
-PLACE:  Elf:1
+PLACE:  Elf
 TAGS:   patrolling
 MONS:   deep elf mage
 SUBST:  B : b.
@@ -287,7 +323,7 @@ ENDMAP
 NAME:   minmay_elf_arrival_plus
 TAGS:   patrolling
 ORIENT: float
-PLACE:  Elf:1
+PLACE:  Elf
 MONS:   deep elf mage w:11 / nothing w:8
 MAP
      x@...@x
@@ -312,7 +348,7 @@ ENDMAP
 NAME:   minmay_elf_arrival_summoners
 TAGS:   patrolling
 ORIENT: float
-PLACE:  Elf:1
+PLACE:  Elf
 MONS:   deep elf mage
 KFEAT:  m = iron_grate
 MAP
@@ -340,7 +376,7 @@ ENDMAP
 
 NAME:    elven_spread
 TAGS:    no_dump extra allow_dup nolayout_encompass luniq
-PLACE:   Elf:1
+PLACE:   Elf
 {{
   local c = 1
   hook("post_place", function()
@@ -585,7 +621,7 @@ ENDMAP
 
 # Dummies give 2 XP and halt autotravel for adjacent players, used for flavour
 NAME:   minmay_elf_archery
-DEPTH:  Elf:2-
+DEPTH:  Elf
 ORIENT: float
 MONS:   deep elf archer / nothing, deep elf master archer
 MONS:   training dummy tile:mons_training_dummy
@@ -602,7 +638,7 @@ x+xxxxxxxxxxxxxx
 ENDMAP
 
 NAME:    minmay_elf_blademastery
-DEPTH:   Elf:$
+DEPTH:   Elf
 ORIENT:  float
 MONS:    deep elf knight / nothing
 MONS:    deep elf blademaster
@@ -634,7 +670,7 @@ ENDMAP
 # They have brought some gold from their mines as a gift
 NAME:    orc_legates
 TAGS:    misc_elf_vault
-DEPTH:   Elf, !Elf:$
+DEPTH:   Elf
 SHUFFLE: AB , 34 , 12
 SUBST:   6 = 4
 SUBST:   0 = 0 .:9 9:1
@@ -668,7 +704,7 @@ ENDMAP
 # A high-level negotiation between orc and deep elf leaders (Shiori)
 NAME:     elf_orc_summit_meeting
 TAGS:     misc_elf_vault
-DEPTH:    Elf:$
+DEPTH:    Elf
 SHUFFLE: 12 , 45
 NSUBST:  7= 1=7 / *= 7:1 .
 NSUBST:  6= 1=6 D:1 / *= 6 .:1
@@ -706,7 +742,7 @@ ENDMAP
 
 NAME:  guppyfry_elf_castle
 TAGS:  transparent
-DEPTH: Elf:2-
+DEPTH: Elf
 MONS:  deep elf mage / deep elf knight / deep elf archer
 MONS:  deep elf blademaster / deep elf death mage / deep elf sorcerer
 MONS:  plant
@@ -729,7 +765,7 @@ ENDMAP
 
 NAME:  guppyfry_elf_garden
 TAGS:  transparent
-DEPTH: Elf:2-
+DEPTH: Elf
 MONS:  deep elf mage
 MONS:  deep elf blademaster / deep elf master archer / deep elf sorcerer
 MONS:  plant
@@ -754,7 +790,7 @@ MAP
 ENDMAP
 
 NAME:  guppyfry_elf_altar
-DEPTH: Elf:2-
+DEPTH: Elf
 MONS:  deep elf knight w:5 / deep elf archer w:5 / deep elf mage
 MONS:  deep elf high priest
 SUBST: F = G:6 F:1
@@ -777,7 +813,7 @@ ENDMAP
 
 NAME:  guppyfry_elf_lava
 TAGS:  transparent
-DEPTH: Elf:2-
+DEPTH: Elf
 MONS:  deep elf mage
 MONS:  deep elf annihilator / deep elf death mage / deep elf demonologist
 KFEAT: v = general shop type:Elven suffix:Fire count:7 ; \
@@ -838,7 +874,7 @@ _______
 ENDMAP
 
 NAME:    nicolae_elf_stair_hall
-DEPTH:   Elf:2-
+DEPTH:   Elf
 TAGS:    extra
 SUBST:   v : vb
 SHUFFLE: {[(
@@ -1318,480 +1354,6 @@ MAP
   xxxxxxxxx
 ENDMAP
 
-##############################################################################
-##############################################################################
-#
-# Elf:2 Hall of Blades.
-#
-# An attempt to salvage the lost branch.
-##############################################################################
-##############################################################################
-
-NAME:     elven_hall_of_blades_hangedman_original
-TAGS:     no_dump no_item_gen no_monster_gen
-PLACE:    Elf:2
-ORIENT:   north
-MONS:     deep elf mage
-MONS:     deep elf knight w:11 / deep elf mage w:1
-MONS:     deep elf blademaster, dancing weapon
-: halls_of_blades_weapon(_G)
-SHUFFLE:  CD / CD / DC / DC / DD
-SUBST:    C = c, D = ., E : c--, F : c--, c : cv
-FTILE:    - = floor_vault
-COLOUR:   - = lightgrey
-SUBST:    - = .
-# Previously for Blade: NSUBST:  . : 6:0 / 6 = 0. / 6 = 0... / *:.
-NSUBST:   . = 6:1 / 3:2 / 1:34 / 4 = 4 / 2 = 42 / 6 = 14...
-SUBVAULT: A : elf_blade_entry
-SUBST:    A : x"", ' = .
-CLEAR:    "
-veto {{
-  return crawl.game_started()
-         and (dgn.br_exists("Blade"))
-}}
-MAP
-                                "
-                                "
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccx
-xcccc---cccc-cccc-cccc-cccc-F-ccccc-F-cccc-cccc-cccc-cccc---ccccx
-xccF-....cc-.-cc-.-cc-.-cc-...-ccc-...-cc-.-cc-.-cc-.-cc-...-Fccx
-xcc-.........................................................-ccx
-xc-....c............--c--................-c--............c....-cx
-xc-...ccc...........-ccc-...............-ccc-...........ccc...-cx
-xcE..ccccc..........ccccc...............ccccc..........ccccc..Ecx
-xcE..ccccc..........-ccc-...............-ccc-..........ccccc..Ecx
-xc-..4ccc...........--c--...............--c--...........ccc4..-cx
-xcE...ccc...............................................ccc...Ecx
-xcE....c.................................................c....Ecx
-xc-............................D.D............................-cx
-xc-...........CC..............DDDDD..............CC...........-cx
-xcE5..2......CCCC.............DDDDD.............CCCC......2..6Ecx
-xc-...........CC..............DDDDD..............CC...........-cx
-xc-............................D.D............................-cx
-xcE....c.................................................c....Ecx
-xcE...ccc...............................................ccc...Ecx
-xc-..4ccc...........--c--...............--c--...........ccc4..-cx
-xc-..ccccc..........-ccc-...............-ccc-..........ccccc..-cx
-xcE..ccccc..........ccccc...............ccccc..........ccccc..Ecx
-xcE...ccc...........-ccc-...............-ccc-...........ccc...Ecx
-xc-....c............--c--...............--c--............c....-cx
-xcc-.........................................................-ccx
-xccF-...-cc-.-cc-.-cc-.-cc'''''ccc'''''cc-.-cc-.-cc-.-cc-...-Fccx
-xcccc---cccc-cccc-cccc-cccc'F'++c++'F'cccc-cccc-cccc-cccc---ccccx
-xcccccccccccccccccccccccccccccc'''cccccccccccccccccccccccccccccxx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=A=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-                          AAAAAAAAAAAAA
-                          AAAAAAAAAAAAA
-                          AAAAAAAAAAAAA
-                          AAAAAAAAAAAAA
-                          AAAAAAAAAAAAA
-                          AAAAAAAAAAAAA
-                          AAAAAAAAAAAAA
-                          AAAAAAAAAAAAA
-                          AAAAAAAAAAAAA
-                          AAAAAAAAAAAAA
-                          AAAAAAAAAAAAA
-                          AAAAAAAAAAAAA
-                          AAAAAAAAAAAAA
-                                @
-ENDMAP
-
-NAME:     elven_hall_of_blades_hangedman_alternative
-TAGS:     no_dump no_item_gen no_monster_gen
-PLACE:    Elf:2
-WEIGHT:   5
-ORIENT:   north
-MONS:     deep elf mage
-MONS:     deep elf knight w:11 / deep elf mage w:1
-MONS:     deep elf blademaster, dancing weapon
-: halls_of_blades_weapon(_G)
-SHUFFLE:  CD / CD / DC / DC / DD
-SUBST:    C = c, D = ., E : c--, F : c--, c : cv
-FTILE:    - = floor_vault
-COLOUR:   - = lightgrey
-SUBST:    - = .
-NSUBST:   . = 6:1 / 3:2 / 1:34 / 4 = 4 / 2 = 42 / 6 = 14...
-SUBVAULT: A : elf_blade_entry
-SUBST:    A : x"", ' = .
-CLEAR:    "
-veto {{
-  return crawl.game_started()
-         and (dgn.br_exists("Blade"))
-}}
-MAP
-                                  "
-                                  "
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-xcccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccx
-xcccc-F-cccc-cccc-cccc-cccc--cccc-F-cccc--cccc-cccc-cccc-cccc-F-ccccx
-xccF-...-cc-.-cc-.-cc-.-cc-..-cc-...-cc-..-cc-.-cc-.-cc-.-cc-...-Fccx
-xcc-..............................D..............................-ccx
-xccc........................''''DDDDD''''........................cccx
-xcc-..--c--.......--c--....'''''''D'''''''....--c--.......--c--..-ccx
-xc-...-ccc-.......-ccc-....c'''''''''''''c....-ccc-.......-ccc-...-cx
-xcc-..ccccc.......ccccc...ccc'''''''''''ccc...ccccc.......ccccc..-ccx
-xccc..-ccc-.......-ccc-..ccccccc==A==ccccccc..-ccc-.......-ccc-..cccx
-xccc..--c--.......--c--..cccAAAAAAAAAAAAAccc..--c--.......--c--..cccx
-xcc-.....................-ccAAAAAAAAAAAAAcc-.....................-ccx
-xc-.......................-cAAAAAAAAAAAAAc-.......................-cx
-xcc-..........C..........-ccAAAAAAAAAAAAAcc-..........C..........-ccx
-xccc.........CCC.........cccAAAAAAAAAAAAAccc.........CCC.........cccx
-xccc.........CCC.........cccAAAAAAAAAAAAAccc.........CCC.........cccx
-xcc-..........C..........-ccAAAAAAAAAAAAAcc-..........C..........-ccx
-xc-.......................-cAAAAAAAAAAAAAc-.......................-cx
-xcc-.....................-ccAAAAAAAAAAAAAcc-.....................-ccx
-xccc...cc...........cc...cccAAAAAAAAAAAAAccc...cc...........cc...cccx
-xccc..ccccc.......ccccc..cccAAAAAAAAAAAAAccc..ccccc.......ccccc..cccx
-xcc-.ccccccc.....ccccccc.-ccAAAAAAAAAAAAAcc-.ccccccc.....ccccccc.-ccx
-xc-...ccccc...2...ccccc...-cAAAAAAAAAAAAAc-...ccccc...2...ccccc...-cx
-xc-....cc4.........4cc....-c     @@@     c-....cc4.........4cc....-cx
-xcc-.....................-cc             cc-.....................-ccx
-xccF-.........5.........-Fcc             ccF-.........6.........-Fccx
-xcccc--EE-EE--E--EE--EE-cccc             cccc-EE--EE--E--EE-EE--ccccx
-xccccccccccccccccccccccccccc             cccccccccccccccccccccccccccx
-xxxxxxxxxxxxxxxxxxxxxxxxxxxx             xxxxxxxxxxxxxxxxxxxxxxxxxxxx
-ENDMAP
-
-NAME:     elven_hall_of_blades_dummy
-# Not tagged 'dummy' because then the veto doesn't run.
-TAGS:     no_dump
-PLACE:    Elf:2
-ORIENT:   float
-veto {{ return crawl.game_started() and not dgn.br_exists("Blade") }}
-MAP
-.
-ENDMAP
-
-NAME:   mumra_blade_entry_bloodbath
-TAGS:   no_item_gen
-SUBST:  d = ..', e = .'', f = .'''
-KPROP:  ' = bloody
-SUBST:  ' = ...'
-KITEM:  ' = short sword / long sword / morningstar / mace / \
-            scimitar / dagger / bardiche / battleaxe / war axe
-: elven_blade_entry(_G)
-MAP
-      =
-xx.1.x-xd1.xx
-x.d...xdd...x
-..dd..ded....
-..deeeeee..dd
-...eefffeeed.
-x..efffffee.x
-.xeeffGffe.x.
-xdeefffffe..x
-dddeefffeee..
-....eee.edd..
-....dd...dd..
-x...d.x...ddx
-xx..dx.x..dxx
-ENDMAP
-
-# Sorry for the shape mangling,
-# but the subvaulting needs it.
-NAME:     mumra_blade_entry_dagger
-TAGS:     no_item_gen
-SUBST:    ' : ll.
-FTILE:    1 = floor_vault
-SUBST:    . : ..W, @ : @xx
-: elven_blade_entry(_G)
-MAP
-      =
-    xx-xx
-   xx'-'xx
-   xx'-'xx
-   xx'-'xx
-   x''-''x
-   x''-''x
-xxxx''-''xxxx
-.-----1-----.
-xx....-....xx
-xxxxx.-.xxxxx
-   xx.-.xx
-   xx.-.xx
-   xxx-xxx
-ENDMAP
-
-NAME:     infiniplex_blade_entry_pillars
-SUBST:    y : x...
-SUBST:    1 = 1.
-: elven_blade_entry(_G)
-MAP
-      =
-   xy---yx
-   y..c..y
-.  ..1.1..  .
-....c...c....
-.  ..1.1..  .
-   y..c..y
-   xy...yx
-      .
-      .
-      .
-      .
-      .
-     ...
-ENDMAP
-
-NAME:     grunt_blade_entry_basic
-TAGS:     no_item_gen
-NSUBST:   1 = 2:1 / *:.
-: elven_blade_entry(_G)
-MAP
-      =
-....c---c....
-....c...c....
-..ccc...ccc..
-..c.......c..
-..c.1...1.c..
-..c.......c..
-..+.......+..
-..c.......c..
-..c.1...1.c..
-..c.......c..
-..cccc+cccc..
-.............
-.............
-ENDMAP
-
-NAME: nicolae_vaults_blade_armed_guards
-KMONS: 2 = deep elf knight ; battleaxe | broad axe | flail | glaive | great mace | \
-   halberd | hand axe | long sword | morningstar | scimitar | short sword | \
-   trident | war axe . chain mail | plate armour . \
-   shield | buckler w:20 | nothing w:60
-: elven_blade_entry(_G)
-MAP
-      =
-    xx-xx
-    x---x
-  xxx...xxx
-  x...c...x
-  x.c.c.c.x
- ....2.2....
-...cc...cc...
- ....2.2....
-  x.c.c.c.x
-  x...c...x
-  xxx...xxx
-     ...
-     ...
-ENDMAP
-
-NAME:    nicolae_blade_entry_hurt_lockers
-SHUFFLE: Aa/Bb/Dd, TG
-SUBST:   BD = x, bd = 1, A = +, a = ., T : T., G : G.
-: elven_blade_entry(_G)
-MAP
-      =
- xccc---cccx
- xc-------cx
- xc-------cx
- xcAxxBxxDcx
-xxcaxxbxxdcxx
-xxc+xx+xx+cxx
-xxc.GT.TG.cxx
- xc.......cx
- xcc.....ccx
- xccc...cccx
- xxxxx+xxxxx
-.............
-     ...
-ENDMAP
-
-NAME:  nicolae_blade_entry_crossed_weapons
-: elven_blade_entry(_G)
-MAP
-      =
-v.v..---..v.v
-.v...v-v...v.
-v.v..vvv..v.v
-...v..c..v...
-....1.c.1....
-.vv...c...vv.
-..vcccccccv..
-.vv...c...vv.
-....1.c.1....
-...v..c..v...
-v.v..vvv..v.v
-.v...v.v...v.
-v.v.......v.v
-ENDMAP
-
-NAME:   nooodl_blade_entry_preview
-TAGS:   no_item_gen
-SUBST:  C : cc.
-NSUBST: 1 = 2:1 / *:.
-FTILE:  . = floor_vault
-: elven_blade_entry(_G)
-MAP
-      =
- xcC-----Ccx
- xcC.c.c.Ccx
- xcC.1.1.Ccx
- xcC.....Ccx
- xcC.c.c.Ccx
- xcC.1.1.Ccx
-xxcC.....Ccxx
- xcC.1.1.Ccx
- xcC.c.c.Ccx
- xcC.....Ccx
- xcC.1.1.Ccx
- xcC.c.c.Ccx
- xcc.....ccx
-ENDMAP
-
-NAME: nicolae_blade_entry_diamond_columns
-: elven_blade_entry(_G)
-SUBST: 1 = 1.., c : cv
-MAP
-      =
-...-------...
-...c-----c...
-..ccc---ccc..
-.ccccc-ccccc.
-..ccc.1.ccc..
-...c.....c...
-....1.1.1....
-...c.....c...
-..ccc.1.ccc..
-.ccccc.ccccc.
-..ccc...ccc..
-...c.....c...
-.............
-ENDMAP
-
-NAME: nicolae_blade_entry_area_security
-: elven_blade_entry(_G)
-FTILE: 1 = floor_vault
-COLOUR: 1 = lightgrey
-SUBST: b : bmc
-KMONS: 2 = deep elf mage
-MAP
-      =
-...c-----c...
-.b.m--1--m.b.
-...c-----c...
-.b.ccc+ccc.b.
-...c.....c...
-.b.+.....+.b.
-...c.2.2.c...
-.b.c.....c.b.
-...cc...cc...
-.b..mmmmm..b.
-..2.......2..
-.b.b.b.b.b.b.
-.............
-ENDMAP
-
-NAME: nicolae_blade_entry_pointy_end
-: elven_blade_entry(_G)
-NSUBST: 1 = 2:1 / *:.
-MAP
-      =
-vvvvvx-xvvvvv
-v1vvvx-xvvv1v
-v...vx-xv...v
-vv.........vv
- v.1.....1.v
- vv.......vv
-  v.......v
-  vv.1.1.vv
-   v.....v
-   vv...vv
-    v...v
-    vv.vv
-     v.v
-ENDMAP
-
-NAME: nicolae_blade_entry_floor_patterns
-TAGS: no_pool_fixup
-NSUBST: 1 = 2:1 / *:.
-SHUFFLE: :X/:w/::/ww/wX/XX
-SUBST: : = -, X = x, C : -wx
-: elven_blade_entry(_G)
-MAP
-      =
-xxxxx---xxxxx
-xxxxx...xxxxx
-xxCCC...CCCxx
-xxC...:...Cxx
-xxC.1:::1.Cxx
--...::X::...-
--..::XXX::..-
--...::X::...-
-xxC.1:::1.Cxx
-xxC...:...Cxx
-xxCCC...CCCxx
-xxxxx...xxxxx
-xxxxx---xxxxx
-ENDMAP
-
-NAME: nicolae_blade_entry_splitting_headache
-: elven_blade_entry(_G)
-SHUFFLE: AB, CD
-NSUBST: I = 2:1 / *:., i = 2:1 / *:.
-SUBST: AC = x, BD = b
-MAP
-      B
-xxxx--A--xxxx
-xDC...B...CDx
-xC....A....Cx
-x..I.ABA.i..x
-x....BxB....x
-A...BAxAB...A
-B.I.AxxxA.i.B
-A...BAxAB...A
-x....BxB....x
-x..I.ABA.i..x
-xC....A....Cx
-xDC...B...CDx
-xxxxB.A.Bxxxx
-ENDMAP
-
-NAME: nicolae_blade_entry_sentries_behind_glass
-: elven_blade_entry(_G)
-SUBST: 1 = 1..
-KMONS: 2 = dancing weapon
-FTILE: 2m = floor_vault
-COLOUR: 2 = lightgrey
-MAP
-      =
-cccc2m-m2cccc
-c.-mmm-mmm-.c
-c.---------.c
-c...1.c.1...c
-..c.......c..
-.ccc.....ccc.
-..c...c...c..
-.....ccc.....
- .1.ccccc.1.
- ....ccc....
-  ....c....
-   .......
-     ...
-ENDMAP
-
-NAME: nicolae_blade_entry_antechamber
-: elven_blade_entry(_G)
-NSUBST: A = 2:1 / *:.
-MAP
-      =
-xxxxx---xxxxx
-xxxxx---xxxxx
-xxxxx---xxxxx
-xxxx.....xxxx
-xx....A....xx
-x..A.....A..x
-x...xbmbx...x
-...xx...xx...
-.A.b.....b.A.
-...m..1..m...
-...b.....b...
-...xx...xx...
-@...xb+bx...@
-ENDMAP
-
 
 ##############################################################################
 ##############################################################################
@@ -1819,12 +1381,13 @@ SHUFFLE: 23, 45
 SUBST:   v = v .:2
 SUBST:   v : xvb
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxcccccccccccccccccxxxxx
 xxxxxxxxxxxxcc*|*|*|**|||||c$ccxxxx
-xxxxxxxxxxxcc*$*|*|*|*|||||c$$ccxxx
+xxxxxxxxxxxcc*R*|*|*|*|||||c$$ccxxx
 xxxxxxxxxxcc*$|*$***$$|||||c|$$ccxx
 xxxxxxxxxcc*$*|**ccccccccccc$$$$ccx
 xxxxxxxxxc*|*$*$ccc..2..2..c+$|$$cx
@@ -1879,10 +1442,11 @@ KMONS:   A = deep elf master archer
 KFEAT:   A = |
 KMONS:   B = deep elf blademaster
 KFEAT:   B = |
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xccccccccccccccccccccccccccx
-xc2ccccccc........cccccccccx
+xc2ccccccc....R...cccccccccx
 xc.cccc2...5....5...2ccccccx
 xc.cc..................ccccx
 xc.c....3....45....3....c3cx
@@ -1932,10 +1496,11 @@ KITEM:   6 = |
 KITEM:   7 = |
 KFEAT:   6 = 6
 KFEAT:   7 = 7
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxx
 xcccccccccccccccccccccccccx
-xc2ccccccc.......cccccccccx
+xc2ccccccc...R...cccccccccx
 xc.cccc2...5...5...2ccccccx
 xc.cc.................cc6cx
 xc.c....3....45...3....c3cx
@@ -1973,6 +1538,7 @@ SUBST:   1=11., 2=22., 3=33., 4=44., 5=543, 6=66., 7=77.
 SHUFFLE: 12, 34, 67
 : elf_loot_defenders(_G)
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxx@xxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxxxxxc.cxxxxxxxxxxxxxxxxxx
@@ -2005,7 +1571,7 @@ xxxxxxxxxxxxxxxxxxc.cxxxxxxxxxxxxxxxxxx
 xxxxxxxxcccccxxxccc.cccxxxcccccxxxxxxxx
 xxxxxcccc|$*ccccc6...6ccccc*||ccccxxxxx
 xxxccc*|$*|$$|+....U....+|$$|*$*$cccxxx
-xxcc*$$*|$$|$$ccc7...7ccc|*|$$$||*$ccxx
+xxcc*$$*|$$|$$ccc7.R.7ccc|*|$$$||*$ccxx
 xcc$*|*|*|*|cccxcccccccxccc$*$$*$$$|ccx
 xc|*|$$|*ccccxxxxxxxxxxxxxcccc|*$||$*cx
 xcccccccccxxxxxxxxxxxxxxxxxxxcccccccccx
@@ -2026,12 +1592,13 @@ SUBST:   1=1., 2=2., 3=3., 4=4., 5=5.
 SUBST:   v = v .:2
 SUBST:   v : xvb
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxcccccccccccxxxxxxxxxxx
 xxxxxxxxccc$|$|$|$|$cccxxxxxxxxx
 xxxxxxccc***$|$|$|$|$|cccxxxxxxx
-xxxxxcc******$|$|$|$|$|$ccxxxxxx
+xxxxxcc******$|$|$|R|$|$ccxxxxxx
 xxxxcc**cc+cc|$|$|$|$|$|$ccxxxxx
 xxxcc**cc5..cccc|$|$|$|$|$ccxxxx
 xxxc****cc...2.ccccc$|$|$|$cxxxx
@@ -2075,12 +1642,13 @@ SHUFFLE: 12, 34, 67
 SUBST:   v = v .:2
 SUBST:   v : xvb
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxcccxxxxxxxxxxcccxxxxxxxxxxcccxxxxxx
 xxxxccc*cccxxxxxxccc.cccxxxxxxccc$cccxxxx
 xxxcc*****ccxxxxcc.....ccxxxxcc|$|$|ccxxx
-xccc**ccc$|cccccc....5..cccccc|$ccc$|cccx
+xccc**ccc$|cccccc..R.5..cccccc|$ccc$|cccx
 xc***ccccc$|$c.............c$|$ccccc$|$cx
 xc*ccccccccc|c.............c|ccccccccc|cx
 xc*ccccccccc$c..........2..c$ccccccccc$cx
@@ -2131,10 +1699,11 @@ SUBST:   1=11., 2=22., 3=33., 4=44., 5=543, 6=66., 7=77.
 SHUFFLE: 12, 34, 67
 : elf_loot_defenders(_G)
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xccccccccccccccccccccccccccccccx
-xccccccccccc4....5..cccccccccccx
+xccccccccccc4..R.5..cccccccccccx
 xcccccccc..............ccccccccx
 xcccccc......1....3......ccccccx
 xccccc...............5....cccccx
@@ -2173,12 +1742,13 @@ SUBST:   v = v .:2
 SUBST:   v : xvb
 : elf_loot_defenders(_G)
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxxxxxxccccxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxxxcccc*|ccccxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxccc|$|$**|$cccxxxxxxxxxxxxxx
-xxxxxxxxxxxxxcc$|$||*$*$|$*ccxxxxxxxxxxxxx
+xxxxxxxxxxxxxcc$|$||*R*$|$*ccxxxxxxxxxxxxx
 xxxxxxxxxxxxxc$|$|**$*$|$|$*cxxxxxxxxxxxxx
 xccccxxxxxxxxc+cccccccccccc+cxxxxxxxxccccx
 xc..cccxxxxccc..............cccxxxxccc2.cx
@@ -2213,6 +1783,7 @@ SUBST:   1=11., 2=22., 3=33., 4=44., 5=543, 6=66., 7=77.
 SHUFFLE: 12, 34, 67
 : elf_loot_defenders(_G)
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxcccccccccccxxxxxxxxxxx
@@ -2221,7 +1792,7 @@ xxxxxxxccc*$|*||c.....6cccxxxxxxx
 xxxxxxcc$*|*|cccc........ccxxxxxx
 xxxxxcc*|$|ccc*|c....3....ccxxxxx
 xxxxcc|$*ccc|$*$+......5...ccxxxx
-xxxcc$||cc*$*|$*c..6........ccxxx
+xxxccR||cc*$*|$*c..6........ccxxx
 xxxc|$$cc*$**cccc............cxxx
 xxcc$*cc$**ccc1....3...U.....ccxx
 xxc$||c*|$cc.................2cxx
@@ -2268,10 +1839,11 @@ SHUFFLE: 12, 34, 67
 SUBST:   b : bc
 : elf_loot_defenders(_G)
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxcccccccccccccccccccccccccxxxxx
-xxxxxc$*|$$$|*$$*$$*$|$|$|$*$cxxxxx
+xxxxxc$*|$$$|*$$*R$*$|$|$|$*$cxxxxx
 xxxxcc+cc|*$$*$$$$|$$$|$*$cc+ccxxxx
 xxxcc..8ccccccccccccccccccc8..ccxxx
 xccc.2......4.......6......4...cccx
@@ -2311,12 +1883,13 @@ SHUFFLE: 12, 34, 67
 : elf_loot_defenders(_G)
 : elf_loot_randomisation(_G)
 SUBST:   n : nnnb
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxx
 xxccccccccccccccccccccx
 xcc||*$**cc||$|*$|*|ccx
 xc*|*|$|**cc$|$*$||$|cx
-xc$$|$*cc+ccc*$|$*$|*cx
+xc$$|$*cc+ccc*R|$*$|*cx
 xc||$|cc2.54cc*$|$*||cx
 xc$*|cc...U..+*$*|*$*cx
 xc|$cc.......ccc$*|*$cx
@@ -2355,10 +1928,11 @@ SUBST:   1=11., 2=22., 3=33., 4=44., 5=543, 6=66., 7=77.
 SHUFFLE: 12, 34, 67
 : elf_loot_defenders(_G)
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxcccccccccccccccccccccccccccccxxxx
-xxxxc$||*$|$$|*$+c2c+*$|*$$$|*||cxxxx
+xxxxc$||*$|R$|*$+c2c+*$|*$$$|*||cxxxx
 xxxccc|$|*$*|*|cc4..cc*|*|**|$*cccxxx
 xxcc.cc|*||*|$cc...3.cc*|$|||*cc4ccxx
 xcc...cc||*||cc.......cc*||$|cc...ccx
@@ -2402,6 +1976,7 @@ SUBST:   1=1., 2=2., 3=3., 4=4., 5=5.
 SHUFFLE: 23, 45, 67
 : elf_loot_defenders(_G)
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
           xxxxc@cxxxxx
         xxxcccc.cccccxxx
@@ -2418,7 +1993,7 @@ xcc.....4.b$|*bb|*$|$|bb..2..ccx
 xc..3.....b|*bbb+bb*|$*bb.....cx
 xc.....1..b$bb|*$|bb*$|$bb.3..cx
 xc...5..U.b*b*$|*$|bbbb+bb....cc
-cc.......6b|+$|*$|*bbb5.4b.....@
+cc.......6b|+$|*R|*bbb5.4b.....@
 @.....b4.5bbb|*$|*$+|b6.......cc
 cc....bb+bbbb*$|*|$b*b.U..5...cx
 xc..3.bb$|$*bb$*|$bb$b..1.....cx
@@ -2459,13 +2034,13 @@ SUBST:   s = +, t = c
 SUBST:   U = +c
 : elf_loot_defenders(_G)
 : elf_loot_randomisation(_G)
-
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxxxcccccccccccccxxxxxxxxxxxxx
-xxxxxxxxxxxxxxcccccc$|$|$ccccccxxxxxxxxxxx
+xxxxxxxxxxxxxxcccccc$|R|$ccccccxxxxxxxxxxx
 xxxxxxxxxxxcccccccc.|$|$|.ccccccccxxxxxxxx
 xxxxxxxxxccccccccc+.$|*|$.+cccccccccxxxxxx
 xxxxxxxxcc.......7c.|$|$|.c7.......ccxxxxx
@@ -2516,12 +2091,13 @@ SUBST:   1=1., 2=2., 3=3., 4=4., 5=5.
 SHUFFLE: 23, 45, 67
 : elf_loot_defenders(_G)
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxcccccccccxxxxxxxxxxx
-xxxxxxxxxxcc$|*|*|$ccxxxxxxxxxx
+xxxxxxxxxxcc$|*R*|$ccxxxxxxxxxx
 xxxxxxxxxxc$|*|*|*|$cxxxxxxxxxx
 xxxxxxxxxxc$.|*|*|.$cxxxxxxxxxx
 xxxxxxxxxxcc+ccccc+ccxxxxxxxxxx
@@ -2559,6 +2135,7 @@ SUBST:   1=1., 2=2., 3=3., 4=4., 5=5.
 SHUFFLE: 23, 45, 67
 : elf_loot_defenders(_G)
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -2566,7 +2143,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxcccxxxxxxxxxxxxxx
 xxxxxxcccxxxxcc|ccxxxxcccxxxxxx
 xxxxxcc$ccxxcc|*|ccxxcc$ccxxxxx
-xxxxcc$..cccc|*|*|cccc..$ccxxxx
+xxxxccR..cccc|*|*|cccc..$ccxxxx
 xxxcc|*$..cc|*|*|*|cc..$*|ccxxx
 xxcc|*|*.5.cc$*|*$cc.5.*|*|ccxx
 xcc$*|*b....cc$.$cc....b*|*$ccx
@@ -2608,6 +2185,7 @@ SHUFFLE: AB, CD, EFGH, IJKL, MNOP
 SUBST:   ACEFIJ = ., BDGH = c, KLP = b, MNO = $
 : elf_loot_defenders(_G)
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxxxxxxxxxxxxx
@@ -2615,7 +2193,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxcccccxxxxxxxxxxx
 xxxxxxxxcc|*|ccxxxxxxxxxx
 xxxxxxxcc|*|*|ccxxxxxxxxx
-xxxxxxccO*|*|*Pccxxxxxxxx
+xxxxxxccO*|R|*Pccxxxxxxxx
 xxxxxccOOO*|*PPPccxxxxxxx
 xxxxcc|*OOO*PPP*|ccxxxxxx
 xxxxc|*|*OObPP*|*|cxxxxxx
@@ -2663,6 +2241,7 @@ SHUFFLE: 12, 34, 67
 SUBST:   v = v .:2
 SUBST:   v : xvb
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxcccccccccccccccxxxxxxxx
@@ -2690,7 +2269,7 @@ xc....v.....5.cc..bbbbbb.2cc||*c
 xcc..vvv.......c.6.bbbb...c||*cc
 xxc...vvvv.2...cc........cc**|cx
 xxc....vvvvv....c.U...4.cc||*|cx
-xxcc.....vvvv...c..3.7ccc***|ccx
+xxcc.....vvvv...c..3.7ccc**R|ccx
 xxxc..5....vvv..cc+cccc|*||**cxx
 xxxcc.......v....c**||**|*|*ccxx
 xxxxccc..1....3..c|**|*|||cccxxx
@@ -2710,12 +2289,13 @@ SHUFFLE: 12, 34, 67
 SUBST:   v = v .:2
 SUBST:   v : xvb
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxcccccccccccxxxxxxxxx
 xxxxxxxccc$|+..4+|*cccxxxxxxx
 xxxxxccc*|*|c2..c*$||cccxxxxx
-xxxccc$*|$$cc6..cc|**|*cccxxx
+xxxccc$*|$$cc6R.cc|**|*cccxxx
 xccc$*|**ccc..v.1ccc$*$*|cccx
 xc*|*|*ccc.6.vvv.2.ccc|$*||cx
 xc|*$ccc24.vvv.vvv...ccc|**cx
@@ -2749,6 +2329,7 @@ SHUFFLE: 12, 34
 SUBST:   v = v .:2
 SUBST:   v : xvb G:1
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxcccccccccccccccxxxxxxxxx
@@ -2771,7 +2352,7 @@ xc.v.+..vv....nn..|||||bb....+.G.c
 xc.4.c..2vv....nb|||||||b...4c..5c
 xc.v.c....vv...bb|||||||bb.G.c...c
 xc...c.....vv..b6|||U|||7b...c.G.c
-xc.v.cc......2.bb|||||||bb..cc...c
+xc.v.cc......2.bb|||R|||bb..cc...c
 xc....c...vv..3.b|||||||b...c5...c
 xc....cc...vv...bb|||||bb..cc....c
 xcc....c....vv...bbb7bbb...c...5.c
@@ -2799,10 +2380,11 @@ SHUFFLE: 12, 34, 67
 SUBST:   v = v .:2
 SUBST:   v : xvb
 : elf_loot_randomisation(_G)
+KITEM:   R = bone rune of Zot
 MAP
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 xxxxxxxxxxxxxcccccccccxxxxxxxxxxxxx
-xxxxxxxxxxcccc|*|*|*|ccccxxxxxxxxxx
+xxxxxxxxxxcccc|*|R|*|ccccxxxxxxxxxx
 xxxxxxxxxxc|*|*|*v*|*|*|cxxxxxxxxxx
 xxxxccccccc*|v|*|*|*|v|*cccccccxxxx
 xxxxc$|$+3cc*|*cc+cc*|*cc4+$$|cxxxx

@@ -36,13 +36,13 @@ const Branch branches[NUM_BRANCHES] =
       BROWN, BROWN,
       'O', {}, branch_noise::normal },
 
-    { BRANCH_ELF, BRANCH_SPIDER, 1, 1, 3, 15,
+    { BRANCH_ELF, BRANCH_SPIDER, 1, 1, 1, 15,
       brflag::dangerous_end,
       DNGN_ENTER_ELF, DNGN_EXIT_ELF, NUM_FEATURES,
       "Elven Halls", "the Elven Halls", "Elf",
       nullptr,
       WHITE, ETC_ELVEN_BRICK,
-      'E', {}, branch_noise::normal },
+      'E', { RUNE_TARTARUS }, branch_noise::normal },
 #if TAG_MAJOR_VERSION == 34
 
     { BRANCH_DWARF, BRANCH_SNAKE, 1, 1, 1, 17,

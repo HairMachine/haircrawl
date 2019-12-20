@@ -18,7 +18,7 @@ function blade_portal(e)
                   "Find the entrance quickly before the gate is sealed!" },
       finalmsg = "With a final great crash, the noises cease.",
       verb = 'clashing',
-      noisemaker = 'army of dancing weapons',
+      noisemaker = 'an army of dancing weapons',
       ranges = {
         { 5000, 'faint ' },  { 4000, '' }, { 2500, 'loud ' },
         { 1500, 'thunderous ' }, { 0, 'deafening ' }
@@ -35,7 +35,7 @@ end
 }}
 
 # Dummy Blade entry
-NAME:   blade_dummy
+NAME:   blade_entry_dummy
 TAGS:   blade_entry transparent
 ORIENT: float
 KFEAT:  O = enter_hall_of_blades
