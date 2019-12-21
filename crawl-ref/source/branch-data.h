@@ -12,7 +12,7 @@ const Branch branches[NUM_BRANCHES] =
     //  floor colour, rock colour
     //  travel shortcut, runes, ambient noise level
 
-    { BRANCH_DUNGEON, NUM_BRANCHES, 0, 0, 8, 0,
+    { BRANCH_DUNGEON, NUM_BRANCHES, 0, 0, 6, 0,
       brflag::none,
       NUM_FEATURES, DNGN_EXIT_DUNGEON, NUM_FEATURES,
       "Dungeon", "the Dungeon", "D",
@@ -20,7 +20,7 @@ const Branch branches[NUM_BRANCHES] =
       LIGHTGREY, BROWN,
       'D', {}, branch_noise::normal },
 
-    { BRANCH_TEMPLE, NUM_BRANCHES, 4, 7, 1, 5,
+    { BRANCH_TEMPLE, BRANCH_DUNGEON, 3, 3, 1, 5,
       brflag::no_items,
       DNGN_ENTER_TEMPLE, DNGN_EXIT_TEMPLE, NUM_FEATURES,
       "Temple", "the Ecumenical Temple", "Temple",
@@ -28,7 +28,7 @@ const Branch branches[NUM_BRANCHES] =
       LIGHTGREY, BROWN,
       'T', {}, branch_noise::normal },
 
-    { BRANCH_ORC, BRANCH_DUNGEON, 6, 7, 1, 10,
+    { BRANCH_ORC, BRANCH_DUNGEON, 5, 5, 1, 10,
       brflag::spotty,
       DNGN_ENTER_ORC, DNGN_EXIT_ORC, NUM_FEATURES,
       "Orcish Mines", "the Orcish Mines", "Orc",
@@ -54,7 +54,7 @@ const Branch branches[NUM_BRANCHES] =
       'K', { RUNE_DIS }, branch_noise::normal },
 #endif
 
-    { BRANCH_LAIR, BRANCH_DUNGEON, 5, 7, 4, 10,
+    { BRANCH_LAIR, BRANCH_DUNGEON, 5, 5, 4, 10,
       brflag::none,
       DNGN_ENTER_LAIR, DNGN_EXIT_LAIR, NUM_FEATURES,
       "Lair", "the Lair of Beasts", "Lair",
@@ -257,7 +257,7 @@ const Branch branches[NUM_BRANCHES] =
       DARKGREY, BLUE,
       '2', {}, branch_noise::normal },
 
-    { BRANCH_SEWER, BRANCH_DUNGEON, 1, 2, 1, 4,
+    { BRANCH_SEWER, BRANCH_DUNGEON, 1, 1, 1, 4,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_SEWER, DNGN_EXIT_SEWER, NUM_FEATURES,
       "Sewer", "a sewer", "Sewer",
@@ -265,7 +265,7 @@ const Branch branches[NUM_BRANCHES] =
       LIGHTGREY, BLUE,
       '3', {}, branch_noise::normal },
 
-    { BRANCH_OSSUARY, BRANCH_DUNGEON, 3, 4, 1, 6,
+    { BRANCH_OSSUARY, BRANCH_DUNGEON, 2, 2, 1, 6,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_OSSUARY, DNGN_EXIT_OSSUARY, NUM_FEATURES,
       "Ossuary", "an ossuary", "Ossuary",
@@ -273,7 +273,7 @@ const Branch branches[NUM_BRANCHES] =
       WHITE, YELLOW,
       '4', {}, branch_noise::normal },
 
-    { BRANCH_BAILEY, BRANCH_DUNGEON, 5, 6, 1, 11,
+    { BRANCH_BAILEY, BRANCH_DUNGEON, 4, 4, 1, 11,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_BAILEY, DNGN_EXIT_BAILEY, NUM_FEATURES,
       "Bailey", "a bailey", "Bailey",
@@ -291,7 +291,7 @@ const Branch branches[NUM_BRANCHES] =
       '6', {}, branch_noise::normal },
 #endif
 
-    { BRANCH_ICE_CAVE, BRANCH_LAIR, 1, 3, 1, 15,
+    { BRANCH_ICE_CAVE, BRANCH_LAIR, 1, 1, 1, 15,
       brflag::no_x_level_travel | brflag::no_items,
       DNGN_ENTER_ICE_CAVE, DNGN_EXIT_ICE_CAVE, NUM_FEATURES,
       "Ice Cave", "an ice cave", "IceCv",
@@ -331,7 +331,7 @@ const Branch branches[NUM_BRANCHES] =
 #endif
 #if TAG_MAJOR_VERSION == 34
 
-    { BRANCH_DEPTHS, BRANCH_DUNGEON, 8, 8, 4, 22,
+    { BRANCH_DEPTHS, BRANCH_DUNGEON, 6, 6, 4, 22,
       brflag::none,
       DNGN_ENTER_DEPTHS, DNGN_EXIT_DEPTHS, NUM_FEATURES,
       "Depths", "the Depths", "Depths",
