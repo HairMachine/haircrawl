@@ -61,6 +61,7 @@
 #include "sound.h"
 #include "spl-book.h"
 #include "spl-clouds.h"
+#include "spl-damage.h"
 #include "spl-goditem.h"
 #include "spl-selfench.h"
 #include "spl-summoning.h"
@@ -3166,8 +3167,7 @@ void read_scroll(item_def& scroll)
         break;
 
     case SCR_NOISE:
-        noisy(25, you.pos(), "You hear a deafening clanging noise!");
-        mass_enchantment(ENCH_CONFUSION, 10000);
+        cast_shatter(1000, false);
         break;
 
     case SCR_SUMMONING:

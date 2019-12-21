@@ -88,7 +88,6 @@ static const vector<spell_type> spellbook_templates[] =
     SPELL_LIGHTNING_BOLT,
     SPELL_IGNITION,
     SPELL_TORNADO,
-    SPELL_SHATTER,
 },
 
 {   // Book of Death
@@ -239,7 +238,7 @@ static const vector<spell_type> spellbook_templates[] =
     SPELL_BOLT_OF_MAGMA,
     SPELL_STATUE_FORM,
     SPELL_IRON_SHOT,
-    SPELL_SHATTER,
+    SPELL_LEHUDIBS_CRYSTAL_SPEAR,
 },
 
 #if TAG_MAJOR_VERSION == 34
