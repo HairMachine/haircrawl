@@ -12,7 +12,7 @@ const Branch branches[NUM_BRANCHES] =
     //  floor colour, rock colour
     //  travel shortcut, runes, ambient noise level
 
-    { BRANCH_DUNGEON, NUM_BRANCHES, 0, 0, 6, 0,
+    { BRANCH_DUNGEON, NUM_BRANCHES, 0, 0, 4, 0,
       brflag::none,
       NUM_FEATURES, DNGN_EXIT_DUNGEON, NUM_FEATURES,
       "Dungeon", "the Dungeon", "D",
@@ -28,7 +28,7 @@ const Branch branches[NUM_BRANCHES] =
       LIGHTGREY, BROWN,
       'T', {}, branch_noise::normal },
 
-    { BRANCH_ORC, BRANCH_DUNGEON, 5, 5, 1, 10,
+    { BRANCH_ORC, BRANCH_LAIR, 1, 1, 1, 10,
       brflag::spotty,
       DNGN_ENTER_ORC, DNGN_EXIT_ORC, NUM_FEATURES,
       "Orcish Mines", "the Orcish Mines", "Orc",
@@ -54,7 +54,7 @@ const Branch branches[NUM_BRANCHES] =
       'K', { RUNE_DIS }, branch_noise::normal },
 #endif
 
-    { BRANCH_LAIR, BRANCH_DUNGEON, 5, 5, 4, 10,
+    { BRANCH_LAIR, BRANCH_DUNGEON, 4, 4, 1, 10,
       brflag::none,
       DNGN_ENTER_LAIR, DNGN_EXIT_LAIR, NUM_FEATURES,
       "Lair", "the Lair of Beasts", "Lair",
@@ -62,7 +62,7 @@ const Branch branches[NUM_BRANCHES] =
       GREEN, BROWN,
       'L', {}, branch_noise::normal },
 
-    { BRANCH_SWAMP, BRANCH_LAIR, 2, 3, 2, 15,
+    { BRANCH_SWAMP, BRANCH_SPIDER, 1, 1, 1, 15,
       brflag::dangerous_end | brflag::spotty,
       DNGN_ENTER_SWAMP, DNGN_EXIT_SWAMP, NUM_FEATURES,
       "Swamp", "the Swamp", "Swamp",
@@ -70,7 +70,7 @@ const Branch branches[NUM_BRANCHES] =
       BROWN, BROWN,
       'S', { RUNE_SWAMP }, branch_noise::normal },
 
-    { BRANCH_SHOALS, BRANCH_LAIR, 2, 4, 2, 15,
+    { BRANCH_SHOALS, BRANCH_SWAMP, 1, 1, 1, 15,
       brflag::dangerous_end,
       DNGN_ENTER_SHOALS, DNGN_EXIT_SHOALS, NUM_FEATURES,
       "Shoals", "the Shoals", "Shoals",
@@ -78,7 +78,7 @@ const Branch branches[NUM_BRANCHES] =
       BROWN, BROWN,
       'A', { RUNE_SHOALS }, branch_noise::loud },
 
-    { BRANCH_SNAKE, BRANCH_LAIR, 2, 4, 2, 15,
+    { BRANCH_SNAKE, BRANCH_ORC, 1, 1, 1, 15,
       brflag::dangerous_end,
       DNGN_ENTER_SNAKE, DNGN_EXIT_SNAKE, NUM_FEATURES,
       "Snake Pit", "the Snake Pit", "Snake",
@@ -86,7 +86,7 @@ const Branch branches[NUM_BRANCHES] =
       LIGHTGREEN, YELLOW,
       'P', { RUNE_SNAKE }, branch_noise::normal },
 
-    { BRANCH_SPIDER, BRANCH_LAIR, 2, 4, 2, 15,
+    { BRANCH_SPIDER, BRANCH_SNAKE, 1, 1, 1, 15,
       brflag::dangerous_end,
       DNGN_ENTER_SPIDER, DNGN_EXIT_SPIDER, NUM_FEATURES,
       "Spider Nest", "the Spider Nest", "Spider",
@@ -102,7 +102,7 @@ const Branch branches[NUM_BRANCHES] =
       GREEN, BROWN,
       'M', { RUNE_SLIME }, branch_noise::quiet },
 
-    { BRANCH_VAULTS, BRANCH_DEPTHS, 2, 2, 3, 19,
+    { BRANCH_VAULTS, BRANCH_SHOALS, 1, 1, 1, 19,
       brflag::dangerous_end,
       DNGN_ENTER_VAULTS, DNGN_EXIT_VAULTS, NUM_FEATURES,
       "Vaults", "the Vaults", "Vaults",
@@ -120,7 +120,7 @@ const Branch branches[NUM_BRANCHES] =
       'B', { RUNE_DEMONIC }, branch_noise::quiet },
 #endif
 
-    { BRANCH_CRYPT, BRANCH_VAULTS, 2, 2, 1, 19,
+    { BRANCH_CRYPT, BRANCH_VAULTS, 1, 1, 1, 19,
       brflag::dangerous_end,
       DNGN_ENTER_CRYPT, DNGN_EXIT_CRYPT, NUM_FEATURES,
       "Crypt", "the Crypt", "Crypt",
@@ -146,7 +146,7 @@ const Branch branches[NUM_BRANCHES] =
       'U', {}, branch_noise::normal },
 #endif
 
-    { BRANCH_VESTIBULE, BRANCH_DEPTHS, 4, 4, 1, 27,
+    { BRANCH_VESTIBULE, BRANCH_VAULTS, 1, 1, 1, 27,
       brflag::no_items,
       DNGN_ENTER_HELL, DNGN_EXIT_HELL, NUM_FEATURES,
       "Hell", "the Vestibule of Hell", "Hell",
@@ -186,7 +186,7 @@ const Branch branches[NUM_BRANCHES] =
       MAGENTA, MAGENTA,
       'Y', {}, branch_noise::normal },
 
-    { BRANCH_ZOT, BRANCH_VESTIBULE, 1, 1, 2, 27,
+    { BRANCH_ZOT, BRANCH_VESTIBULE, 1, 1, 1, 27,
       brflag::dangerous_end,
       DNGN_ENTER_ZOT, DNGN_EXIT_ZOT, NUM_FEATURES,
       "Zot", "the Realm of Zot", "Zot",

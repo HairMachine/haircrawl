@@ -32,7 +32,7 @@ function hell_portal(e)
 end
 
 function hell_pan_portal(e)
-  local timeout_turns = crawl.random_range(2500, 3000)
+  local timeout_turns = crawl.random_range(5000, 6000)
 
   local messager =
     timed_msg {

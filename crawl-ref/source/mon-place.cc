@@ -630,6 +630,13 @@ monster* place_monster(mgen_data mg, bool force_pos, bool dont_place)
     mprf(MSGCH_DIAGNOSTICS, "in place_monster()");
 #endif
 
+    // Randomly skip some monsters. A beautiful hack to reduce monster counts to something reasonable. ~Hair
+    // TODO: Never skip uniques
+    if (x_chance_in_y(9, 12)) {
+        mpr("Skipped monster gen.");
+        return nullptr;
+    }
+
     const int mon_count = count_if(begin(menv), end(menv),
                                    [] (const monster &mons) -> bool
                                    { return mons.type != MONS_NO_MONSTER; });
@@ -2585,7 +2592,7 @@ static monster_type _pick_zot_exit_defender()
 }
 
 monster* mons_place(mgen_data mg)
-{
+{ 
 #ifdef DEBUG_MON_CREATION
     mprf(MSGCH_DIAGNOSTICS, "in mons_place()");
 #endif
