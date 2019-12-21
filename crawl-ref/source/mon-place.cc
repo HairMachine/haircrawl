@@ -1599,7 +1599,6 @@ monster_type pick_local_zombifiable_monster(level_id place,
                                             const coord_def& pos,
                                             bool for_corpse)
 {
-    const bool really_in_d = place.branch == BRANCH_DUNGEON;
 
     if (place.branch == BRANCH_ZIGGURAT)
     {
@@ -1618,12 +1617,9 @@ monster_type pick_local_zombifiable_monster(level_id place,
 
     place.depth = max(1, min(place.depth, branch_ood_cap(place.branch)));
 
-    const bool need_veto = really_in_d && !for_corpse;
-    mon_pick_vetoer veto = need_veto ? _mc_too_slow_for_zombies : nullptr;
-
     // try to grab a proper zombifiable monster
     monster_type mt = picker.pick_with_veto(zombie_population(place.branch),
-                                            place.depth, MONS_0, veto);
+                                            place.depth, MONS_0, nullptr);
     // there might not be one in this branch - if we can't find one, try
     // elsewhere
     if (!mt)
