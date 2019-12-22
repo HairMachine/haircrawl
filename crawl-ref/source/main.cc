@@ -788,7 +788,6 @@ static bool _cmd_is_repeatable(command_type cmd, bool is_again = false)
     case CMD_TOGGLE_TRAVEL_SPEED:
     case CMD_TOGGLE_SOUND:
     case CMD_ADJUST_INVENTORY:
-    case CMD_QUIVER_ITEM:
     case CMD_REPLAY_MESSAGES:
     case CMD_REDRAW_SCREEN:
     case CMD_MACRO_ADD:
@@ -1631,6 +1630,7 @@ static void _do_reload() {
                     break;
             }
             weapon->plus2 = loadval;
+            you.wield_change = true;
         }
     }
 }
@@ -2007,10 +2007,8 @@ void process_command(command_type cmd)
         break;
     }
 
-        // Quiver commands.
-    case CMD_QUIVER_ITEM:           choose_item_for_quiver(); break;
-    case CMD_CYCLE_QUIVER_FORWARD:  _do_cycle_quiver(+1);     break;
-    case CMD_CYCLE_QUIVER_BACKWARD: _do_cycle_quiver(-1);     break;
+        // Quiver commands removed. ~Hair
+
 
 #ifdef WIZARD
     case CMD_WIZARD: handle_wizard_command(); break;

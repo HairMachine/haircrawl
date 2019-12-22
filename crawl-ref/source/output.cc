@@ -929,6 +929,11 @@ static void _print_stats_wp(int y)
             wpn.plus -= 4 * you.props["corrosion_amount"].get_int();
 
         text = wpn.name(DESC_PLAIN, true, false, true);
+        // If a ranged weapon, display magazine information. ~Hair
+        // TODO: All this ranged code is spread around all over the place, probably should be neatly combined into a single file.
+        if (is_ranged_weapon_type(wpn.sub_type)) {
+            text += " (" + to_string(wpn.plus2) + " shots)";
+        }
     }
     else
         text = you.unarmed_attack_name();
@@ -947,49 +952,8 @@ static void _print_stats_wp(int y)
 
 static void _print_stats_qv(int y)
 {
-    int col;
-    string text;
-
-    int q = you.m_quiver.get_fire_item();
-    ASSERT_RANGE(q, -1, ENDOFPACK);
-    char hud_letter = '-';
-    if (q != -1 && !fire_warn_if_impossible(true))
-    {
-        const item_def& quiver = you.inv[q];
-        hud_letter = index_to_letter(quiver.link);
-        const string prefix = item_prefix(quiver);
-        const int prefcol =
-            menu_colour(quiver.name(DESC_PLAIN), prefix, "stats");
-        if (prefcol != -1)
-            col = prefcol;
-        else
-            col = LIGHTGREY;
-        text = quiver.name(DESC_PLAIN, true);
-    }
-    else
-    {
-        if (fire_warn_if_impossible(true))
-        {
-            col  = DARKGREY;
-            text = "Quiver unavailable";
-        }
-        else
-        {
-            col  = LIGHTGREY;
-            text = "Nothing quivered";
-        }
-    }
-    CGOTOXY(1, y, GOTO_STAT);
-    textcolour(HUD_CAPTION_COLOUR);
-    CPRINTF("%c) ", hud_letter);
-    textcolour(col);
-#ifdef USE_TILE_LOCAL
-    int w = crawl_view.hudsz.x - (tiles.is_using_small_layout()?0:4);
-    CPRINTF("%s", chop_string(text, w).c_str());
-#else
-    CPRINTF("%s", chop_string(text, crawl_view.hudsz.x-4).c_str());
-#endif
-    textcolour(LIGHTGREY);
+    // No quiver. ~Hair
+    return;
 }
 
 struct status_light

@@ -564,74 +564,61 @@ void fire_thing(int item)
     parse_sound(FIRE_PROMPT_SOUND);
 #endif
 
-    // NEW RUBBISH
-    if (!you.weapon()) {
-        mpr("Thou canst not KABOOM! when thou dost not hold a weapon");
+    if (you.berserk()) {
+        mpr("You're too angry to aim straight!");
         return;
     }
 
-    if (you.berserk()) {
-        mpr("Thou art far too angry!");
+    if (!you.weapon()) {
+        mpr("You fire your finger guns. Pkow, blammo!");
         return;
     }
 
     item_def* weapon = you.weapon(0);
-    if (weapon->base_type == OBJ_WEAPONS && is_ranged_weapon_type(weapon->sub_type)) 
-    {
-        if (weapon->plus2 <= 0) {
-            mpr("Your weapon is not loaded! (wait in a safe place to reload).");
-            return;
-        }
-        spret success = spret::fail;
-        switch (weapon->sub_type) {
-            case WPN_HUNTING_SLING:
-                success = your_spells(SPELL_MAGIC_DART, you.skill(SK_SLINGS) * 2, false);
-                break;
-            case WPN_FUSTIBALUS:
-                success = your_spells(SPELL_STICKY_FLAME_RANGE, you.skill(SK_SLINGS) * 10, false);
-                break;
-            case WPN_SHORTBOW:
-                success = your_spells(SPELL_MAGIC_DART, you.skill(SK_BOWS) * 2 * random2(3) + 1, false);
-                break;
-            case WPN_LONGBOW:
-                success = your_spells(SPELL_SCATTERSHOT, you.skill(SK_BOWS) * 5, false);
-                break;
-            case WPN_HAND_CROSSBOW:
-                success = your_spells(SPELL_FORCE_LANCE, you.skill(SK_CROSSBOWS) * 5, false);
-                break;
-            case WPN_ARBALEST:
-                success = your_spells(SPELL_FIREBALL, you.skill(SK_CROSSBOWS) * 10, false);
-                break;
-            case WPN_TRIPLE_CROSSBOW:
-                success = your_spells(SPELL_CHAIN_LIGHTNING, you.skill(SK_CROSSBOWS) * 10, false);
-                break;
-        }
-        if (success == spret::success) {
-            you.time_taken = you.attack_delay(weapon).roll();
-            you.turn_is_over = true;
-            weapon->plus2 -= 1;
-            mprf("You fire your %s! You may fire %d more before needing to reload.", item_base_name(weapon->base_type, weapon->sub_type).c_str(), weapon->plus2);
-        }
-        return;
-    }
-    mpr("Thou canst not KABOOM! with this thou foll");
-    return;
     
-
-    // OLD CRAP
-    dist target;
-    item = get_ammo_to_shoot(item, target, is_pproj_active());
-    if (item == -1)
-        return;
-
-    if (check_warning_inscriptions(you.inv[item], OPER_FIRE)
-        && (!you.weapon()
-            || is_launched(&you, you.weapon(), you.inv[item]) != launch_retval::LAUNCHED
-            || check_warning_inscriptions(*you.weapon(), OPER_FIRE)))
+    if (weapon->base_type == OBJ_WEAPONS && !is_ranged_weapon_type(weapon->sub_type)) 
     {
-        bolt beam;
-        throw_it(beam, item, &target);
+            mpr("You can't find the trigger...");
+            return;
     }
+
+    if (weapon->plus2 <= 0) {
+        mpr("Your weapon is not loaded! (wait in a safe place to reload).");
+        return;
+    }
+
+    spret success = spret::fail;
+    switch (weapon->sub_type) {
+        case WPN_HUNTING_SLING:
+            success = your_spells(SPELL_MAGIC_DART, you.skill(SK_SLINGS) * 2, false);
+            break;
+        case WPN_FUSTIBALUS:
+            success = your_spells(SPELL_STICKY_FLAME_RANGE, you.skill(SK_SLINGS) * 10, false);
+            break;
+        case WPN_SHORTBOW:
+            success = your_spells(SPELL_MAGIC_DART, you.skill(SK_BOWS) * 2 * random2(3) + 1, false);
+            break;
+        case WPN_LONGBOW:
+            success = your_spells(SPELL_SCATTERSHOT, you.skill(SK_BOWS) * 5, false);
+            break;
+        case WPN_HAND_CROSSBOW:
+            success = your_spells(SPELL_FORCE_LANCE, you.skill(SK_CROSSBOWS) * 5, false);
+            break;
+        case WPN_ARBALEST:
+            success = your_spells(SPELL_FIREBALL, you.skill(SK_CROSSBOWS) * 10, false);
+            break;
+        case WPN_TRIPLE_CROSSBOW:
+            success = your_spells(SPELL_CHAIN_LIGHTNING, you.skill(SK_CROSSBOWS) * 10, false);
+            break;
+    }
+    if (success == spret::success) {
+        you.time_taken = you.attack_delay(weapon).roll();
+        you.turn_is_over = true;
+        weapon->plus2 -= 1;
+        mprf("You fire your %s! You may fire %d more before needing to reload.", item_base_name(weapon->base_type, weapon->sub_type).c_str(), weapon->plus2);
+        you.wield_change = true;
+    }
+    
 }
 
 // Basically does what throwing used to do: throw an item without changing
