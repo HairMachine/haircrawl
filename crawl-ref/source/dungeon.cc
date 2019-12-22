@@ -2656,7 +2656,7 @@ static bool _pan_level()
         { "mnoleg", "lom_lobon", "cerebov", "gloorx_vloq", };
     int which_demon = -1;
     const PlaceInfo &place_info = you.get_place_info();
-    bool all_demons_generated = true;
+    bool all_demons_generated = false;
 
     if (you.props.exists("force_map"))
     {
@@ -2668,17 +2668,17 @@ static bool _pan_level()
         return vault->orient != MAP_ENCOMPASS;
     }
 
+    // Generate one random Pan lord; and that's your lot. ~Hair
     for (int i = 0; i < 4; i++)
     {
-        if (!get_uniq_map_tags().count(string("uniq_") + pandemon_level_names[i]))
+        if (get_uniq_map_tags().count(string("uniq_") + pandemon_level_names[i]))
         {
-            all_demons_generated = false;
+            all_demons_generated = true;
             break;
         }
     }
 
-    // Pan lords always generate until there are none left.
-    if (!all_demons_generated)
+    if (!all_demons_generated)  
     {
         do
         {
@@ -2696,7 +2696,7 @@ static bool _pan_level()
     // If we've run out of demons, generate a boring normal vault instead. Pan is now over basically.
     if (!vault) {
         vault = random_map_in_depth(level_id::current(), false, MB_FALSE);
-        mpr("You feel staying in this place would be unproductive.");
+        mpr("Now you have seized the Runes and the means of production, you feel staying in this place would be unproductive.");
     }
     
     // Every Pan level should have a primary vault.

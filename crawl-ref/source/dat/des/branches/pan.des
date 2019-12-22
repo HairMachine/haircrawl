@@ -26,17 +26,11 @@ function pan_lord_epilogue(name)
         Cerebov = "Searing heat pours from the floors and walls of this place.",
         ['Gloorx Vloq'] = "Shadowy figures dance across your vision."
     }
-    local runes = {
-        Mnoleg = "glowing",
-        ['Lom Lobon'] = "magical",
-        Cerebov = "fiery",
-        ['Gloorx Vloq'] = "dark"
-    }
 
     crawl.mpr(msgs[name], "warning")
     crawl.mpr("The mighty Pandemonium lord " .. name .. " resides here.", "warning")
     -- Counterpart to branch_rune_desc from lookup-help.cc
-    crawl.mpr("It guards the " .. runes[name] .. " rune of Zot.")
+    crawl.mpr("It guards the glowing rune of Zot.")
     crawl.take_note('Entered the realm of ' .. name .. '.')
     crawl.mark_milestone('br.enter', 'entered the realm of ' .. name .. '.', "")
 end
@@ -79,19 +73,19 @@ function pan_lord_setup(_G, name)
         _G.lrockcol("white")
         _G.lfloortile("floor_rough_lightgray")
         _G.lrocktile("wall_hall_white")
-        _G.kitem("O = magical rune of Zot")
+        _G.kitem("O = glowing rune of Zot")
     elseif name == "Cerebov" then
         _G.lfloorcol("red")
         _G.lrockcol("red")
         _G.lfloortile("floor_volcanic")
         _G.lrocktile("wall_zot_red")
-        _G.kitem("O = fiery rune of Zot")
+        _G.kitem("O = glowing rune of Zot")
     elseif name == "Gloorx Vloq" then
         _G.lfloorcol("blue")
         _G.lrockcol("blue")
         _G.lfloortile("floor_grey_dirt")
         _G.lrocktile("wall_hall_darkgray")
-        _G.kitem("O = dark rune of Zot")
+        _G.kitem("O = glowing rune of Zot")
     end
 end
 
@@ -165,7 +159,7 @@ end)
 
 function pan_demonic_rune(e, glyph, place_lord)
     e.subst(glyph .. ' = ' .. (place_lord and glyph or '.') .. ':6 O:1 N:2')
-    e.kitem('O = demonic rune of Zot')
+    e.kfeat('O = exit_pandemonium')
     e.kfeat('N = exit_pandemonium')
     if place_lord then
         e.kmons(glyph .. 'ON = pandemonium lord')
@@ -198,11 +192,6 @@ function pan_entry_vault_contents(e, glyph)
     end
 end
 
-function pan_declare_demonic_rune(e)
-  crawl.mpr("The tension of great conflict fills the air!", "warning")
-  crawl.mpr("The demonic rune of Zot may be found here.")
-end
-
 function pan_highlights_setup(e)
   -- Choose fixed demonic rune vaults.
   local set = { "boxes", "hellions", "pain", "frozen", "disco" }
@@ -220,13 +209,7 @@ function pan_highlights_setup(e)
 end
 
 function demonic_rune_vault_is_decoy(e)
-  local params = dgn.map_parameters()
-  if params == nil then
-    return false
-  end
-
-  local tag, tag2 = unpack(params)
-  return tag ~= nil and string.find(tag, "lure")
+  return true
 end
 
 function serial_pan_setup(e, set)
@@ -2496,7 +2479,6 @@ NAME:   pan_demonic_rune_highlights
 ORIENT: float
 WEIGHT: 0
 : pan_highlights_setup(_G)
-: pan_declare_demonic_rune(_G)
 
 # Concept inherited from lemuel_draining_boxes.
 NAME:   regret_index_pan_draining_boxed
@@ -3901,12 +3883,7 @@ NAME:   evilmike_holy_pan
 TAGS:   no_pool_fixup
 ORIENT: encompass
 NSUBST: . = > / .
-: if you.have_rune("demonic") then
 KFEAT:  O = exit_pandemonium
-: else
-: pan_declare_demonic_rune(_G)
-KITEM:  O = demonic rune of Zot
-: end
 ITEM:   w:5 any / potion of curing
 ITEM:   any / potion of heal wounds
 ITEM:   any good_item

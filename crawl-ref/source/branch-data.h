@@ -220,8 +220,7 @@ const Branch branches[NUM_BRANCHES] =
       "You enter the halls of Pandemonium!\n"
       "To return, you must find a gate leading back.",
       BLACK, BLACK, // set specially
-      'R', { RUNE_MNOLEG, RUNE_LOM_LOBON, RUNE_CEREBOV,
-             RUNE_GLOORX_VLOQ }, branch_noise::normal },
+      'R', { RUNE_MNOLEG }, branch_noise::normal },
 
     { BRANCH_ZIGGURAT, BRANCH_ZOT, 1, 1, 27, 27,
       brflag::no_x_level_travel | brflag::no_items,
