@@ -7260,21 +7260,8 @@ int player::beam_resists(bolt &beam, int hurted, bool doEffects, string source)
 // different effect from the player invokable ability.
 bool player::do_shaft()
 {
-    if (!is_valid_shaft_level()
-        || !feat_is_shaftable(grd(pos()))
-        || duration[DUR_SHAFT_IMMUNITY])
-    {
-        return false;
-    }
-
-    // Ensure altars, items, and shops discovered at the moment
-    // the player gets shafted are correctly registered.
-    maybe_update_stashes();
-
-    duration[DUR_SHAFT_IMMUNITY] = 1;
-    down_stairs(DNGN_TRAP_SHAFT);
-
-    return true;
+    // Shafts are removed; it's too unfair with the hyper shortened dungeon. ~Hair
+    return false;
 }
 
 bool player::can_do_shaft_ability(bool quiet) const
