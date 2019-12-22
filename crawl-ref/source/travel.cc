@@ -3282,13 +3282,6 @@ level_id level_id::parse_level_id(const string &s)
                      brlev == "$"  ? branches[br].numlevels
                                    : atoi(brlev.c_str()));
 
-    // The branch might have been longer when the save has been created.
-    if (dep < 0 || dep > brdepth[br] && dep > branches[br].numlevels)
-    {
-        throw bad_level_id_f("Invalid depth for %s in spec \"%s\"",
-                             brname.c_str(), s.c_str());
-    }
-
     return level_id(br, dep);
 }
 

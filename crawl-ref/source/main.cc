@@ -1613,6 +1613,28 @@ static void _toggle_travel_speed()
     }
 }
 
+static void _do_reload() {
+    // Reload all ranged weapons. This could be its own command, perhaps. ~Hair
+    mpr("Reloading all guns.");
+    for (int inv_slot = 0; inv_slot < ENDOFPACK; inv_slot++)
+    {
+        item_def* weapon = &you.inv[inv_slot];
+        if (weapon->base_type == OBJ_WEAPONS && is_ranged_weapon_type(weapon->sub_type)) {            
+            // TODO: Moving this function ~Hair
+            int loadval = 1;
+            switch (weapon->sub_type) {
+                case WPN_HUNTING_SLING:
+                    loadval = 6;
+                    break;
+                case WPN_LONGBOW:
+                    loadval = 2;
+                    break;
+            }
+            weapon->plus2 = loadval;
+        }
+    }
+}
+
 static void _do_rest()
 {
     if (apply_starvation_penalties())
@@ -1630,12 +1652,14 @@ static void _do_rest()
         {
             mpr("You start waiting.");
             _start_running(RDIR_REST, RMODE_WAIT_DURATION);
+            _do_reload();
             return;
         }
         else
             mpr("You start resting.");
+        
+        _do_reload();
     }
-
     _start_running(RDIR_REST, RMODE_REST_DURATION);
 }
 
