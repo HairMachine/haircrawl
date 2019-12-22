@@ -4751,6 +4751,15 @@ monster* dgn_place_monster(mons_spec &mspec, coord_def where,
     const bool m_patrolling     = (patrolling || mspec.patrolling);
     const bool m_band           = mspec.band;
 
+    // Randomly skip some monsters. A beautiful hack to reduce monster counts to something reasonable. ~Hair
+    // Note this is duplcated in mon-place.cc, because Crawl has two methods of placing monsters, and they don't share any code.
+    // This is for placement from vaults.
+    // TODO: This method needs to be more sophisticated, there actually doesn't seem to be one clear way of deciding what is a hostile monster and what isn't
+    if (!mons_is_unique(type) && x_chance_in_y(1, 2)) {
+        mpr("Skipped monster gen (dungeon.cc)");
+        return 0;
+    }
+
     if (!mspec.place.is_valid())
         mspec.place = level_id::current();
     bool chose_ood = false;

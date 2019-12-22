@@ -743,8 +743,8 @@ monster* place_monster(mgen_data mg, bool force_pos, bool dont_place)
 
     // Randomly skip some monsters. A beautiful hack to reduce monster counts to something reasonable. ~Hair
     // TODO: This method needs to be more sophisticated, there actually doesn't seem to be one clear way of deciding what is a hostile monster and what isn't
-    if (!mons_is_unique(mon->type) && mon->type != MONS_FOXFIRE && mon->type != MONS_ORB_OF_DESTRUCTION && mon->type != MONS_BUTTERFLY && x_chance_in_y(3, 4)) {
-        mpr("Skipped monster gen.");
+    if (!mons_is_unique(mon->type) && mon->type != MONS_FOXFIRE && mon->type != MONS_ORB_OF_DESTRUCTION && mon->type != MONS_BUTTERFLY && x_chance_in_y(1, 2)) {
+        mpr("Skipped monster gen. (mon-place.cc)");
         return nullptr;
     }
     
