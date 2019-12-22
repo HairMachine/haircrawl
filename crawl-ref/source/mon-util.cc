@@ -2187,7 +2187,8 @@ int hit_points(int avg_hp, int scale)
     const int min_perc = 33;
     const int hp_variance = div_rand_round(avg_hp * min_perc, 100);
     const int min_hp = avg_hp - hp_variance;
-    const int hp = min_hp + random2avg(hp_variance * 2, 8);
+    // Reduce any final HP amount by 75% to accomodate the shorter game. ~Hair
+    const int hp = (min_hp + random2avg(hp_variance * 2, 8)) * 0.75;
     return max(1, div_rand_round(hp, scale));
 }
 

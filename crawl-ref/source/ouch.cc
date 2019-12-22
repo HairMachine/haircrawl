@@ -741,7 +741,8 @@ void reset_damage_counters()
 
 bool can_shave_damage()
 {
-    return you.species == SP_DEEP_DWARF;
+    // Damage shaving for everyone. This is to make up for the significant difficulty increase caused by shortening everything. ~Hair
+    return true;
 }
 
 int do_shave_damage(int dam)

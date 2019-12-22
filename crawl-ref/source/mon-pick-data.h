@@ -2,16 +2,17 @@ static const pop_entry pop_d[] =
 { // Dungeon (OOD cap: 27). Orcs, goblins, trolls, giants, undead (?)
   // D1: The Sewer and its environs. Sewer-approrpiate monsters are here.
   {  1,  1,  515, FLAT, MONS_GIANT_COCKROACH },
-  {  1,  1, 1000, FLAT, MONS_KOBOLD },
-  {  1,  1, 1000, FLAT, MONS_RAT },
+  {  1,  1,  800, FLAT, MONS_KOBOLD },
+  {  1,  1,  800, FLAT, MONS_RAT },
+  {  1,  1,  200, FLAT, MONS_RIVER_RAT },
   {  1,  1,  192, FLAT, MONS_BALL_PYTHON },
   {  1,  1,  640, FLAT, MONS_FRILLED_LIZARD},
   {  1,  1,  136, FLAT, MONS_OOZE },
-  {  1,  1, 1000, FLAT, MONS_BAT },
+  {  1,  1,  800, FLAT, MONS_BAT },
   {  1,  1,  335, FLAT, MONS_DART_SLUG },
   {  1,  1,  100, FLAT, MONS_BIG_KOBOLD },
   {  1,  1,  100, FLAT, MONS_WORM },
-  {  1,  1,   25, FLAT, MONS_BULLFROG },
+  {  1,  1,  100, FLAT, MONS_BULLFROG },
   // D2: The Ossuary and its environs. Spoopy undead oooo!
   {  2,  2, 2000, FLAT, MONS_SKELETON },
   {  2,  2, 1000, FLAT, MONS_ZOMBIE },
@@ -20,14 +21,16 @@ static const pop_entry pop_d[] =
   {  2,  2,  100, FLAT, MONS_VAMPIRE },
   // D3: The Temple and its environs, guarded by the servitors of the otherworld.
   // TODO: Adjust these monsters to a set of new ones, thematically.
-  {  3,  3,  650, FLAT, MONS_CRIMSON_IMP },
+  {  3,  3,  500, FLAT, MONS_CRIMSON_IMP },
   {  3,  3,  500, FLAT, MONS_SHADOW_IMP },
   {  3,  3,  500, FLAT, MONS_QUASIT },
   {  3,  3,  200, FLAT, MONS_SKY_BEAST },
-  {  3,  3,  200, FLAT, MONS_IRON_IMP },
-  {  3,  3,  100, FLAT, MONS_WHITE_IMP },
+  {  3,  3,  300, FLAT, MONS_IRON_IMP },
+  {  3,  3,  200, FLAT, MONS_WHITE_IMP },
   {  3,  3,  100, FLAT, MONS_ICE_BEAST },
   {  3,  3,  100, FLAT, MONS_UFETUBUS },
+  {  3,  3,   50, FLAT, MONS_CHAOS_SPAWN },
+  {  3,  3,   50, FLAT, MONS_RED_DEVIL },
   // D4: The Bailey and its environs; warriors and fighters!  
   {  4,  4,  400, FLAT, MONS_GNOLL_SHAMAN }, 
   {  4,  4,  400, FLAT, MONS_GNOLL_SERGEANT }, 
@@ -1064,12 +1067,12 @@ COMPILE_CHECK(ARRAYSZ(population) == NUM_BRANCHES);
 
 static const pop_entry pop_generic_early_zombie[] =
 {
-  {  1,  27,    10, FLAT, MONS_CENTAUR },
-  {  1,  27,    12, FLAT, MONS_ELF },
-  {  1,  27,    27, FLAT, MONS_HUMAN },
-  {  1,  27,   100, FLAT, MONS_KOBOLD },
+  {  1,  27,    30, FLAT, MONS_CENTAUR },
+  {  1,  27,    15, FLAT, MONS_ELF },
+  {  1,  27,    30, FLAT, MONS_HUMAN },
+  {  1,  27,    10, FLAT, MONS_KOBOLD },
   {  1,  27,    10, FLAT, MONS_OGRE },
-  {  1,  27,   100, FLAT, MONS_ORC },
+  {  1,  27,    35, FLAT, MONS_ORC },
   {  1,  27,    10, FLAT, MONS_TROLL },
   { 0,0,0,FLAT,MONS_0 }
 };

@@ -592,7 +592,7 @@ static bool _slime_can_spawn(const coord_def target)
 // See if slime creature 'thing' can split, and carry out the split if
 // we can find a square to place the new slime creature on.
 static monster *_slime_split(monster* thing, bool force_split)
-{
+{    
     if (!thing || thing->blob_size <= 1 || thing->hit_points < 4
         || (coinflip() && !force_split) // Don't make splitting quite so reliable. (jpeg)
         || _disabled_merge(thing))
@@ -1079,7 +1079,7 @@ bool mon_special_ability(monster* mons)
         break;
 
     case MONS_STARCURSED_MASS:
-        if (x_chance_in_y(mons->blob_size,8) && x_chance_in_y(2,3)
+        if (x_chance_in_y(mons->blob_size, 100) && x_chance_in_y(2,3)
             && mons->hit_points >= 8)
         {
             _starcursed_split(mons), used = true;
