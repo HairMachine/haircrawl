@@ -290,7 +290,9 @@ void spawn_random_monsters()
             && player_in_connected_branch()
             && you.chapter == CHAPTER_ORB_HUNTING)
         // Spawns no longer occur outside the Orb run in connected branches.
-        || !player_on_orb_run() && player_in_connected_branch())
+        || !player_on_orb_run() && player_in_connected_branch()
+        // This basically is to stop orb run spawns when zigging, as the player always has the orb. ~Hair
+        || player_in_branch(BRANCH_ZIGGURAT))
     {
         return;
     }
