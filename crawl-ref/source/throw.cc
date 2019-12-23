@@ -32,6 +32,7 @@
 #include "macro.h"
 #include "message.h"
 #include "mon-behv.h"
+#include "mon-cast.h"
 #include "output.h"
 #include "prompt.h"
 #include "religion.h"
@@ -607,7 +608,7 @@ void fire_thing(int item)
             success = your_spells(SPELL_FORCE_LANCE, you.skill(SK_CROSSBOWS) * 5, false);
             break;
         case WPN_ARBALEST:
-            success = your_spells(SPELL_FIREBALL, you.skill(SK_CROSSBOWS) * 10, false);
+            success = your_spells(SPELL_FIREBALL, you.skill(SK_CROSSBOWS) * 10, false);            
             break;
         case WPN_TRIPLE_CROSSBOW:
             success = your_spells(SPELL_CHAIN_LIGHTNING, you.skill(SK_CROSSBOWS) * 10, false);
@@ -1118,17 +1119,13 @@ void setup_monster_throw_beam(monster* mons, bolt &beam)
 // msl is the item index of the thrown missile (or weapon).
 bool mons_throw(monster* mons, bolt &beam, int msl, bool teleport)
 {
-    string ammo_name;
-
-    bool returning = false;
-
-    // Some initial convenience & initializations.
-    ASSERT(mitm[msl].base_type == OBJ_MISSILES);
-
-    const int weapon    = mons->inv[MSLOT_WEAPON];
-
-    mon_inv_type slot = get_mon_equip_slot(mons, mitm[msl]);
-    ASSERT(slot != NUM_MONSTER_SLOTS);
+    // Now monsters shoot without having a bunch of crazy item interactions, this is a lot simpler. ~Hair
+    // Also this is one fuck of a hack. It's done because I want to use the spellcasting system as the abstraction layer, but the stuff
+    // above is a giant bundle of complexity with needed logic all mixed up in unneeded. A proper version would just replace all of that guff.
+    // But hey, I'm lazy and this works.
+    // It also has very strong parallels with the player logic, which suggests it can be unified (that at least is a good sign).
+    if (!mons->weapon())
+        return false;
 
     // Energy is already deducted for the spell cast, if using portal projectile
     // FIXME: should it use this delay and not the spell delay?
@@ -1141,113 +1138,17 @@ bool mons_throw(monster* mons, bolt &beam, int msl, bool teleport)
         mons->speed_increment -= div_rand_round(energy * delay, 10);
     }
 
-    // Dropping item copy, since the launched item might be different.
-    item_def item = mitm[msl];
-    item.quantity = 1;
-
-    if (_setup_missile_beam(mons, beam, item, ammo_name, returning))
-        return false;
-
-    beam.aimed_at_spot |= returning;
-
-    const launch_retval projected =
-        is_launched(mons, mons->mslot_item(MSLOT_WEAPON),
-                    mitm[msl]);
-
-    if (projected == launch_retval::THROWN)
-        returning = returning && !teleport;
-
-    // Identify before throwing, so we don't get different
-    // messages for first and subsequent missiles.
-    if (mons->observable())
-    {
-        if (projected == launch_retval::LAUNCHED
-               && item_type_known(mitm[weapon])
-            || projected == launch_retval::THROWN
-               && mitm[msl].base_type == OBJ_MISSILES)
-        {
-            set_ident_flags(mitm[msl], ISFLAG_KNOW_TYPE);
-            set_ident_flags(item, ISFLAG_KNOW_TYPE);
-        }
+    bolt newbeam;
+    spell_type spell;
+    switch (mons->weapon(0)->sub_type) {
+        case WPN_FUSTIBALUS: spell = SPELL_STICKY_FLAME_RANGE; break;
+        case WPN_LONGBOW: spell =  SPELL_SCATTERSHOT; break;
+        case WPN_HAND_CROSSBOW: spell = SPELL_FORCE_LANCE; break;
+        case WPN_ARBALEST: spell = SPELL_FIREBALL; break;
+        case WPN_TRIPLE_CROSSBOW: spell = SPELL_CHAIN_LIGHTNING; break;
+        default: spell = SPELL_MAGIC_DART; break;
     }
-
-    // Now, if a monster is, for some reason, throwing something really
-    // stupid, it will have baseHit of 0 and damage of 0. Ah well.
-    string msg = mons->name(DESC_THE);
-    if (teleport)
-        msg += " magically";
-    msg += ((projected == launch_retval::LAUNCHED) ? " shoots " : " throws ");
-
-    if (!beam.name.empty() && projected == launch_retval::LAUNCHED)
-        msg += article_a(beam.name);
-    else
-    {
-        // build shoot message
-        msg += item.name(DESC_A, false, false, false);
-
-        // build beam name
-        beam.name = item.name(DESC_PLAIN, false, false, false);
-    }
-    msg += ".";
-
-    if (mons->observable())
-    {
-        mons->flags |= MF_SEEN_RANGED;
-        mpr(msg);
-    }
-
-    _throw_noise(mons, item);
-
-    beam.drop_item = !returning;
-
-    // Redraw the screen before firing, in case the monster just
-    // came into view and the screen hasn't been updated yet.
-    viewwindow();
-    if (teleport)
-    {
-        beam.use_target_as_pos = true;
-        beam.affect_cell();
-        beam.affect_endpoint();
-        if (!returning)
-            beam.drop_object();
-    }
-    else
-    {
-        beam.fire();
-
-        // The item can be destroyed before returning.
-        if (returning && thrown_object_destroyed(&item))
-            returning = false;
-    }
-
-    if (returning)
-    {
-        // Fire beam in reverse.
-        beam.setup_retrace();
-        viewwindow();
-        beam.fire();
-
-        // Only print a message if you can see the target or the thrower.
-        // Otherwise we get "The weapon returns whence it came from!" regardless.
-        if (you.see_cell(beam.target) || you.can_see(*mons))
-        {
-            msg::stream << "The weapon returns "
-                        << (you.can_see(*mons)?
-                              ("to " + mons->name(DESC_THE))
-                            : "from whence it came")
-                        << "!" << endl;
-        }
-
-        // Player saw the item return.
-        if (!is_artefact(item))
-            set_ident_flags(mitm[msl], ISFLAG_KNOW_TYPE);
-    }
-    else if (dec_mitm_item_quantity(msl, 1))
-        mons->inv[slot] = NON_ITEM;
-
-    if (beam.special_explosion != nullptr)
-        delete beam.special_explosion;
-
+    mons_cast(mons, newbeam, spell, MON_SPELL_NO_FLAGS);
     return true;
 }
 
