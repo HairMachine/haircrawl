@@ -588,6 +588,7 @@ void fire_thing(int item)
     }
 
     spret success = spret::fail;
+    int shots = 1;
     switch (weapon->sub_type) {
         case WPN_HUNTING_SLING:
             success = your_spells(SPELL_MAGIC_DART, you.skill(SK_SLINGS) * 2, false);
@@ -596,7 +597,8 @@ void fire_thing(int item)
             success = your_spells(SPELL_STICKY_FLAME_RANGE, you.skill(SK_SLINGS) * 10, false);
             break;
         case WPN_SHORTBOW:
-            success = your_spells(SPELL_MAGIC_DART, you.skill(SK_BOWS) * 2 * random2(3) + 1, false);
+            shots = random2(3) + 1;
+            success = your_spells(SPELL_MAGIC_DART, you.skill(SK_BOWS) * 2 * shots, false);
             break;
         case WPN_LONGBOW:
             success = your_spells(SPELL_SCATTERSHOT, you.skill(SK_BOWS) * 5, false);
@@ -614,7 +616,7 @@ void fire_thing(int item)
     if (success == spret::success) {
         you.time_taken = you.attack_delay(weapon).roll();
         you.turn_is_over = true;
-        weapon->plus2 -= 1;
+        weapon->plus2 -= shots;
         mprf("You fire your %s! You may fire %d more before needing to reload.", item_base_name(weapon->base_type, weapon->sub_type).c_str(), weapon->plus2);
         you.wield_change = true;
     }
