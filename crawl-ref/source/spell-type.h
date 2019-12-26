@@ -470,5 +470,6 @@ enum spell_type : int
     SPELL_NOXIOUS_BOG,
     SPELL_AGONY_RANGE,
     SPELL_DISPEL_UNDEAD_RANGE,
+    SPELL_BULLET,
     NUM_SPELLS
 };

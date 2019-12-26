@@ -592,14 +592,14 @@ void fire_thing(int item)
     int shots = 1;
     switch (weapon->sub_type) {
         case WPN_HUNTING_SLING:
-            success = your_spells(SPELL_MAGIC_DART, you.skill(SK_SLINGS) * 2, false);
+            success = your_spells(SPELL_BULLET, you.skill(SK_SLINGS) * 2, false);
             break;
         case WPN_FUSTIBALUS:
             success = your_spells(SPELL_STICKY_FLAME_RANGE, you.skill(SK_SLINGS) * 10, false);
             break;
         case WPN_SHORTBOW:
             shots = random2(3) + 1;
-            success = your_spells(SPELL_MAGIC_DART, you.skill(SK_BOWS) * 2 * shots, false);
+            success = your_spells(SPELL_BULLET, you.skill(SK_BOWS) * 2 * shots, false);
             break;
         case WPN_LONGBOW:
             success = your_spells(SPELL_SCATTERSHOT, you.skill(SK_BOWS) * 5, false);
@@ -1128,6 +1128,10 @@ bool mons_throw(monster* mons, bolt &beam, bool teleport)
 
     if (!weap)
         return false;
+
+    // One does not simply fire a melee weapon ~Hair
+    if (!is_ranged_weapon_type(weap->sub_type))
+        return false;
     
     // Energy is already deducted for the spell cast, if using portal projectile
     // FIXME: should it use this delay and not the spell delay?
@@ -1146,7 +1150,7 @@ bool mons_throw(monster* mons, bolt &beam, bool teleport)
         case WPN_HAND_CROSSBOW: spell = SPELL_FORCE_LANCE; break;
         case WPN_ARBALEST: spell = SPELL_FIREBALL; break;
         case WPN_TRIPLE_CROSSBOW: spell = SPELL_CHAIN_LIGHTNING; break;
-        default: spell = SPELL_MAGIC_DART; break;
+        default: spell = SPELL_BULLET; break;
     }
     mons_cast(mons, newbeam, spell, MON_SPELL_NO_FLAGS);
     return true;

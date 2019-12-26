@@ -1358,4 +1358,22 @@ _mon_hex_zap(ZAP_DRAIN_MAGIC, BEAM_DRAIN_MAGIC),
     1
 },
 
+{
+    ZAP_BULLET,
+    "bullet",
+    1000,
+    new dicedef_calculator<1, 2, 10, 10>,
+    new tohit_calculator<10>,
+    new dicedef_calculator<1, 2, 10, 10>,
+    new tohit_calculator<10>,
+    LIGHTGREY,
+    false,
+    BEAM_MMISSILE,
+    DCHAR_FIRED_ZAP,
+    true,
+    false,
+    false,
+    1
+},
+
 };
