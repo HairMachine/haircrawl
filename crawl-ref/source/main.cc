@@ -1640,6 +1640,8 @@ static void _do_reload() {
 
 static void _do_rest()
 {
+    run_mode_type rmt = RMODE_REST_DURATION;
+
     if (apply_starvation_penalties())
     {
         mpr("You're too hungry to rest.");
@@ -1654,16 +1656,13 @@ static void _do_rest()
             && ancestor_full_hp())
         {
             mpr("You start waiting.");
-            _start_running(RDIR_REST, RMODE_WAIT_DURATION);
-            _do_reload();
-            return;
+            rmt = RMODE_WAIT_DURATION;
         }
         else
             mpr("You start resting.");
-        
-        _do_reload();
     }
-    _start_running(RDIR_REST, RMODE_REST_DURATION);
+    _do_reload();
+    _start_running(RDIR_REST, rmt);
 }
 
 static void _do_display_map()
