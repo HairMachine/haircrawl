@@ -1117,30 +1117,30 @@ void setup_monster_throw_beam(monster* mons, bolt &beam)
 }
 
 // msl is the item index of the thrown missile (or weapon).
-bool mons_throw(monster* mons, bolt &beam, int msl, bool teleport)
+bool mons_throw(monster* mons, bolt &beam, bool teleport)
 {
     // Now monsters shoot without having a bunch of crazy item interactions, this is a lot simpler. ~Hair
     // Also this is one fuck of a hack. It's done because I want to use the spellcasting system as the abstraction layer, but the stuff
     // above is a giant bundle of complexity with needed logic all mixed up in unneeded. A proper version would just replace all of that guff.
     // But hey, I'm lazy and this works.
     // It also has very strong parallels with the player logic, which suggests it can be unified (that at least is a good sign).
-    if (!mons->weapon())
-        return false;
+    item_def* weap = mons->weapon();
 
+    if (!weap)
+        return false;
+    
     // Energy is already deducted for the spell cast, if using portal projectile
     // FIXME: should it use this delay and not the spell delay?
     if (!teleport)
     {
-        const int energy = mons->action_energy(EUT_MISSILE);
-        const int delay = mons->attack_delay(&mitm[msl]).roll();
+        const int energy = mons->action_energy(EUT_SPELL);
         ASSERT(energy > 0);
-        ASSERT(delay > 0);
-        mons->speed_increment -= div_rand_round(energy * delay, 10);
+        mons->speed_increment -= energy;
     }
 
     bolt newbeam;
     spell_type spell;
-    switch (mons->weapon(0)->sub_type) {
+    switch (weap->sub_type) {
         case WPN_FUSTIBALUS: spell = SPELL_STICKY_FLAME_RANGE; break;
         case WPN_LONGBOW: spell =  SPELL_SCATTERSHOT; break;
         case WPN_HAND_CROSSBOW: spell = SPELL_FORCE_LANCE; break;

@@ -1213,29 +1213,16 @@ bool handle_throw(monster* mons, bolt & beem, bool teleport, bool check_only)
 
     item_def *launcher = nullptr;
     const item_def *weapon = nullptr;
-    const int mon_item = mons_usable_missile(mons, &launcher);
 
-    if (mon_item == NON_ITEM || !mitm[mon_item].defined())
-        return false;
+    // Adding this line because without it the below logic seems senseles (launcher is always nulltpr),
+    // and therefore the monster will never switch to their launcher to fire a missile.
+    // But I'm not sure what the intention actually was here. I might have broken it removing something else.  ~Hair
+    launcher = mons->mslot_item(MSLOT_ALT_WEAPON);
 
     if (player_or_mon_in_sanct(*mons))
         return false;
 
-    item_def *missile = &mitm[mon_item];
-
     const actor *act = actor_at(beem.target);
-    ASSERT(missile->base_type == OBJ_MISSILES);
-    if (act && missile->sub_type == MI_THROWING_NET)
-    {
-        // Throwing a net at a target that is already caught would be
-        // completely useless, so bail out.
-        if (act->caught())
-            return false;
-        // Netting targets that are already permanently stuck in place
-        // is similarly useless.
-        if (mons_class_is_stationary(act->type))
-            return false;
-    }
 
     // If the attack needs a launcher that we can't wield, bail out.
     if (launcher)
@@ -1250,9 +1237,6 @@ bool handle_throw(monster* mons, bolt & beem, bool teleport, bool check_only)
 
     // Set fake damage for the tracer.
     beem.damage = dice_def(10, 10);
-
-    // Set item for tracer, even though it probably won't be used
-    beem.item = missile;
 
     ru_interference interference = DO_NOTHING;
     // See if Ru worshippers block or redirect the attack.
@@ -1316,7 +1300,7 @@ bool handle_throw(monster* mons, bolt & beem, bool teleport, bool check_only)
             mons->swap_weapons();
 
         beem.name.clear();
-        return mons_throw(mons, beem, mon_item, teleport);
+        return mons_throw(mons, beem, teleport);
     }
 
     return false;

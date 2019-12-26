@@ -1478,7 +1478,7 @@ void dithmenos_shadow_throw(const dist &d, const item_def &item)
         beem.set_target(d);
         setup_monster_throw_beam(mon, beem);
         beem.item = &mitm[mon->inv[MSLOT_MISSILE]];
-        mons_throw(mon, beem, mon->inv[MSLOT_MISSILE]);
+        mons_throw(mon, beem);
     }
 
     shadow_monster_reset(mon);

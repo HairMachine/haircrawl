@@ -1917,7 +1917,6 @@ int items(bool allow_uniques,
                                    212, OBJ_ARMOUR,
                                    212, OBJ_WEAPONS,
                                    176, OBJ_POTIONS,
-                                   300, OBJ_MISSILES,
                                    320, OBJ_SCROLLS,
                                    440, OBJ_GOLD);
 
@@ -1966,10 +1965,6 @@ int items(bool allow_uniques,
     case OBJ_WEAPONS:
         _generate_weapon_item(item, allow_uniques, force_type,
                               item_level, agent);
-        break;
-
-    case OBJ_MISSILES:
-        _generate_missile_item(item, force_type, item_level);
         break;
 
     case OBJ_ARMOUR:

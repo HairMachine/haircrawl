@@ -40,4 +40,4 @@ bool throw_it(bolt &pbolt, int throw_2, dist *target = nullptr);
 bool thrown_object_destroyed(item_def *item);
 
 void setup_monster_throw_beam(monster* mons, bolt &beam);
-bool mons_throw(monster* mons, bolt &beam, int msl, bool teleport = false);
+bool mons_throw(monster* mons, bolt &beam, bool teleport = false);
