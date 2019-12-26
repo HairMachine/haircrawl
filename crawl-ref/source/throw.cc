@@ -592,26 +592,25 @@ void fire_thing(int item)
     int shots = 1;
     switch (weapon->sub_type) {
         case WPN_HUNTING_SLING:
-            success = your_spells(SPELL_BULLET, you.skill(SK_SLINGS) * 2, false);
+            success = your_spells(SPELL_BULLET, (weapon->plus + you.skill(SK_SLINGS)) * 2, false);
             break;
         case WPN_FUSTIBALUS:
-            success = your_spells(SPELL_STICKY_FLAME_RANGE, you.skill(SK_SLINGS) * 10, false);
+            success = your_spells(SPELL_STICKY_FLAME_RANGE, (weapon->plus + you.skill(SK_SLINGS)) * 10, false);
             break;
         case WPN_SHORTBOW:
-            shots = random2(3) + 1;
-            success = your_spells(SPELL_BULLET, you.skill(SK_BOWS) * 2 * shots, false);
+            success = your_spells(SPELL_BULLET_BURST, (weapon->plus + you.skill(SK_BOWS)) * 2, false);
             break;
         case WPN_LONGBOW:
-            success = your_spells(SPELL_SCATTERSHOT, you.skill(SK_BOWS) * 5, false);
+            success = your_spells(SPELL_SCATTERSHOT, (weapon->plus + you.skill(SK_BOWS)) * 5, false);
             break;
         case WPN_HAND_CROSSBOW:
-            success = your_spells(SPELL_FORCE_LANCE, you.skill(SK_CROSSBOWS) * 5, false);
+            success = your_spells(SPELL_FORCE_LANCE, (weapon->plus + you.skill(SK_CROSSBOWS)) * 5, false);
             break;
         case WPN_ARBALEST:
-            success = your_spells(SPELL_FIREBALL, you.skill(SK_CROSSBOWS) * 10, false);            
+            success = your_spells(SPELL_FIREBALL, (weapon->plus + you.skill(SK_CROSSBOWS)) * 10, false);            
             break;
         case WPN_TRIPLE_CROSSBOW:
-            success = your_spells(SPELL_CHAIN_LIGHTNING, you.skill(SK_CROSSBOWS) * 10, false);
+            success = your_spells(SPELL_CHAIN_LIGHTNING, (weapon->plus + you.skill(SK_CROSSBOWS)) * 10, false);
             break;
     }
     if (success == spret::success) {

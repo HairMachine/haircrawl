@@ -4089,7 +4089,18 @@ static const struct spell_desc spelldata[] =
 },
 
 {
-    SPELL_BULLET, "Bullet",
+    SPELL_BULLET, "bullet",
+    spschool::conjuration,
+    spflag::dir_or_target | spflag::needs_tracer,
+    1,
+    500,
+    LOS_RADIUS, LOS_RADIUS,
+    1, 0,
+    TILEG_MAGIC_DART,
+},
+
+{
+    SPELL_BULLET_BURST, "burst of bullets",
     spschool::conjuration,
     spflag::dir_or_target | spflag::needs_tracer,
     1,

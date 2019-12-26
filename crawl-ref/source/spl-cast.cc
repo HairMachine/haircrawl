@@ -1920,6 +1920,21 @@ static spret _do_cast(spell_type spell, int powc, const dist& spd,
     case SPELL_ISKENDERUNS_MYSTIC_BLAST:
         return cast_imb(powc, fail);
 
+    // Firing a burst of bullets from a rapid fire weapon ~Hair
+    case SPELL_BULLET_BURST:
+        for (int i = 0; i < random_range(4, 8); i++) {
+            zapping(ZAP_BULLET, spell_zap_power(spell, powc), beam, true, nullptr, fail);
+            // This is a nasty hack TBH. Nevertheless, it is always true right now.
+            if (i > 0)
+            {
+                you.weapon()->plus2 -= 1;
+                if (you.weapon()->plus2 <= 1)
+                    break;
+            }
+        }
+        // Always succeeding in this case (it doesn't really mean much here anyway)
+        return spret::success;
+
     // non-player spells that have a zap, but that shouldn't be called (e.g
     // because they will crash as a player zap).
     case SPELL_DRAIN_LIFE:

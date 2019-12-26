@@ -1673,6 +1673,12 @@ bolt mons_spell_beam(const monster* mons, spell_type spell_cast, int power,
         beam.ex_size     = 2;
         break;
 
+    case SPELL_BULLET_BURST:
+        for (int i = 0; i < random_range(4, 8); i++) {
+            zappy(ZAP_BULLET, power, true, beam);
+        }
+        break;
+
     default:
         if (logic && logic->setup_beam) // already setup
             break;

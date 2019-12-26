@@ -471,5 +471,6 @@ enum spell_type : int
     SPELL_AGONY_RANGE,
     SPELL_DISPEL_UNDEAD_RANGE,
     SPELL_BULLET,
+    SPELL_BULLET_BURST,
     NUM_SPELLS
 };
