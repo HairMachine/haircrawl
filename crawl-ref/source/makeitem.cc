@@ -689,6 +689,8 @@ static void _generate_missile_item(item_def& item, int force_type,
             item.quantity += random2(12);
 
     }
+    // Increase item quantity by a lot, as everything now auto-mulches. ~Hair
+    item.quantity *= 10;
 }
 
 static bool _armour_disallows_randart(int sub_type)
