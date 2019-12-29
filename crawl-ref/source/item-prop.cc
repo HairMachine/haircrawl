@@ -617,10 +617,10 @@ static const weapon_def Weapon_prop[] =
 #endif
 
     { WPN_HUNTING_SLING,     "hunting sling",       5,  2, 12,
-        SK_SLINGS,       SIZE_LITTLE, SIZE_LITTLE, MI_STONE,
+        SK_SLINGS,       SIZE_LITTLE, SIZE_LITTLE, MI_SLING_BULLET,
         DAMV_NON_MELEE, 8, 10, 15, RANGED_BRANDS },
     { WPN_FUSTIBALUS,        "fustibalus",          8, -1, 14,
-        SK_SLINGS,       SIZE_LITTLE, SIZE_LITTLE, MI_STONE,
+        SK_SLINGS,       SIZE_LITTLE, SIZE_LITTLE, MI_SLING_BULLET,
         DAMV_NON_MELEE, 2, 2, 150, RANGED_BRANDS },
 
     { WPN_HAND_CROSSBOW,     "hand crossbow",      12,  5, 15,

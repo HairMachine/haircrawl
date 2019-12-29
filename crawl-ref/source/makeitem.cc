@@ -638,8 +638,7 @@ static void _generate_missile_item(item_def& item, int force_type,
     else
     {
         item.sub_type =
-            random_choose_weighted(50, MI_STONE,
-                                   20, MI_ARROW,
+            random_choose_weighted(20, MI_ARROW,
                                    12, MI_BOLT,
                                    12, MI_SLING_BULLET,
                                    3,  MI_BOOMERANG,
