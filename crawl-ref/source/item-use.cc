@@ -3354,23 +3354,15 @@ void read_scroll(item_def& scroll)
         {
         // Get the new location
         branch_type curr_branch = you.where_are_you;
-        dungeon_feature_type stair_taken = branches[curr_branch].entry_stairs;
-        const level_id old_level = level_id::current();
-        
-        // Set the new depth
-        you.depth = 1;
-        
-        // Change levels
-        leaving_level_now(stair_taken);
-        const bool newlevel = load_level(stair_taken, LOAD_ENTER_LEVEL, old_level);
-        tile_new_level(newlevel);
-        new_level();
-        seen_monsters_react();
-        viewwindow();
+        //branch_type parent = branches[curr_branch].parent_branch;
+        if (curr_branch == BRANCH_DUNGEON)
+        {
+            mpr("Reading this here would take you out of the dungeon!");
+            break;
+        }
 
-        // Tell stash-tracker and travel that we've changed levels.
-        trackers_init_new_level();
-        save_game_state();
+        dungeon_feature_type stair_taken = branches[curr_branch].exit_stairs;
+        floor_transition(stair_taken, stair_taken, brentry[curr_branch], true);
 
         // Boom! Crash! Spectacular next-gen special effects!
         big_cloud(CLOUD_TLOC_ENERGY, &you, you.pos(), 50, 4 + random2(4));

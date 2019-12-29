@@ -1174,7 +1174,7 @@ static const population_list population_zombie[] =
     POP(bazaar),
     POP(trove),
     POP(sewer),
-    POP(ossuary),
+    POP(generic_early_zombie),
     POP(bailey),
 #if TAG_MAJOR_VERSION > 34
     POP(gauntlet),

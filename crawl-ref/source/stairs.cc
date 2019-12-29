@@ -888,8 +888,8 @@ void floor_transition(dungeon_feature_type how,
         get_item_by_name(&it, "scroll of escape", OBJ_SCROLLS, false);
         for (inv_slot = 0; inv_slot < ENDOFPACK; inv_slot++)
         {
-            // You can only carry 3 scrolls of escape at most.
-            if (items_similar(you.inv[inv_slot], it) && you.inv[inv_slot].quantity >= 3) {
+            // You can only carry 1 scrolls of escape at most.
+            if (items_similar(you.inv[inv_slot], it)) {
                 return;
             }
                 
