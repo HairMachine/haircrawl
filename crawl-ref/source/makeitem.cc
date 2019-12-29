@@ -438,7 +438,8 @@ static void _generate_weapon_item(item_def& item, bool allow_uniques,
     const bool forced_ego = item.brand > 0;
     const bool no_brand   = item.brand == SPWPN_FORBID_BRAND;
 
-    if (no_brand)
+    // Ranged weapons do not have brands. ~Hair
+    if (no_brand || is_range_weapon(item))
         set_item_ego_type(item, OBJ_WEAPONS, SPWPN_NORMAL);
 
     // If it's forced to be a good item, reroll clubs.
