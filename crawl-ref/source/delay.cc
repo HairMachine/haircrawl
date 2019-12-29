@@ -283,6 +283,12 @@ bool RevivifyDelay::try_interrupt()
     return false;
 }
 
+bool ReloadingDelay::try_interrupt()
+{
+    mpr("Your reloading is interrupted.");
+    return true;
+}
+
 void stop_delay(bool stop_stair_travel)
 {
     if (you.delay_queue.empty())
@@ -966,6 +972,32 @@ void RevivifyDelay::finish()
     mpr("Now alive.");
     temp_mutate(MUT_FRAIL, "vampire revification");
     vampire_update_transformations();
+}
+
+void ReloadingDelay::finish()
+{
+    for (int inv_slot = 0; inv_slot < ENDOFPACK; inv_slot++)
+    {
+        item_def* weapon = &you.inv[inv_slot];
+        if (weapon->base_type == OBJ_WEAPONS && is_ranged_weapon_type(weapon->sub_type)) {            
+            // TODO: Moving this function ~Hair
+            int loadval = 1;
+            switch (weapon->sub_type) {
+                case WPN_HUNTING_SLING:
+                    loadval = 6;
+                    break;
+                case WPN_SHORTBOW:
+                    loadval = 32;
+                    break;
+                case WPN_LONGBOW:
+                    loadval = 2;
+                    break;
+            }
+            weapon->plus2 = loadval;
+            you.wield_change = true;
+        }
+    }
+    mpr("Reloaded all guns.");
 }
 
 void run_macro(const char *macroname)

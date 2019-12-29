@@ -731,6 +731,19 @@ public:
     }
 };
 
+// Reloading delay. ~Hair
+class ReloadingDelay: public Delay
+{
+   void finish() override; 
+public:
+   ReloadingDelay(int dur) : Delay(dur){}
+   const char* name() const override
+    {
+        return "reload";
+    }
+    bool try_interrupt() override;
+};
+
 void push_delay(shared_ptr<Delay> delay);
 
 template<typename T, typename... Args>

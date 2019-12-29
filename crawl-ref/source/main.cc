@@ -1612,32 +1612,6 @@ static void _toggle_travel_speed()
     }
 }
 
-static void _do_reload() {
-    // Reload all ranged weapons. This could be its own command, perhaps. ~Hair
-    mpr("Reloading all guns.");
-    for (int inv_slot = 0; inv_slot < ENDOFPACK; inv_slot++)
-    {
-        item_def* weapon = &you.inv[inv_slot];
-        if (weapon->base_type == OBJ_WEAPONS && is_ranged_weapon_type(weapon->sub_type)) {            
-            // TODO: Moving this function ~Hair
-            int loadval = 1;
-            switch (weapon->sub_type) {
-                case WPN_HUNTING_SLING:
-                    loadval = 6;
-                    break;
-                case WPN_SHORTBOW:
-                    loadval = 32;
-                    break;
-                case WPN_LONGBOW:
-                    loadval = 2;
-                    break;
-            }
-            weapon->plus2 = loadval;
-            you.wield_change = true;
-        }
-    }
-}
-
 static void _do_rest()
 {
     run_mode_type rmt = RMODE_REST_DURATION;
@@ -1661,7 +1635,6 @@ static void _do_rest()
         else
             mpr("You start resting.");
     }
-    _do_reload();
     _start_running(RDIR_REST, rmt);
 }
 
@@ -1879,7 +1852,10 @@ void process_command(command_type cmd)
         break;
 
         // Action commands.
-    case CMD_BUTCHER:              butchery();               break;
+    case CMD_BUTCHER:       
+        // TODO: Rearrange these keys so they make more sense.       
+        start_delay<ReloadingDelay>(5);             
+        break;
     case CMD_CAST_SPELL:           do_cast_spell_cmd(false); break;
     case CMD_DISPLAY_SPELLS:       inspect_spells();         break;
     case CMD_EAT:                  eat_food();               break;

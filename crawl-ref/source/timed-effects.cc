@@ -709,7 +709,6 @@ static void _catchup_monster_moves(monster* mon, int turns)
         return;
 
 
-
     const int mon_turns = (turns * mon->speed) / 10;
     const int moves = min(mon_turns, 50);
 
@@ -721,7 +720,6 @@ static void _catchup_monster_moves(monster* mon, int turns)
 
     if (mon_turns <= 0)
         return;
-
 
     // did the monster forget about the player?
     const bool forgot = _monster_forget(mon, mon_turns);

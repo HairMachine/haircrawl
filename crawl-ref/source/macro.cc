@@ -1379,9 +1379,9 @@ command_type key_to_command(int key, KeymapContext context)
         {
             mprf(MSGCH_ERROR,
                  "key_to_command(): command '%s' (%d:%d) wrong for desired "
-                 "context %d",
+                 "context %d (did not match context %d)",
                  command_to_name(cmd).c_str(), -key - CMD_NO_CMD,
-                 CMD_MAX_CMD + key, (int) context);
+                 CMD_MAX_CMD + key, (int) context, cmd_context);
             if (is_processing_macro())
                 flush_input_buffer(FLUSH_ABORT_MACRO);
             if (crawl_state.is_replaying_keys()

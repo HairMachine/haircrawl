@@ -579,12 +579,12 @@ void fire_thing(int item)
     
     if (weapon->base_type == OBJ_WEAPONS && !is_ranged_weapon_type(weapon->sub_type)) 
     {
-            mpr("You can't find the trigger...");
-            return;
+        mpr("You can't find the trigger...");
+        return;
     }
 
     if (weapon->plus2 <= 0) {
-        mpr("Your weapon is not loaded! (wait in a safe place to reload).");
+        mpr("Your weapon is not loaded! Press c to reload (takes 5 turns).");
         return;
     }
 
@@ -610,14 +610,14 @@ void fire_thing(int item)
             success = your_spells(SPELL_FIREBALL, (weapon->plus + you.skill(SK_CROSSBOWS)) * 10, false);            
             break;
         case WPN_TRIPLE_CROSSBOW:
-            success = your_spells(SPELL_CHAIN_LIGHTNING, (weapon->plus + you.skill(SK_CROSSBOWS)) * 10, false);
+            success = your_spells(SPELL_LIGHTNING_BOLT, (weapon->plus + you.skill(SK_CROSSBOWS)) * 10, false);
             break;
     }
     if (success == spret::success) {
         you.time_taken = you.attack_delay(weapon).roll();
         you.turn_is_over = true;
         weapon->plus2 -= shots;
-        mprf("You fire your %s! You may fire %d more before needing to reload.", item_base_name(weapon->base_type, weapon->sub_type).c_str(), weapon->plus2);
+        mprf("You fire your %s! You may fire %d more times before needing to reload.", item_base_name(weapon->base_type, weapon->sub_type).c_str(), weapon->plus2);
         you.wield_change = true;
     }
     
