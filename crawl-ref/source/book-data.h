@@ -24,7 +24,6 @@ static const vector<spell_type> spellbook_templates[] =
     SPELL_CONJURE_FLAME,
     SPELL_INNER_FLAME,
     SPELL_STICKY_FLAME,
-    SPELL_FIREBALL,
 },
 
 {   // Book of Frost
@@ -85,7 +84,6 @@ static const vector<spell_type> spellbook_templates[] =
 
 {   // Book of the Tempests
     SPELL_DISCHARGE,
-    SPELL_LIGHTNING_BOLT,
     SPELL_IGNITION,
     SPELL_TORNADO,
 },
@@ -179,7 +177,6 @@ static const vector<spell_type> spellbook_templates[] =
     SPELL_SWIFTNESS,
     SPELL_DISCHARGE,
     SPELL_AIRSTRIKE,
-    SPELL_LIGHTNING_BOLT,
 },
 
 {   // Book of the Sky
