@@ -5673,6 +5673,8 @@ void item_list::parse_raw_name(string name, item_spec &spec)
         name = "potion of curing";
     else if (name == "scroll of fear")
         name = "scroll of noise";
+    else if (name == "scroll of random uselessness")
+        name = "scroll of fog";
 
     item_kind parsed = item_kind_by_name(name);
     if (parsed.base_type != OBJ_UNASSIGNED)
