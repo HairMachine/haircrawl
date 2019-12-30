@@ -483,7 +483,7 @@ KMONS:  O = player ghost
 # Progressive depth/numbers of zombies and type/amount of loot.
 : if you.in_branch("D") then
 :     if you.depth() < 6 then
-MONS:   skeleton place:D:6 / zombie place:D:6
+MONS:   skeleton place:D:2 / zombie place:D:2
 SUBST:  d = *%, e = %$, fghij = -
 NSUBST: 1 = 2=1 / 1---
 :     elseif you.depth() < 9 then
@@ -654,7 +654,7 @@ KMONS:  O = player ghost
 : ghost_good_loot(_G)
 : if you.in_branch("D") then
 :     if you.depth() < 6 then
-MONS:   skeleton place:D:6 / zombie place:D:6
+MONS:   skeleton place:D:2 / zombie place:D:2
 MONS:   mummy / shadow imp / wight / necrophage / phantom / hungry ghost
 SUBST:  d = *%, e = %$, f = %$--, ghij = -
 NSUBST: D = 2=1 / 2=1- / 2- / -
@@ -1242,7 +1242,7 @@ MAP
 ENDMAP
 
 NAME:   ebering_ghost_xom
-WEIGHT: 0 (D:3-5), 5 (D:6-7)
+WEIGHT: 0 (D:3-5), 5 (D:3-5)
 ORIENT: float
 : lone_ghost_guarded_loot(_G, "O")
 : lone_ghost_extra_loot(_G, "-")
@@ -1262,7 +1262,7 @@ ENDMAP
 # based on sewer_entry_d
 NAME:   ebering_ghost_sewer_d
 ORIENT: float
-DEPTH:  D:3-6
+DEPTH:  D:3-4
 KMONS:  O = player_ghost
 KFEAT:  O = expired_portal
 KMONS:  1 = adder
@@ -1290,7 +1290,7 @@ ENDMAP
 # based on sewer_entry_f
 NAME:   ebering_ghost_sewer_f
 ORIENT: float
-DEPTH:  D:3-6
+DEPTH:  D:3-4
 KMONS:  O = player_ghost
 KMONS:  1 = leopard gecko / giant cockroach / rat / ball python
 KMONS:  2 = adder / worm / river rat
@@ -1317,7 +1317,7 @@ MAP
 ENDMAP
 
 NAME:   ploomutoo_gammafunk_ghost_potion_laboratory
-DEPTH:  D:8-, Elf, Depths
+DEPTH:  Elf, Depths
 ORIENT: float
 ITEM:   potion of mutation ident:type q:1
 : item(dgn.loot_potions)
@@ -1851,7 +1851,7 @@ cc-------cc
 ENDMAP
 
 NAME:   gammafunk_ghost_berserking_beasts
-DEPTH:  D:7-, Lair, Orc, Shoals, Snake, Spider, Swamp, Elf, Depths, Zot
+DEPTH:  Lair, Orc, Shoals, Snake, Spider, Swamp, Elf, Depths, Zot
 KITEM:  D = any jewellery good_item
 : kitem("E = " .. dgn.good_aux_armour)
 KITEM:  F = any jewellery randart
